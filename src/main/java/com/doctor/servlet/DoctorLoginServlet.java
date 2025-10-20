@@ -25,8 +25,10 @@ public class DoctorLoginServlet extends HttpServlet {
         if (doctor != null) {
             // ✅ Successful login
             session.setAttribute("doctorObj", doctor);
+            session.setAttribute("userName", doctor.getFullName());
+            session.setAttribute("userRole", "Doctor");
             session.setAttribute("successMsg", "Login successful!");
-            response.sendRedirect("doctor/index.jsp");
+            response.sendRedirect("doctor/doctors_dashboard.jsp"); // <-- fixed redirect
         } else {
             // ❌ Failed login
             session.setAttribute("errorMsg", "Invalid Email & Password or account not approved!");

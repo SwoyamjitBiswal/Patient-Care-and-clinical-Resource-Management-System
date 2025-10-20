@@ -300,6 +300,13 @@
                     </div>
                     <c:remove var="errorMsg" scope="session"/>
                 </c:if>
+				<!-- Warning Message for already logged in -->
+				<c:if test="${not empty sessionScope.warningMsg}">
+				    <div class="text-danger">
+				        <i class="fas fa-exclamation-triangle me-2"></i>${sessionScope.warningMsg}
+				    </div>
+				</c:if>
+
 
                 <form action="${pageContext.request.contextPath}/patient/patientLogin" method="post" id="loginForm" class="needs-validation" novalidate>
                     <div class="form-group">

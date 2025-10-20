@@ -13,7 +13,8 @@ public class DoctorRegisterServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
 
-        String fullName = request.getParameter("fullName");
+        // Fetch form parameters
+        String fullName = request.getParameter("fullname");
         String email = request.getParameter("email");
         String password = request.getParameter("password");
         String specialization = request.getParameter("specialization");
@@ -25,18 +26,32 @@ public class DoctorRegisterServlet extends HttpServlet {
         String clinicAddress = request.getParameter("clinicAddress");
         String availability = request.getParameter("availability");
 
-        Doctor doctor = new Doctor(fullName,email,password,specialization,licenseNumber,
-                years,qualification,phone,department,clinicAddress,availability);
+        // New field: Consulting fee / visiting charge
+        double visitingCharge = 0.0;
+        String visitingChargeStr = request.getParameter("visitingCharge");
+        if (visitingChargeStr != null && !visitingChargeStr.isEmpty()) {
+            try {
+                visitingCharge = Double.parseDouble(visitingChargeStr);
+            } catch (NumberFormatException e) {
+                visitingCharge = 0.0; // default if parsing fails
+            }
+        }
+
+        // Create Doctor object including visiting charge
+        Doctor doctor = new Doctor(fullName, email, password, specialization, licenseNumber,
+                years, qualification, phone, department, clinicAddress, availability);
+        doctor.setVisitingCharge(visitingCharge); // set the consulting fee
 
         DoctorDao dao = new DoctorDao();
         HttpSession session = request.getSession();
 
+        // Save doctor
         if(dao.registerDoctor(doctor)) {
-            session.setAttribute("successMsg","Registration successful! Wait for admin approval.");
-            response.sendRedirect("doctor_register.jsp");
+            session.setAttribute("successMsg", "Registration successful! Wait for admin approval.");
+            response.sendRedirect("doctor/doctor_register.jsp");
         } else {
-            session.setAttribute("errorMsg","Something went wrong. Try again.");
-            response.sendRedirect("doctor_register.jsp");
+            session.setAttribute("errorMsg", "Something went wrong. Try again.");
+            response.sendRedirect("doctor/doctor_register.jsp");
         }
     }
 }

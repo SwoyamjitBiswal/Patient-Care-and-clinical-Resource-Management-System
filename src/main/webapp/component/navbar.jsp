@@ -1,207 +1,218 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-  <%@ page isELIgnored="false" %>
+<%@ page isELIgnored="false" %>
 
-    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
-      <div class="container-fluid px-4">
+<c:set var="userObj" value="${sessionScope.userObj}" />
 
-        <a class="navbar-brand fw-bold d-flex align-items-center" href="#">
-          <i class="fa-solid fa-hospital me-2 text-primary"></i>
-          <span class="text-dark">MedCare</span>
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
+    <div class="container-fluid px-4">
+
+        <a class="navbar-brand fw-bold d-flex align-items-center" href="${pageContext.request.contextPath}/index.jsp">
+            <i class="fa-solid fa-hospital me-2 text-primary"></i>
+            <span class="text-dark">MedCare</span>
         </a>
 
         <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
-          aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
+                aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
         </button>
 
         <div class="collapse navbar-collapse" id="navbarContent">
-          <ul class="navbar-nav mx-auto align-items-lg-center">
-            <li class="nav-item px-2">
-              <a class="nav-link fw-medium text-dark position-relative" href="${pageContext.request.contextPath}/index.jsp">
-                <i class="fa-solid fa-house me-1 fa-fw"></i> Home
-              </a>
-            </li>
-            <li class="nav-item px-2">
-              <a class="nav-link fw-medium text-dark position-relative" href="#section-header">
-                <i class="fa-solid fa-stethoscope me-1 fa-fw"></i> Services
-              </a>
-            </li>
-            <li class="nav-item px-2">
-              <a class="nav-link fw-medium text-dark position-relative"
-                href="${pageContext.request.contextPath}/doctors_dashboard.jsp">
-                <i class="fa-solid fa-user-doctor me-1 fa-fw"></i> Doctors
-              </a>
-            </li>
-            <li class="nav-item px-2">
-              <a class="nav-link fw-medium text-dark position-relative" href="user_appointment.jsp">
-                <i class="fa-solid fa-calendar-check me-1 fa-fw"></i> Appointments
-              </a>
-            </li>
-            <li class="nav-item px-2">
-              <a class="nav-link fw-medium text-dark position-relative" href="contact.jsp">
-                <i class="fa-solid fa-phone me-1 fa-fw"></i> Contact
-              </a>
-            </li>
-          </ul>
+            <ul class="navbar-nav mx-auto align-items-lg-center">
+                <li class="nav-item px-2">
+                    <a class="nav-link fw-medium text-dark position-relative"
+                       href="${pageContext.request.contextPath}/index.jsp">
+                        <i class="fa-solid fa-house me-1 fa-fw"></i> Home
+                    </a>
+                </li>
+                <li class="nav-item px-2">
+                    <a class="nav-link fw-medium text-dark position-relative" href="#section-header">
+                        <i class="fa-solid fa-stethoscope me-1 fa-fw"></i> Services
+                    </a>
+                </li>
+                <li class="nav-item px-2">
+                    <a class="nav-link fw-medium text-dark position-relative"
+                       href="${pageContext.request.contextPath}/doctors_dashboard.jsp">
+                        <i class="fa-solid fa-user-doctor me-1 fa-fw"></i> Doctors
+                    </a>
+                </li>
+                <li class="nav-item px-2">
+                    <a class="nav-link fw-medium text-dark position-relative"
+                       href="${pageContext.request.contextPath}/patient/book_appointment.jsp">
+                        <i class="fa-solid fa-calendar-check me-1 fa-fw"></i> Appointment
+                    </a>
+                </li>
+                <li class="nav-item px-2">
+                    <a class="nav-link fw-medium text-dark position-relative"
+                       href="${pageContext.request.contextPath}/contact.jsp">
+                        <i class="fa-solid fa-phone me-1 fa-fw"></i> Contact
+                    </a>
+                </li>
+            </ul>
 
-          <ul class="navbar-nav ms-auto align-items-lg-center">
-            <c:if test="${empty userObj}">
-              <li class="nav-item px-2">
-                <a class="btn btn-primary fw-medium text-white d-flex align-items-center join-btn"
-                  href="${pageContext.request.contextPath}/role_selection.jsp">
-                  <i class="fa-solid fa-user-plus me-2"></i> Join Now
-                </a>
-              </li>
+            <ul class="navbar-nav ms-auto align-items-lg-center">
+                <!-- Guest User -->
+                <c:if test="${empty userObj}">
+                    <li class="nav-item px-2">
+                        <a class="btn btn-primary fw-medium text-white d-flex align-items-center join-btn"
+                           href="${pageContext.request.contextPath}/role_selection.jsp">
+                            <i class="fa-solid fa-user-plus me-2"></i> Join Now
+                        </a>
+                    </li>
 
-              <li class="nav-item dropdown px-2">
-                <a class="nav-link dropdown-toggle fw-medium text-dark d-flex align-items-center position-relative login-dropdown"
-                  href="#" id="loginDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                  <i class="fa-solid fa-right-to-bracket me-2"></i> Login
-                </a>
-                <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3 p-3"
-                  aria-labelledby="loginDropdown" style="min-width: 280px;">
-                  <li class="dropdown-header fw-bold text-primary mb-2">Choose Your Role</li>
+                    <li class="nav-item dropdown px-2">
+                        <a class="nav-link dropdown-toggle fw-medium text-dark d-flex align-items-center position-relative login-dropdown"
+                           href="#" id="loginDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa-solid fa-right-to-bracket me-2"></i> Login
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3 p-3"
+                            aria-labelledby="loginDropdown">
+                            <li class="dropdown-header fw-bold text-primary mb-2">Choose Your Role</li>
 
-                  <li>
-                    <a class="dropdown-item d-flex align-items-center p-3 rounded-3 mb-2 patient-login"
-                      href="${pageContext.request.contextPath}/patient/patient_login.jsp">
-                      <div
-                        class="role-icon bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-3"
-                        style="width: 40px; height: 40px;">
-                        <i class="fa-solid fa-user-injured  fa-fw"></i>
-                      </div>
-                      <div>
-                        <div class="fw-semibold">Patient Login</div>
-                        <small class="text-muted">Access your medical records</small>
-                      </div>
-                    </a>
-                  </li>
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center p-3 rounded-3 mb-2 patient-login"
+                                   href="${pageContext.request.contextPath}/patient/patient_login.jsp">
+                                    <div class="role-icon bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-3"
+                                         style="width: 40px; height: 40px;">
+                                        <i class="fa-solid fa-user-injured fa-fw"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold">Patient Login</div>
+                                        <small class="text-muted">Access your medical records</small>
+                                    </div>
+                                </a>
+                            </li>
 
-                  <li>
-                    <a class="dropdown-item d-flex align-items-center p-3 rounded-3 mb-2 doctor-login"
-                      href="${pageContext.request.contextPath}/doctor/doctor_login.jsp">
-                      <div
-                        class="role-icon bg-success bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-3"
-                        style="width: 40px; height: 40px;">
-                        <i class="fa-solid fa-user-md  fa-fw"></i>
-                      </div>
-                      <div>
-                        <div class="fw-semibold">Doctor Login</div>
-                        <small class="text-muted">Manage patients & appointments</small>
-                      </div>
-                    </a>
-                  </li>
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center p-3 rounded-3 mb-2 doctor-login"
+                                   href="${pageContext.request.contextPath}/doctor/doctor_login.jsp">
+                                    <div class="role-icon bg-success bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-3"
+                                         style="width: 40px; height: 40px;">
+                                        <i class="fa-solid fa-user-md fa-fw"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold">Doctor Login</div>
+                                        <small class="text-muted">Manage patients & appointments</small>
+                                    </div>
+                                </a>
+                            </li>
 
-                  <li>
-                    <a class="dropdown-item d-flex align-items-center p-3 rounded-3 admin-login"
-                      href="${pageContext.request.contextPath}/admin/admin_login.jsp">
-                      <div
-                        class="role-icon bg-warning bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-3"
-                        style="width: 40px; height: 40px;">
-                        <i class="fa-solid fa-user-shield  fa-fw"></i>
-                      </div>
-                      <div>
-                        <div class="fw-semibold">Admin Login</div>
-                        <small class="text-muted">System administration</small>
-                      </div>
-                    </a>
-                  </li>
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center p-3 rounded-3 admin-login"
+                                   href="${pageContext.request.contextPath}/admin/admin_login.jsp">
+                                    <div class="role-icon bg-warning bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-3"
+                                         style="width: 40px; height: 40px;">
+                                        <i class="fa-solid fa-user-shield fa-fw"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold">Admin Login</div>
+                                        <small class="text-muted">System administration</small>
+                                    </div>
+                                </a>
+                            </li>
 
-                  <li>
-                    <hr class="dropdown-divider my-3">
-                  </li>
-                  <li>
-                    <a class="dropdown-item text-center text-primary fw-semibold"
-                      href="${pageContext.request.contextPath}/role_selection.jsp">
-                      <i class="fa-solid fa-user-plus me-1 fa-fw"></i> Create New Account
-                    </a>
-                  </li>
-                </ul>
-              </li>
-            </c:if>
+                            <li>
+                                <hr class="dropdown-divider my-3">
+                            </li>
+                            <li>
+                                <a class="dropdown-item text-center text-primary fw-semibold"
+                                   href="${pageContext.request.contextPath}/role_selection.jsp">
+                                    <i class="fa-solid fa-user-plus me-1 fa-fw"></i> Create New Account
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                </c:if>
 
-            <c:if test="${not empty userObj}">
-              <li class="nav-item px-2">
-                <a class="btn btn-outline-primary fw-medium d-flex align-items-center" href="user_appointment.jsp">
-                  <i class="fa-solid fa-calendar-plus me-2 fa-fw"></i> Book Appointment
-                </a>
-              </li>
-              <li class="nav-item px-2">
-                <a class="nav-link fw-medium text-dark position-relative" href="view_appointment.jsp">
-                  <i class="fa-solid fa-eye me-1 fa-fw"></i> My Appointments
-                </a>
-              </li>
+                <!-- Logged-in User -->
+                <c:if test="${not empty userObj}">
+                    <li class="nav-item px-2">
+                        <a class="btn btn-outline-primary fw-medium d-flex align-items-center"
+                           href="${pageContext.request.contextPath}/user_appointment.jsp">
+                            <i class="fa-solid fa-calendar-plus me-2 fa-fw"></i> Book Appointment
+                        </a>
+                    </li>
+                    <li class="nav-item px-2">
+                        <a class="nav-link fw-medium text-dark position-relative"
+                           href="${pageContext.request.contextPath}/view_appointment.jsp">
+                            <i class="fa-solid fa-eye me-1 fa-fw"></i> My Appointments
+                        </a>
+                    </li>
 
-              <li class="nav-item dropdown px-2">
-                <a class="nav-link dropdown-toggle fw-medium text-dark d-flex align-items-center position-relative user-dropdown"
-                  href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                  <div
-                    class="user-avatar bg-primary rounded-circle d-flex align-items-center justify-content-center me-2"
-                    style="width: 32px; height: 32px;">
-                    <i class="fa-regular fa-user text-white small fa-fw"></i>
-                  </div>
-                  <span class="user-name">${userObj.fullName}</span>
-                </a>
-                <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3 p-2"
-                  aria-labelledby="userDropdown" style="min-width: 250px;">
-                  <li class="dropdown-header p-3">
-                    <div class="d-flex align-items-center">
-                      <div
-                        class="user-avatar bg-primary rounded-circle d-flex align-items-center justify-content-center me-3"
-                        style="width: 40px; height: 40px;">
-                        <i class="fa-regular fa-user text-white fa-fw"></i>
-                      </div>
-                      <div>
-                        <div class="fw-bold">${userObj.fullName}</div>
-                        <small class="text-muted">Patient</small>
-                      </div>
-                    </div>
-                  </li>
-                  <li>
-                    <hr class="dropdown-divider my-2">
-                  </li>
-                  <li>
-                    <a class="dropdown-item d-flex align-items-center text-dark p-2" href="profile.jsp">
-                      <i class="fa-regular fa-user me-2 fa-fw"></i> My Profile
-                    </a>
-                  </li>
-                  <li>
-                    <a class="dropdown-item d-flex align-items-center text-dark p-2" href="medical_records.jsp">
-                      <i class="fa-regular fa-file-alt me-2 fa-fw"></i> Medical Records
-                    </a>
-                  </li>
-                  <li>
-                    <a class="dropdown-item d-flex align-items-center text-dark p-2" href="prescriptions.jsp">
-                      <i class="fa-solid fa-prescription me-2 fa-fw"></i> Prescriptions
-                    </a>
-                  </li>
-                  <li>
-                    <hr class="dropdown-divider my-2">
-                  </li>
-                  <li>
-                    <a class="dropdown-item d-flex align-items-center text-dark p-2" href="change_password.jsp">
-                      <i class="fa-solid fa-key me-2 fa-fw"></i> Change Password
-                    </a>
-                  </li>
-                  <li>
-                    <hr class="dropdown-divider my-2">
-                  </li>
-                  <li>
-                    <a class="dropdown-item d-flex align-items-center text-danger p-2" href="userLogout">
-                      <i class="fa-solid fa-right-from-bracket me-2 fa-fw"></i> Logout
-                    </a>
-                  </li>
-                </ul>
-              </li>
-            </c:if>
-          </ul>
+                    <li class="nav-item dropdown px-2">
+                        <a class="nav-link dropdown-toggle fw-medium text-dark d-flex align-items-center position-relative user-dropdown"
+                           href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <div class="user-avatar bg-primary rounded-circle d-flex align-items-center justify-content-center me-2"
+                                 style="width: 32px; height: 32px;">
+                                <i class="fa-regular fa-user text-white small fa-fw"></i>
+                            </div>
+                            <span class="user-name">${userObj.fullname}</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3 p-2"
+                            aria-labelledby="userDropdown">
+                            <li class="dropdown-header p-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="user-avatar bg-primary rounded-circle d-flex align-items-center justify-content-center me-3"
+                                         style="width: 40px; height: 40px;">
+                                        <i class="fa-regular fa-user text-white fa-fw"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold">${userObj.fullname}</div>
+                                        <small class="text-muted">Patient</small>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <hr class="dropdown-divider my-2">
+                            </li>
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center text-dark p-2"
+                                   href="${pageContext.request.contextPath}/profile.jsp">
+                                    <i class="fa-regular fa-user me-2 fa-fw"></i> My Profile
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center text-dark p-2"
+                                   href="${pageContext.request.contextPath}/medical_records.jsp">
+                                    <i class="fa-regular fa-file-alt me-2 fa-fw"></i> Medical Records
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center text-dark p-2"
+                                   href="${pageContext.request.contextPath}/prescriptions.jsp">
+                                    <i class="fa-solid fa-prescription me-2 fa-fw"></i> Prescriptions
+                                </a>
+                            </li>
+                            <li>
+                                <hr class="dropdown-divider my-2">
+                            </li>
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center text-dark p-2"
+                                   href="${pageContext.request.contextPath}/change_password.jsp">
+                                    <i class="fa-solid fa-key me-2 fa-fw"></i> Change Password
+                                </a>
+                            </li>
+                            <li>
+                                <hr class="dropdown-divider my-2">
+                            </li>
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center text-danger p-2"
+                                   href="${pageContext.request.contextPath}/userLogout">
+                                    <i class="fa-solid fa-right-from-bracket me-2 fa-fw"></i> Logout
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                </c:if>
+            </ul>
         </div>
-      </div>
-    </nav>
+    </div>
+</nav>
 
-    <style>
-      /* Modern Light Theme Navbar */
-      .navbar {
+
+<!-- Styles remain exactly the same -->
+<style>
+    /* Modern Light Theme Navbar */
+    .navbar {
         padding: 0.6rem 0;
         transition: all 0.3s ease;
         position: fixed;
@@ -211,7 +222,8 @@
         backdrop-filter: blur(10px);
         background: rgba(255, 255, 255, 0.98) !important;
         border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-      }
+    }
+
 
       .navbar-brand {
         font-size: 1.6rem;

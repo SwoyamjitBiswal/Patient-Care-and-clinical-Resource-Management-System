@@ -435,7 +435,7 @@
                     <c:remove var="errorMsg" scope="session"/>
                 </c:if>
 
-                <form action="registerDoctor" method="post" id="doctorForm" class="needs-validation" novalidate>
+                <form action="<%=request.getContextPath()%>/registerDoctor" method="post" id="doctorForm" class="needs-validation" novalidate>
                     <!-- Personal Information Section -->
                     <div class="section-title">
                         <i class="fas fa-user"></i>
@@ -448,7 +448,7 @@
                                 <i class="fas fa-user-circle"></i>Full Name
                             </label>
                             <div class="input-group">
-                                <input type="text" class="form-control" id="fullName" name="fullName" 
+                                <input type="text" class="form-control" id="fullName" name="fullname" 
                                        placeholder="Enter your full name" required minlength="3" maxlength="50">
                                 <i class="input-icon fas fa-user"></i>
                                 <div class="invalid-feedback">
@@ -625,6 +625,20 @@
                             </div>
                         </div>
                     </div>
+	                 <div class="form-group">
+						    <label for="visitingCharge" class="form-label">
+						        <i class="fas fa-money-bill-wave"></i>Consulting Fee (₹)
+						    </label>
+						    <div class="input-group">
+						        <input type="number" class="form-control" id="visitingCharge" name="visitingCharge"
+						               placeholder="Enter your consulting fee in INR" required min="0" step="0.01">
+						        <i class="input-icon fas fa-money-bill-wave"></i>
+						        <div class="invalid-feedback">
+						            Please provide a valid consulting fee (non-negative value).
+						        </div>
+						    </div>
+					</div>
+                    
                     
                     <!-- Contact & Availability Section -->
                     <div class="section-title">

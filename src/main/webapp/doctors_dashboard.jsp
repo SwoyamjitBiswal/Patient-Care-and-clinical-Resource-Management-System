@@ -1,1222 +1,994 @@
+<%@ page import="java.util.*, com.dao.DoctorDao, com.entity.Doctor" %>
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page session="true" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MediCare - Doctor Dashboard</title>
+    <title>Doctors Dashboard | HealthCare</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        :root {
+            --primary-color: #1a73e8;
+            --primary-dark: #0d47a1;
+            --primary-light: #64b5f6;
+            --accent-color: #42a5f5;
+            --secondary-color: #7e57c2;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --light-bg: #f8fbff;
+            --text-dark: #2c3e50;
+            --text-light: #566573;
+            --white: #ffffff;
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            --hover-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+            --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         body {
-            background-color: #f5f7fa;
-            color: #333;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            color: var(--text-dark);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
             line-height: 1.6;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            box-shadow: 0 4px 18px rgba(26, 115, 232, 0.25);
+            padding: 0.8rem 0;
+            backdrop-filter: blur(10px);
         }
 
-        header {
-            background: linear-gradient(135deg, #1a73e8, #0d47a1);
-            color: white;
-            padding: 20px 0;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        .navbar-brand {
+            font-weight: 800;
+            font-size: 1.8rem;
+            color: var(--white) !important;
+            letter-spacing: -0.5px;
         }
 
-        .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .logo i {
-            font-size: 28px;
-        }
-
-        .logo h1 {
-            font-size: 24px;
-            font-weight: 600;
-        }
-
-        nav ul {
-            display: flex;
-            list-style: none;
-            gap: 25px;
-        }
-
-        nav a {
-            color: white;
-            text-decoration: none;
+        .navbar-nav .nav-link {
+            color: rgba(255, 255, 255, 0.9) !important;
             font-weight: 500;
-            transition: all 0.3s ease;
-        }
-
-        nav a:hover {
-            color: #a7d1ff;
-        }
-
-        .user-actions {
-            display: flex;
-            gap: 15px;
-        }
-
-        .btn {
-            padding: 8px 16px;
-            border-radius: 4px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: none;
-        }
-
-        .btn-login {
-            background-color: white;
-            color: #1a73e8;
-        }
-
-        .btn-login:hover {
-            background-color: #f0f0f0;
-        }
-
-        .btn-logout {
-            background-color: transparent;
-            color: white;
-            border: 1px solid white;
-        }
-
-        .btn-logout:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-
-        .dashboard-title {
-            text-align: center;
-            margin: 30px 0;
-            color: #1a73e8;
-        }
-
-        .dashboard-title h2 {
-            font-size: 32px;
-            margin-bottom: 10px;
-        }
-
-        .dashboard-title p {
-            color: #666;
-            font-size: 18px;
-        }
-
-        .filters {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-        }
-
-        .filter-btn {
-            padding: 8px 20px;
-            background-color: white;
-            border: 1px solid #ddd;
-            border-radius: 30px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .filter-btn:hover, .filter-btn.active {
-            background-color: #1a73e8;
-            color: white;
-            border-color: #1a73e8;
-        }
-
-        .search-box {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 30px;
-        }
-
-        .search-input {
-            width: 100%;
-            max-width: 500px;
-            padding: 12px 20px;
-            border: 1px solid #ddd;
-            border-radius: 30px;
-            font-size: 16px;
-            outline: none;
-            transition: all 0.3s ease;
-        }
-
-        .search-input:focus {
-            border-color: #1a73e8;
-            box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
-        }
-
-        .doctors-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 25px;
-            margin-bottom: 40px;
-        }
-
-        .doctor-card {
-            background-color: white;
-            border-radius: 10px;
+            margin: 0 5px;
+            padding: 10px 18px !important;
+            border-radius: 8px;
+            transition: var(--transition);
+            position: relative;
             overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
-        .doctor-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        .navbar-nav .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.15);
+            transition: left 0.4s ease;
+            z-index: -1;
         }
 
-        .doctor-header {
-            display: flex;
-            padding: 20px;
-            background: linear-gradient(to right, #f8f9fa, #e9ecef);
+        .navbar-nav .nav-link:hover::before {
+            left: 0;
         }
 
-        .doctor-img {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 3px solid white;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        .navbar-nav .nav-link:hover {
+            color: var(--white) !important;
+            transform: translateY(-2px);
         }
 
-        .doctor-basic-info {
-            margin-left: 20px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
+        .navbar-nav .nav-link.active {
+            background: rgba(255, 255, 255, 0.15);
+            color: var(--white) !important;
         }
 
-        .doctor-name {
-            font-size: 20px;
-            font-weight: 600;
-            color: #1a73e8;
-            margin-bottom: 5px;
-        }
-
-        .doctor-department {
-            color: #666;
-            font-size: 16px;
-            margin-bottom: 8px;
-        }
-
-        .doctor-rating {
-            color: #ffc107;
-            font-size: 14px;
-        }
-
-        .doctor-details {
-            padding: 20px;
-        }
-
-        .detail-item {
-            display: flex;
-            margin-bottom: 12px;
-            align-items: flex-start;
-        }
-
-        .detail-icon {
-            color: #1a73e8;
-            width: 20px;
-            margin-right: 10px;
-            margin-top: 3px;
-        }
-
-        .detail-label {
-            font-weight: 600;
-            margin-right: 5px;
-            min-width: 120px;
-        }
-
-        .doctor-actions {
-            display: flex;
-            padding: 15px 20px;
-            background-color: #f8f9fa;
-            border-top: 1px solid #eee;
-        }
-
-        .btn-action {
-            flex: 1;
-            padding: 10px;
-            text-align: center;
-            border-radius: 5px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .btn-info {
-            background-color: #e3f2fd;
-            color: #1a73e8;
-            margin-right: 10px;
-        }
-
-        .btn-info:hover {
-            background-color: #bbdefb;
-        }
-
-        .btn-book {
-            background-color: #1a73e8;
+        .user-info {
             color: white;
+            font-weight: 500;
+            margin-right: 15px;
         }
 
-        .btn-book:hover {
-            background-color: #0d47a1;
+        .page-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            padding: 4rem 0 3rem;
+            margin-bottom: 3rem;
+            border-radius: 0 0 30px 30px;
+            position: relative;
+            overflow: hidden;
         }
 
-        .btn-book:disabled {
-            background-color: #ccc;
-            cursor: not-allowed;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
+        .page-header::before {
+            content: '';
+            position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
+            background-size: cover;
+            background-position: center;
         }
 
-        .modal-content {
-            background-color: white;
-            border-radius: 10px;
-            width: 90%;
-            max-width: 500px;
-            padding: 30px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        .page-title {
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            font-size: 2.8rem;
             position: relative;
         }
 
-        .close-modal {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            font-size: 24px;
-            cursor: pointer;
-            color: #666;
+        .page-subtitle {
+            font-weight: 400;
+            opacity: 0.9;
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 0 auto;
         }
 
-        .modal-title {
-            margin-bottom: 20px;
-            color: #1a73e8;
-            text-align: center;
+        .doctor-count {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 50px;
+            padding: 12px 25px;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
-        .form-group {
-            margin-bottom: 20px;
+        /* Filter Section Styles */
+        .filter-section {
+            background: var(--white);
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            padding: 2rem;
+            margin-bottom: 3rem;
+            transition: var(--transition);
         }
 
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
+        .filter-section:hover {
+            box-shadow: var(--hover-shadow);
         }
 
-        .form-control {
-            width: 100%;
-            padding: 10px 15px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-
-        .btn-submit {
-            width: 100%;
-            padding: 12px;
-            background-color: #1a73e8;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        .btn-submit:hover {
-            background-color: #0d47a1;
-        }
-
-        .info-modal {
-            max-width: 700px;
-        }
-
-        .info-content {
-            max-height: 400px;
-            overflow-y: auto;
-            padding-right: 10px;
-        }
-
-        .info-section {
-            margin-bottom: 25px;
-        }
-
-        .info-section h3 {
-            color: #1a73e8;
-            margin-bottom: 10px;
-            padding-bottom: 5px;
-            border-bottom: 1px solid #eee;
-        }
-
-        .login-prompt {
-            text-align: center;
-            padding: 20px;
-            background-color: #fff8e1;
-            border-radius: 5px;
-            margin-top: 15px;
-            color: #ff8f00;
-            font-weight: 500;
-        }
-
-        footer {
-            background-color: #1a73e8;
-            color: white;
-            padding: 30px 0;
-            margin-top: 50px;
-        }
-
-        .footer-content {
+        .filter-header {
             display: flex;
             justify-content: space-between;
-            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            padding-bottom: 1rem;
         }
 
-        .footer-section {
-            flex: 1;
-            min-width: 250px;
-            margin-bottom: 20px;
+        .filter-title {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--primary-dark);
+            margin: 0;
         }
 
-        .footer-section h3 {
-            margin-bottom: 15px;
-            font-size: 18px;
+        .filter-reset {
+            background: transparent;
+            border: 2px solid var(--text-light);
+            color: var(--text-light);
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-weight: 600;
+            transition: var(--transition);
         }
 
-        .footer-section p, .footer-section a {
-            color: #e3f2fd;
-            margin-bottom: 8px;
+        .filter-reset:hover {
+            background: var(--text-light);
+            color: var(--white);
+            transform: translateY(-2px);
+        }
+
+        .filter-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .filter-label {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
             display: block;
-            text-decoration: none;
         }
 
-        .footer-section a:hover {
-            text-decoration: underline;
+        .filter-select, .filter-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            background: var(--white);
+            font-size: 1rem;
+            transition: var(--transition);
         }
 
-        .copyright {
-            text-align: center;
-            padding-top: 20px;
-            border-top: 1px solid #64b5f6;
-            margin-top: 20px;
-            color: #e3f2fd;
+        .filter-select:focus, .filter-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.2);
+            outline: none;
         }
 
-        .loading {
-            text-align: center;
-            padding: 40px;
-            font-size: 18px;
-            color: #666;
+        .range-inputs {
+            display: flex;
+            gap: 15px;
         }
 
-        .loading i {
-            font-size: 24px;
-            margin-bottom: 10px;
-            color: #1a73e8;
+        .range-inputs .filter-input {
+            flex: 1;
         }
 
-        .no-results {
-            text-align: center;
-            padding: 40px;
-            color: #666;
-            font-size: 18px;
+        .range-slider {
+            width: 100%;
+            margin: 15px 0;
         }
 
-        .no-results i {
-            font-size: 48px;
-            margin-bottom: 15px;
-            color: #ccc;
+        .filter-checkbox {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .filter-checkbox input {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+
+        .filter-checkbox label {
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+
+        .filter-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 1.5rem;
+        }
+
+        /* Card Styles */
+        .card {
+            border: none;
+            border-radius: 20px;
+            overflow: hidden;
+            transition: var(--transition);
+            height: 100%;
+            box-shadow: var(--card-shadow);
+            background: var(--white);
+            position: relative;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        }
+
+        .card:hover {
+            transform: translateY(-12px);
+            box-shadow: var(--hover-shadow);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            padding: 1.8rem 1.5rem;
+            border-bottom: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .doctor-name {
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+            font-size: 1.5rem;
+            letter-spacing: -0.3px;
+        }
+
+        .doctor-department {
+            font-weight: 500;
+            opacity: 0.9;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .card-body {
+            padding: 2rem 1.5rem;
+        }
+
+        .doctor-details {
+            margin-bottom: 1.5rem;
+        }
+
+        .detail-item {
+            display: flex;
+            margin-bottom: 1rem;
+            align-items: flex-start;
+        }
+
+        .detail-icon {
+            color: var(--primary-color);
+            width: 24px;
+            margin-right: 12px;
+            margin-top: 3px;
+            font-size: 1.1rem;
+        }
+
+        .detail-text {
+            flex: 1;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 2px;
+        }
+
+        .detail-value {
+            font-weight: 500;
+            color: var(--text-dark);
+            font-size: 1rem;
+        }
+
+        .availability-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        .available {
+            background: rgba(46, 204, 113, 0.15);
+            color: var(--success-color);
+            border: 1px solid rgba(46, 204, 113, 0.3);
+        }
+
+        .not-available {
+            background: rgba(231, 76, 60, 0.15);
+            color: var(--danger-color);
+            border: 1px solid rgba(231, 76, 60, 0.3);
+        }
+
+        .card-footer {
+            background-color: transparent;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Updated Button Styles */
+        .btn {
+            border: none;
+            border-radius: 12px;
+            padding: 12px 24px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.7s ease;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: var(--white);
+        }
+
+        .btn-info:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(52, 152, 219, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success-color), #27ae60);
+            color: var(--white);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(46, 204, 113, 0.4);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(26, 115, 232, 0.4);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, var(--warning-color), #e67e22);
+            color: var(--white);
+        }
+
+        .btn-warning:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(243, 156, 18, 0.4);
+        }
+
+        .btn-outline-secondary {
+            background: transparent;
+            color: var(--text-light);
+            border: 2px solid #bdc3c7;
+        }
+
+        .btn-outline-secondary:hover {
+            background: #bdc3c7;
+            color: var(--white);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(189, 195, 199, 0.4);
+        }
+
+        .btn i {
+            margin-right: 8px;
+            font-size: 1rem;
+        }
+
+        .main-content {
+            flex: 1;
+        }
+        .no-doctors i {
+            font-size: 5rem;
+            color: #ddd;
+            margin-bottom: 2rem;
+        }
+
+        .no-doctors h3 {
+            color: var(--text-dark);
+            margin-bottom: 1rem;
+        }
+
+        .no-doctors p {
+            color: var(--text-light);
+            max-width: 500px;
+            margin: 0 auto;
         }
 
         @media (max-width: 768px) {
-            .header-content {
+            .page-header {
+                padding: 3rem 0 2rem;
+                border-radius: 0 0 20px 20px;
+            }
+            
+            .page-title {
+                font-size: 2.2rem;
+            }
+            
+            .card {
+                margin-bottom: 2rem;
+            }
+            
+            .card-footer {
                 flex-direction: column;
-                gap: 15px;
+                gap: 12px;
             }
             
-            nav ul {
-                gap: 15px;
+            .card-footer .btn {
+                width: 100%;
             }
-            
-            .doctors-container {
-                grid-template-columns: 1fr;
-            }
-            
-            .doctor-header {
+
+            .filter-actions {
                 flex-direction: column;
-                text-align: center;
             }
-            
-            .doctor-basic-info {
-                margin-left: 0;
-                margin-top: 15px;
+
+            .range-inputs {
+                flex-direction: column;
+                gap: 10px;
             }
+        }
+
+        /* Animation for cards when they appear */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .doctor-card {
+            animation: fadeInUp 0.6s ease forwards;
+            opacity: 0;
+        }
+
+        /* Stagger animation for cards */
+        .doctor-card:nth-child(1) { animation-delay: 0.1s; }
+        .doctor-card:nth-child(2) { animation-delay: 0.2s; }
+        .doctor-card:nth-child(3) { animation-delay: 0.3s; }
+        .doctor-card:nth-child(4) { animation-delay: 0.4s; }
+        .doctor-card:nth-child(5) { animation-delay: 0.5s; }
+        .doctor-card:nth-child(6) { animation-delay: 0.6s; }
+
+        /* Filter results count */
+        .filter-results {
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 1.1rem;
         }
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <header>
+    <%
+        DoctorDao dao = new DoctorDao();
+        List<Doctor> doctors = dao.getAllDoctors();
+        
+        // Check if patient is logged in
+        Boolean isPatientLoggedIn = false;
+        String patientName = "";
+        if (session.getAttribute("patientId") != null) {
+            isPatientLoggedIn = true;
+            patientName = (String) session.getAttribute("patientName");
+        }
+
+        // Get unique departments for filter
+        Set<String> departments = new HashSet<>();
+        // Get unique locations for filter
+        Set<String> locations = new HashSet<>();
+        // Get fee range for filter
+        double minFeeValue = Double.MAX_VALUE;
+        double maxFeeValue = 0;
+        
+        for (Doctor doctor : doctors) {
+            departments.add(doctor.getDepartment());
+            locations.add(doctor.getClinicAddress());
+            
+            // Calculate fee range - FIXED: Use double instead of int
+            double fee = doctor.getVisitingCharge();
+            if (fee < minFeeValue) minFeeValue = fee;
+            if (fee > maxFeeValue) maxFeeValue = fee;
+        }
+        
+        // Set default min/max if no doctors
+        if (doctors.isEmpty()) {
+            minFeeValue = 0;
+            maxFeeValue = 1000;
+        }
+    %>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
         <div class="container">
-            <div class="header-content">
-                <div class="logo">
-                    <i class="fas fa-stethoscope"></i>
-                    <h1>MediCare</h1>
-                </div>
-                <nav>
-                    <ul>
-                        <li><a href="#"><i class="fas fa-home"></i> Home</a></li>
-                        <li><a href="#"><i class="fas fa-user-md"></i> Doctors</a></li>
-                        <li><a href="#"><i class="fas fa-calendar-check"></i> Appointments</a></li>
-                        <li><a href="#"><i class="fas fa-info-circle"></i> About</a></li>
-                        <li><a href="#"><i class="fas fa-phone"></i> Contact</a></li>
-                    </ul>
-                </nav>
-                <div class="user-actions">
-                    <button id="loginBtn" class="btn btn-login"><i class="fas fa-sign-in-alt"></i> Login</button>
-                    <button id="logoutBtn" class="btn btn-logout" style="display: none;"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            <a class="navbar-brand" href="index.jsp">
+                <i class="fas fa-heartbeat me-2"></i>HealthCare
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.jsp"><i class="fas fa-home me-1"></i> Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="doctors.jsp"><i class="fas fa-user-md me-1"></i> Doctors</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="departments.jsp"><i class="fas fa-stethoscope me-1"></i> Departments</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="about.jsp"><i class="fas fa-info-circle me-1"></i> About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="contact.jsp"><i class="fas fa-envelope me-1"></i> Contact</a>
+                    </li>
+                </ul>
+                <div class="d-flex align-items-center">
+                    <% if (isPatientLoggedIn) { %>
+                        <span class="user-info"><i class="fas fa-user me-1"></i> Welcome, <%= patientName %></span>
+                        <a href="patientLogout.jsp" class="btn btn-outline-light btn-sm">
+                            <i class="fas fa-sign-out-alt me-1"></i> Logout
+                        </a>
+                    <% } else { %>
+                        <a href="patientLogin.jsp" class="btn btn-outline-light btn-sm me-2">
+                            <i class="fas fa-sign-in-alt me-1"></i> Login
+                        </a>
+                        <a href="patientRegister.jsp" class="btn btn-light btn-sm">
+                            <i class="fas fa-user-plus me-1"></i> Register
+                        </a>
+                    <% } %>
                 </div>
             </div>
         </div>
-    </header>
+    </nav>
 
-    <!-- Dashboard Title -->
-    <section class="dashboard-title">
+    <!-- Page Header -->
+    <div class="page-header">
         <div class="container">
-            <h2>Find Your Specialist</h2>
-            <p>Browse our team of experienced healthcare professionals</p>
-        </div>
-    </section>
-
-    <!-- Search Box -->
-    <section class="search-box container">
-        <input type="text" id="searchInput" class="search-input" placeholder="Search doctors by name, department, or specialty...">
-    </section>
-
-    <!-- Filters -->
-    <section class="filters container">
-        <button class="filter-btn active">All Specialties</button>
-        <button class="filter-btn">Cardiology</button>
-        <button class="filter-btn">Neurology</button>
-        <button class="filter-btn">Pediatrics</button>
-        <button class="filter-btn">Dermatology</button>
-        <button class="filter-btn">Orthopedics</button>
-    </section>
-
-    <!-- Doctors Container -->
-    <section class="container">
-        <div class="doctors-container" id="doctorsContainer">
-            <!-- Doctor cards will be dynamically inserted here -->
-        </div>
-    </section>
-
-    <!-- Login Modal -->
-    <div id="loginModal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal">&times;</span>
-            <h2 class="modal-title">Patient Login</h2>
-            <form id="loginForm">
-                <div class="form-group">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" class="form-control" placeholder="Enter your email" required>
+            <div class="row align-items-center">
+                <div class="col-lg-8 text-center text-lg-start">
+                    <h1 class="page-title">Our Medical Experts</h1>
+                    <p class="page-subtitle">Find and book appointments with our qualified healthcare professionals committed to your well-being</p>
                 </div>
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" class="form-control" placeholder="Enter your password" required>
+                <div class="col-lg-4 text-center text-lg-end mt-4 mt-lg-0">
+                    <span class="doctor-count"><i class="fas fa-user-md me-2"></i><span id="doctorCount"><%= doctors.size() %></span> Doctors Available</span>
                 </div>
-                <button type="submit" class="btn-submit">Login</button>
-            </form>
-            <div class="login-prompt" id="loginMessage" style="display: none;">
-                Please login to book an appointment
             </div>
         </div>
     </div>
 
-    <!-- Appointment Modal -->
-    <div id="appointmentModal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal">&times;</span>
-            <h2 class="modal-title">Book Appointment</h2>
-            <form id="appointmentForm">
-                <div class="form-group">
-                    <label for="patientName">Full Name</label>
-                    <input type="text" id="patientName" class="form-control" placeholder="Enter your full name" required>
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="container">
+            <!-- Filter Section -->
+            <div class="filter-section">
+                <div class="filter-header">
+                    <h2 class="filter-title"><i class="fas fa-filter me-2"></i>Find Your Doctor</h2>
+                    <button class="filter-reset" id="resetFilters"><i class="fas fa-redo me-1"></i> Reset Filters</button>
                 </div>
-                <div class="form-group">
-                    <label for="patientEmail">Email</label>
-                    <input type="email" id="patientEmail" class="form-control" placeholder="Enter your email" required>
+                
+                <div class="row">
+                    <div class="col-md-6 col-lg-3">
+                        <div class="filter-group">
+                            <label class="filter-label">Department</label>
+                            <select class="filter-select" id="departmentFilter">
+                                <option value="">All Departments</option>
+                                <% for (String department : departments) { %>
+                                    <option value="<%= department %>"><%= department %></option>
+                                <% } %>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 col-lg-3">
+                        <div class="filter-group">
+                            <label class="filter-label">Location</label>
+                            <select class="filter-select" id="locationFilter">
+                                <option value="">All Locations</option>
+                                <% for (String location : locations) { %>
+                                    <option value="<%= location %>"><%= location %></option>
+                                <% } %>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 col-lg-3">
+                        <div class="filter-group">
+                            <label class="filter-label">Consultation Fee (₹<span id="minFeeDisplay"><%= String.format("%.0f", minFeeValue) %></span> - ₹<span id="maxFeeDisplay"><%= String.format("%.0f", maxFeeValue) %></span>)</label>
+                            <div class="range-inputs">
+                                <input type="number" class="filter-input" id="minFee" placeholder="Min" min="0" value="<%= (int)minFeeValue %>">
+                                <input type="number" class="filter-input" id="maxFee" placeholder="Max" min="0" value="<%= (int)maxFeeValue %>">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 col-lg-3">
+                        <div class="filter-group">
+                            <label class="filter-label">Experience</label>
+                            <select class="filter-select" id="experienceFilter">
+                                <option value="">Any Experience</option>
+                                <option value="5">5+ years</option>
+                                <option value="10">10+ years</option>
+                                <option value="15">15+ years</option>
+                                <option value="20">20+ years</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="patientPhone">Phone Number</label>
-                    <input type="tel" id="patientPhone" class="form-control" placeholder="Enter your phone number" required>
+                
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <div class="filter-group">
+                            <label class="filter-label">Availability</label>
+                            <div class="d-flex flex-wrap gap-3">
+                                <div class="filter-checkbox">
+                                    <input type="checkbox" id="availableNow" value="Available">
+                                    <label for="availableNow">Available Now</label>
+                                </div>
+                                <div class="filter-checkbox">
+                                    <input type="checkbox" id="availableToday" value="Today">
+                                    <label for="availableToday">Available Today</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="filter-actions">
+                            <button class="btn btn-primary" id="applyFilters">
+                                <i class="fas fa-search me-1"></i> Apply Filters
+                            </button>
+                            <button class="btn btn-warning" id="clearFilters">
+                                <i class="fas fa-times me-1"></i> Clear All
+                            </button>
+                        </div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="appointmentDate">Preferred Date</label>
-                    <input type="date" id="appointmentDate" class="form-control" required>
-                </div>
-                <div class="form-group">
-                    <label for="appointmentTime">Preferred Time</label>
-                    <select id="appointmentTime" class="form-control" required>
-                        <option value="">Select a time</option>
-                        <option value="09:00">09:00 AM</option>
-                        <option value="10:00">10:00 AM</option>
-                        <option value="11:00">11:00 AM</option>
-                        <option value="14:00">02:00 PM</option>
-                        <option value="15:00">03:00 PM</option>
-                        <option value="16:00">04:00 PM</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="symptoms">Symptoms / Reason for Visit</label>
-                    <textarea id="symptoms" class="form-control" rows="3" placeholder="Briefly describe your symptoms or reason for appointment"></textarea>
-                </div>
-                <button type="submit" class="btn-submit">Book Appointment</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Doctor Info Modal -->
-    <div id="infoModal" class="modal">
-        <div class="modal-content info-modal">
-            <span class="close-modal">&times;</span>
-            <h2 class="modal-title">Doctor Information</h2>
-            <div class="info-content" id="doctorInfoContent">
-                <!-- Doctor info will be dynamically inserted here -->
             </div>
+
+            <!-- Results Count -->
+            <div class="filter-results">
+                Showing <span id="resultsCount"><%= doctors.size() %></span> doctors
+            </div>
+
+            <!-- Doctors Grid -->
+            <% if (doctors.isEmpty()) { %>
+                <div class="no-doctors">
+                    <i class="fas fa-user-md"></i>
+                    <h3>No Doctors Available</h3>
+                    <p class="text-muted">We're currently updating our doctor database. Please check back later or contact our support for assistance.</p>
+                    <a href="contact.jsp" class="btn btn-info mt-3"><i class="fas fa-headset me-2"></i>Contact Support</a>
+                </div>
+            <% } else { %>
+                <div class="row" id="doctorsContainer">
+                    <% for (Doctor doctor : doctors) { %>
+                        <div class="col-xl-4 col-lg-6 col-md-6 mb-4 doctor-card" 
+                             data-department="<%= doctor.getDepartment() %>"
+                             data-location="<%= doctor.getClinicAddress() %>"
+                             data-fee="<%= doctor.getVisitingCharge() %>"
+                             data-experience="<%= doctor.getYearsOfExperience() %>"
+                             data-availability="<%= doctor.getAvailability() %>">
+                            <div class="card h-100">
+                                <div class="card-header">
+                                    <h4 class="doctor-name"><%= doctor.getFullName() %></h4>
+                                    <p class="doctor-department mb-0"><i class="fas fa-stethoscope me-2"></i> <%= doctor.getDepartment() %></p>
+                                </div>
+                                <div class="card-body">
+                                    <div class="doctor-details">
+                                        <div class="detail-item">
+                                            <div class="detail-icon">
+                                                <i class="fas fa-graduation-cap"></i>
+                                            </div>
+                                            <div class="detail-text">
+                                                <div class="detail-label">Qualification</div>
+                                                <div class="detail-value"><%= doctor.getQualification() %></div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="detail-item">
+                                            <div class="detail-icon">
+                                                <i class="fas fa-briefcase"></i>
+                                            </div>
+                                            <div class="detail-text">
+                                                <div class="detail-label">Experience</div>
+                                                <div class="detail-value"><%= doctor.getYearsOfExperience() %> years</div>
+                                            </div>
+                                        </div>
+                                        
+										<div class="detail-item">
+										        <div class="detail-icon">
+										            <i class="fas fa-money-bill-wave"></i>
+										        </div>
+										        <div class="detail-text">
+										            <div class="detail-label">Consultation Fee</div>
+										            <div class="detail-value">₹<%= doctor.getVisitingCharge() %></div>
+										        </div>
+										    </div>
+                                        
+                                        <div class="detail-item">
+                                            <div class="detail-icon">
+                                                <i class="fas fa-map-marker-alt"></i>
+                                            </div>
+                                            <div class="detail-text">
+                                                <div class="detail-label">Clinic Address</div>
+                                                <div class="detail-value"><%= doctor.getClinicAddress() %></div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="detail-item">
+                                            <div class="detail-icon">
+                                                <i class="fas fa-phone"></i>
+                                            </div>
+                                            <div class="detail-text">
+                                                <div class="detail-label">Contact</div>
+                                                <div class="detail-value"><%= doctor.getPhone() %></div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="detail-item">
+                                            <div class="detail-icon">
+                                                <i class="fas fa-clock"></i>
+                                            </div>
+                                            <div class="detail-text">
+                                                <div class="detail-label">Availability</div>
+                                                <div class="detail-value">
+                                                    <span class="availability-badge <%= doctor.getAvailability().toLowerCase().contains("available") ? "available" : "not-available" %>">
+                                                        <i class="fas <%= doctor.getAvailability().toLowerCase().contains("available") ? "fa-check-circle" : "fa-times-circle" %> me-1"></i>
+                                                        <%= doctor.getAvailability() %>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-footer">
+                                    <a href="doctorInfo.jsp?doctorId=<%= doctor.getId() %>" class="btn btn-info">
+                                        <i class="fas fa-info-circle me-1"></i> View Profile
+                                    </a>
+                                    <% if (isPatientLoggedIn) { %>
+                                        <a href="bookAppointment.jsp?doctorId=<%= doctor.getId() %>" class="btn btn-success">
+                                            <i class="fas fa-calendar-check me-1"></i> Book Now
+                                        </a>
+                                    <% } else { %>
+                                        <a href="patientLogin.jsp" class="btn btn-outline-secondary">
+                                            <i class="fas fa-sign-in-alt me-1"></i> Login to Book
+                                        </a>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
+                    <% } %>
+                </div>
+            <% } %>
         </div>
     </div>
 
     <!-- Footer -->
     <footer>
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h3>About MediCare</h3>
-                    <p>We are committed to providing the highest quality healthcare services with our team of experienced specialists.</p>
-                </div>
-                <div class="footer-section">
-                    <h3>Quick Links</h3>
-                    <a href="#">Home</a>
-                    <a href="#">Doctors</a>
-                    <a href="#">Services</a>
-                    <a href="#">Appointments</a>
-                </div>
-                <div class="footer-section">
-                    <h3>Contact Us</h3>
-                    <p><i class="fas fa-map-marker-alt"></i> 123 Healthcare Ave, Medical City</p>
-                    <p><i class="fas fa-phone"></i> +1 (555) 123-4567</p>
-                    <p><i class="fas fa-envelope"></i> info@medicare.com</p>
-                </div>
-            </div>
-            <div class="copyright">
-                <p>&copy; 2023 MediCare. All rights reserved.</p>
-            </div>
-        </div>
+            <%@include file="../component/footer.jsp"%>
     </footer>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Database simulation using localStorage
-        class Database {
-            constructor() {
-                this.doctorsKey = 'medicare_doctors';
-                this.appointmentsKey = 'medicare_appointments';
-                this.patientsKey = 'medicare_patients';
-                this.init();
-            }
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get filter elements
+            const departmentFilter = document.getElementById('departmentFilter');
+            const locationFilter = document.getElementById('locationFilter');
+            const minFee = document.getElementById('minFee');
+            const maxFee = document.getElementById('maxFee');
+            const experienceFilter = document.getElementById('experienceFilter');
+            const availableNow = document.getElementById('availableNow');
+            const availableToday = document.getElementById('availableToday');
+            const applyFilters = document.getElementById('applyFilters');
+            const clearFilters = document.getElementById('clearFilters');
+            const resetFilters = document.getElementById('resetFilters');
+            const doctorCards = document.querySelectorAll('.doctor-card');
+            const doctorCount = document.getElementById('doctorCount');
+            const resultsCount = document.getElementById('resultsCount');
+            const minFeeDisplay = document.getElementById('minFeeDisplay');
+            const maxFeeDisplay = document.getElementById('maxFeeDisplay');
 
-            init() {
-                // Initialize with sample data if not exists
-                if (!localStorage.getItem(this.doctorsKey)) {
-                    this.initializeDoctors();
-                }
+            // Apply filters function
+            function applyDoctorFilters() {
+                let visibleCount = 0;
                 
-                if (!localStorage.getItem(this.patientsKey)) {
-                    this.initializePatients();
-                }
-                
-                if (!localStorage.getItem(this.appointmentsKey)) {
-                    localStorage.setItem(this.appointmentsKey, JSON.stringify([]));
-                }
-            }
-
-            initializeDoctors() {
-                const doctors = [
-                    {
-                        id: 1,
-                        name: "Dr. Sarah Johnson",
-                        department: "Cardiology",
-                        education: "MD from Harvard Medical School, Fellowship in Cardiology at Johns Hopkins",
-                        experience: "15 years of experience in cardiology, specialized in interventional procedures",
-                        visitingCharge: "$200",
-                        location: "Main Hospital, Floor 3, Room 305",
-                        timing: "Mon, Wed, Fri: 9:00 AM - 5:00 PM",
-                        contact: "+1 (555) 123-4567",
-                        email: "s.johnson@medicare.com",
-                        img: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
-                        rating: "4.9"
-                    },
-                    {
-                        id: 2,
-                        name: "Dr. Michael Chen",
-                        department: "Neurology",
-                        education: "MD from Stanford University, Neurology Residency at Mayo Clinic",
-                        experience: "12 years of experience, specialized in neurodegenerative disorders",
-                        visitingCharge: "$180",
-                        location: "Neuro Center, Building B, Room 102",
-                        timing: "Tue, Thu, Sat: 10:00 AM - 6:00 PM",
-                        contact: "+1 (555) 234-5678",
-                        email: "m.chen@medicare.com",
-                        img: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
-                        rating: "4.8"
-                    },
-                    {
-                        id: 3,
-                        name: "Dr. Emily Rodriguez",
-                        department: "Pediatrics",
-                        education: "MD from University of California, Pediatric Residency at Boston Children's Hospital",
-                        experience: "10 years of experience in pediatric care and adolescent medicine",
-                        visitingCharge: "$150",
-                        location: "Children's Wing, Floor 1, Room 115",
-                        timing: "Mon-Fri: 8:00 AM - 4:00 PM",
-                        contact: "+1 (555) 345-6789",
-                        email: "e.rodriguez@medicare.com",
-                        img: "https://images.unsplash.com/photo-1591604021695-0c69b7c05981?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
-                        rating: "4.9"
-                    },
-                    {
-                        id: 4,
-                        name: "Dr. James Wilson",
-                        department: "Orthopedics",
-                        education: "MD from Duke University, Orthopedic Surgery Residency at Hospital for Special Surgery",
-                        experience: "18 years of experience, specialized in joint replacement and sports injuries",
-                        visitingCharge: "$220",
-                        location: "Ortho Center, Building C, Room 210",
-                        timing: "Mon, Wed, Fri: 8:00 AM - 4:00 PM; Tue, Thu: 1:00 PM - 7:00 PM",
-                        contact: "+1 (555) 456-7890",
-                        email: "j.wilson@medicare.com",
-                        img: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
-                        rating: "4.7"
-                    },
-                    {
-                        id: 5,
-                        name: "Dr. Lisa Thompson",
-                        department: "Dermatology",
-                        education: "MD from Yale School of Medicine, Dermatology Residency at NYU Langone",
-                        experience: "14 years of experience, specialized in cosmetic and medical dermatology",
-                        visitingCharge: "$190",
-                        location: "Skin Health Center, Floor 2, Room 205",
-                        timing: "Tue, Thu, Sat: 9:00 AM - 5:00 PM",
-                        contact: "+1 (555) 567-8901",
-                        email: "l.thompson@medicare.com",
-                        img: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
-                        rating: "4.8"
-                    },
-                    {
-                        id: 6,
-                        name: "Dr. Robert Kim",
-                        department: "Cardiology",
-                        education: "MD from Johns Hopkins University, Cardiology Fellowship at Cleveland Clinic",
-                        experience: "16 years of experience, specialized in electrophysiology",
-                        visitingCharge: "$210",
-                        location: "Heart Center, Floor 4, Room 410",
-                        timing: "Mon, Wed, Fri: 10:00 AM - 6:00 PM",
-                        contact: "+1 (555) 678-9012",
-                        email: "r.kim@medicare.com",
-                        img: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
-                        rating: "4.9"
+                doctorCards.forEach(card => {
+                    const department = card.getAttribute('data-department');
+                    const location = card.getAttribute('data-location');
+                    const fee = parseFloat(card.getAttribute('data-fee')); // Use parseFloat for double values
+                    const experience = parseInt(card.getAttribute('data-experience'));
+                    const availability = card.getAttribute('data-availability');
+                    
+                    let isVisible = true;
+                    
+                    // Department filter
+                    if (departmentFilter.value && department !== departmentFilter.value) {
+                        isVisible = false;
                     }
-                ];
-                localStorage.setItem(this.doctorsKey, JSON.stringify(doctors));
-            }
-
-            initializePatients() {
-                const patients = [
-                    {
-                        id: 1,
-                        name: "John Smith",
-                        email: "john@example.com",
-                        password: "password123",
-                        phone: "+1 (555) 111-2222"
-                    },
-                    {
-                        id: 2,
-                        name: "Emma Wilson",
-                        email: "emma@example.com",
-                        password: "password123",
-                        phone: "+1 (555) 333-4444"
+                    
+                    // Location filter
+                    if (locationFilter.value && location !== locationFilter.value) {
+                        isVisible = false;
                     }
-                ];
-                localStorage.setItem(this.patientsKey, JSON.stringify(patients));
-            }
-
-            // Doctor methods
-            getDoctors() {
-                return new Promise((resolve) => {
-                    setTimeout(() => {
-                        const doctors = JSON.parse(localStorage.getItem(this.doctorsKey) || '[]');
-                        resolve(doctors);
-                    }, 500); // Simulate database delay
-                });
-            }
-
-            getDoctorById(id) {
-                return new Promise((resolve) => {
-                    setTimeout(() => {
-                        const doctors = JSON.parse(localStorage.getItem(this.doctorsKey) || '[]');
-                        const doctor = doctors.find(d => d.id === parseInt(id));
-                        resolve(doctor);
-                    }, 300);
-                });
-            }
-
-            // Patient methods
-            getPatients() {
-                return new Promise((resolve) => {
-                    const patients = JSON.parse(localStorage.getItem(this.patientsKey) || '[]');
-                    resolve(patients);
-                });
-            }
-
-            validatePatient(email, password) {
-                return new Promise((resolve) => {
-                    setTimeout(() => {
-                        const patients = JSON.parse(localStorage.getItem(this.patientsKey) || '[]');
-                        const patient = patients.find(p => p.email === email && p.password === password);
-                        resolve(patient);
-                    }, 500);
-                });
-            }
-
-            // Appointment methods
-            getAppointments() {
-                return new Promise((resolve) => {
-                    const appointments = JSON.parse(localStorage.getItem(this.appointmentsKey) || '[]');
-                    resolve(appointments);
-                });
-            }
-
-            saveAppointment(appointment) {
-                return new Promise((resolve) => {
-                    setTimeout(() => {
-                        const appointments = JSON.parse(localStorage.getItem(this.appointmentsKey) || '[]');
-                        appointment.id = appointments.length > 0 ? Math.max(...appointments.map(a => a.id)) + 1 : 1;
-                        appointments.push(appointment);
-                        localStorage.setItem(this.appointmentsKey, JSON.stringify(appointments));
-                        resolve(appointment);
-                    }, 500);
-                });
-            }
-        }
-
-        // Dashboard Application
-        class DashboardApp {
-            constructor() {
-                this.db = new Database();
-                this.doctors = [];
-                this.isLoggedIn = false;
-                this.currentPatient = null;
-                this.currentDoctorId = null;
-                
-                // DOM Elements
-                this.doctorsContainer = document.getElementById('doctorsContainer');
-                this.loginBtn = document.getElementById('loginBtn');
-                this.logoutBtn = document.getElementById('logoutBtn');
-                this.loginModal = document.getElementById('loginModal');
-                this.appointmentModal = document.getElementById('appointmentModal');
-                this.infoModal = document.getElementById('infoModal');
-                this.loginForm = document.getElementById('loginForm');
-                this.appointmentForm = document.getElementById('appointmentForm');
-                this.doctorInfoContent = document.getElementById('doctorInfoContent');
-                this.closeModalButtons = document.querySelectorAll('.close-modal');
-                this.filterButtons = document.querySelectorAll('.filter-btn');
-                this.searchInput = document.getElementById('searchInput');
-                
-                this.init();
-            }
-
-            async init() {
-                await this.loadDoctors();
-                this.setupEventListeners();
-                this.checkLoginStatus();
-            }
-
-            async loadDoctors() {
-                this.showLoading();
-                this.doctors = await this.db.getDoctors();
-                this.renderDoctors(this.doctors);
-            }
-
-            showLoading() {
-                this.doctorsContainer.innerHTML = `
-                    <div class="loading">
-                        <i class="fas fa-spinner fa-spin"></i>
-                        <p>Loading doctors...</p>
-                    </div>
-                `;
-            }
-
-            showNoResults() {
-                this.doctorsContainer.innerHTML = `
-                    <div class="no-results">
-                        <i class="fas fa-user-md"></i>
-                        <p>No doctors found matching your criteria.</p>
-                    </div>
-                `;
-            }
-
-            renderDoctors(doctorsArray) {
-                if (doctorsArray.length === 0) {
-                    this.showNoResults();
-                    return;
-                }
-
-                this.doctorsContainer.innerHTML = '';
-                
-                doctorsArray.forEach(doctor => {
-                    const doctorCard = document.createElement('div');
-                    doctorCard.className = 'doctor-card';
-                    doctorCard.innerHTML = `
-                        <div class="doctor-header">
-                            <img src="${doctor.img}" alt="${doctor.name}" class="doctor-img">
-                            <div class="doctor-basic-info">
-                                <h3 class="doctor-name">${doctor.name}</h3>
-                                <p class="doctor-department">${doctor.department}</p>
-                                <div class="doctor-rating">
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star-half-alt"></i>
-                                    ${doctor.rating}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="doctor-details">
-                            <div class="detail-item">
-                                <i class="fas fa-graduation-cap detail-icon"></i>
-                                <span class="detail-label">Education:</span>
-                                <span>${doctor.education.substring(0, 60)}...</span>
-                            </div>
-                            <div class="detail-item">
-                                <i class="fas fa-briefcase detail-icon"></i>
-                                <span class="detail-label">Experience:</span>
-                                <span>${doctor.experience.substring(0, 60)}...</span>
-                            </div>
-                            <div class="detail-item">
-                                <i class="fas fa-dollar-sign detail-icon"></i>
-                                <span class="detail-label">Fee:</span>
-                                <span>${doctor.visitingCharge}</span>
-                            </div>
-                            <div class="detail-item">
-                                <i class="fas fa-map-marker-alt detail-icon"></i>
-                                <span class="detail-label">Location:</span>
-                                <span>${doctor.location}</span>
-                            </div>
-                            <div class="detail-item">
-                                <i class="fas fa-clock detail-icon"></i>
-                                <span class="detail-label">Availability:</span>
-                                <span>${doctor.timing}</span>
-                            </div>
-                        </div>
-                        <div class="doctor-actions">
-                            <button class="btn-action btn-info" data-id="${doctor.id}">
-                                <i class="fas fa-info-circle"></i> Show Info
-                            </button>
-                            <button class="btn-action btn-book" data-id="${doctor.id}">
-                                <i class="fas fa-calendar-plus"></i> Book Appointment
-                            </button>
-                        </div>
-                    `;
-                    this.doctorsContainer.appendChild(doctorCard);
-                });
-                
-                // Update button states based on login status
-                this.updateBookButtons();
-                
-                // Add event listeners to the buttons
-                document.querySelectorAll('.btn-info').forEach(button => {
-                    button.addEventListener('click', (e) => this.handleShowInfo(e));
-                });
-                
-                document.querySelectorAll('.btn-book').forEach(button => {
-                    button.addEventListener('click', (e) => this.handleBookAppointment(e));
-                });
-            }
-
-            // Update book buttons based on login status
-            updateBookButtons() {
-                document.querySelectorAll('.btn-book').forEach(button => {
-                    button.disabled = !this.isLoggedIn;
-                });
-            }
-
-            setupEventListeners() {
-                // Login button
-                this.loginBtn.addEventListener('click', () => {
-                    this.loginModal.style.display = 'flex';
-                });
-                
-                // Logout button
-                this.logoutBtn.addEventListener('click', () => this.handleLogout());
-                
-                // Close modal buttons
-                this.closeModalButtons.forEach(button => {
-                    button.addEventListener('click', () => {
-                        this.loginModal.style.display = 'none';
-                        this.appointmentModal.style.display = 'none';
-                        this.infoModal.style.display = 'none';
-                    });
-                });
-                
-                // Login form submission
-                this.loginForm.addEventListener('submit', (e) => this.handleLogin(e));
-                
-                // Appointment form submission
-                this.appointmentForm.addEventListener('submit', (e) => this.handleAppointmentSubmit(e));
-                
-                // Filter buttons
-                this.filterButtons.forEach(button => {
-                    button.addEventListener('click', (e) => this.handleFilter(e));
-                });
-                
-                // Search input
-                this.searchInput.addEventListener('input', (e) => this.handleSearch(e));
-                
-                // Close modal when clicking outside
-                window.addEventListener('click', (e) => {
-                    if (e.target === this.loginModal) {
-                        this.loginModal.style.display = 'none';
+                    
+                    // Fee filter - use parseFloat for comparison
+                    const minFeeValue = minFee.value ? parseFloat(minFee.value) : 0;
+                    const maxFeeValue = maxFee.value ? parseFloat(maxFee.value) : Infinity;
+                    
+                    if (fee < minFeeValue || fee > maxFeeValue) {
+                        isVisible = false;
                     }
-                    if (e.target === this.appointmentModal) {
-                        this.appointmentModal.style.display = 'none';
+                    
+                    // Experience filter
+                    if (experienceFilter.value && experience < parseInt(experienceFilter.value)) {
+                        isVisible = false;
                     }
-                    if (e.target === this.infoModal) {
-                        this.infoModal.style.display = 'none';
+                    
+                    // Availability filters
+                    if (availableNow.checked && !availability.toLowerCase().includes('available')) {
+                        isVisible = false;
+                    }
+                    
+                    if (availableToday.checked && !availability.toLowerCase().includes('today')) {
+                        isVisible = false;
+                    }
+                    
+                    // Show or hide card based on filters
+                    if (isVisible) {
+                        card.style.display = 'block';
+                        visibleCount++;
+                    } else {
+                        card.style.display = 'none';
                     }
                 });
+                
+                // Update counts
+                resultsCount.textContent = visibleCount;
             }
 
-            checkLoginStatus() {
-                const patient = JSON.parse(localStorage.getItem('currentPatient'));
-                if (patient) {
-                    this.isLoggedIn = true;
-                    this.currentPatient = patient;
-                    this.loginBtn.style.display = 'none';
-                    this.logoutBtn.style.display = 'block';
-                    this.updateBookButtons();
-                }
+            // Clear all filters
+            function clearAllFilters() {
+                departmentFilter.value = '';
+                locationFilter.value = '';
+                minFee.value = '<%= (int)minFeeValue %>';
+                maxFee.value = '<%= (int)maxFeeValue %>';
+                experienceFilter.value = '';
+                availableNow.checked = false;
+                availableToday.checked = false;
+                
+                applyDoctorFilters();
             }
 
-            async handleLogin(e) {
-                e.preventDefault();
-                const email = document.getElementById('email').value;
-                const password = document.getElementById('password').value;
-                
-                const patient = await this.db.validatePatient(email, password);
-                
-                if (patient) {
-                    this.isLoggedIn = true;
-                    this.currentPatient = patient;
-                    this.loginBtn.style.display = 'none';
-                    this.logoutBtn.style.display = 'block';
-                    this.loginModal.style.display = 'none';
-                    
-                    // Update book buttons
-                    this.updateBookButtons();
-                    
-                    // Save login state
-                    localStorage.setItem('currentPatient', JSON.stringify(patient));
-                    
-                    // Show success message
-                    alert('Login successful! You can now book appointments.');
-                } else {
-                    alert('Invalid email or password. Please try again.');
-                }
+            // Reset to default state
+            function resetToDefault() {
+                clearAllFilters();
+                doctorCount.textContent = '<%= doctors.size() %>';
             }
 
-            handleLogout() {
-                this.isLoggedIn = false;
-                this.currentPatient = null;
-                this.loginBtn.style.display = 'block';
-                this.logoutBtn.style.display = 'none';
-                
-                // Update book buttons
-                this.updateBookButtons();
-                
-                // Remove login state
-                localStorage.removeItem('currentPatient');
-                
-                alert('You have been logged out.');
-            }
+            // Event listeners
+            applyFilters.addEventListener('click', applyDoctorFilters);
+            clearFilters.addEventListener('click', clearAllFilters);
+            resetFilters.addEventListener('click', resetToDefault);
 
-            async handleShowInfo(e) {
-                const doctorId = parseInt(e.target.closest('.btn-info').getAttribute('data-id'));
-                const doctor = await this.db.getDoctorById(doctorId);
-                
-                if (doctor) {
-                    this.doctorInfoContent.innerHTML = `
-                        <div class="info-section">
-                            <h3>About Dr. ${doctor.name.split(' ')[2]}</h3>
-                            <p>${doctor.name} is a specialist in ${doctor.department} with ${doctor.experience}.</p>
-                        </div>
-                        <div class="info-section">
-                            <h3>Education</h3>
-                            <p>${doctor.education}</p>
-                        </div>
-                        <div class="info-section">
-                            <h3>Experience</h3>
-                            <p>${doctor.experience}</p>
-                        </div>
-                        <div class="info-section">
-                            <h3>Contact Details</h3>
-                            <p><strong>Phone:</strong> ${doctor.contact}</p>
-                            <p><strong>Email:</strong> ${doctor.email}</p>
-                            <p><strong>Location:</strong> ${doctor.location}</p>
-                        </div>
-                        <div class="info-section">
-                            <h3>Availability</h3>
-                            <p>${doctor.timing}</p>
-                        </div>
-                        <div class="info-section">
-                            <h3>Consultation Fee</h3>
-                            <p>${doctor.visitingCharge} per visit</p>
-                        </div>
-                    `;
-                    
-                    this.infoModal.style.display = 'flex';
-                }
-            }
-
-            handleBookAppointment(e) {
-                if (!this.isLoggedIn) {
-                    this.loginModal.style.display = 'flex';
-                    return;
-                }
-                
-                this.currentDoctorId = parseInt(e.target.closest('.btn-book').getAttribute('data-id'));
-                
-                document.getElementById('patientName').value = this.currentPatient.name;
-                document.getElementById('patientEmail').value = this.currentPatient.email;
-                document.getElementById('patientPhone').value = this.currentPatient.phone;
-                document.getElementById('appointmentDate').value = '';
-                document.getElementById('appointmentTime').value = '';
-                document.getElementById('symptoms').value = '';
-                
-                this.appointmentModal.style.display = 'flex';
-            }
-
-            async handleAppointmentSubmit(e) {
-                e.preventDefault();
-                
-                const patientName = document.getElementById('patientName').value;
-                const patientEmail = document.getElementById('patientEmail').value;
-                const patientPhone = document.getElementById('patientPhone').value;
-                const appointmentDate = document.getElementById('appointmentDate').value;
-                const appointmentTime = document.getElementById('appointmentTime').value;
-                const symptoms = document.getElementById('symptoms').value;
-                
-                if (patientName && patientEmail && patientPhone && appointmentDate && appointmentTime) {
-                    const doctor = await this.db.getDoctorById(this.currentDoctorId);
-                    
-                    const appointment = {
-                        patientName,
-                        patientEmail,
-                        patientPhone,
-                        appointmentDate,
-                        appointmentTime,
-                        symptoms,
-                        doctorId: this.currentDoctorId,
-                        doctorName: doctor.name,
-                        department: doctor.department,
-                        status: 'Pending'
-                    };
-                    
-                    const savedAppointment = await this.db.saveAppointment(appointment);
-                    
-                    alert(`Appointment booked successfully with ${doctor.name} on ${appointmentDate} at ${appointmentTime}. A confirmation has been sent to ${patientEmail}. Your appointment ID is ${savedAppointment.id}.`);
-                    
-                    this.appointmentModal.style.display = 'none';
-                } else {
-                    alert('Please fill in all required fields');
-                }
-            }
-
-            handleFilter(e) {
-                // Remove active class from all buttons
-                this.filterButtons.forEach(button => {
-                    button.classList.remove('active');
+            // Apply filters on Enter key in fee inputs
+            [minFee, maxFee].forEach(input => {
+                input.addEventListener('keyup', function(event) {
+                    if (event.key === 'Enter') {
+                        applyDoctorFilters();
+                    }
                 });
-                
-                // Add active class to clicked button
-                e.target.classList.add('active');
-                
-                const department = e.target.textContent;
-                
-                if (department === 'All Specialties') {
-                    this.renderDoctors(this.doctors);
-                } else {
-                    const filteredDoctors = this.doctors.filter(doctor => 
-                        doctor.department === department
-                    );
-                    this.renderDoctors(filteredDoctors);
-                }
-            }
+            });
 
-            handleSearch(e) {
-                const searchTerm = e.target.value.toLowerCase();
-                
-                if (searchTerm === '') {
-                    this.renderDoctors(this.doctors);
-                    return;
-                }
-                
-                const filteredDoctors = this.doctors.filter(doctor => 
-                    doctor.name.toLowerCase().includes(searchTerm) ||
-                    doctor.department.toLowerCase().includes(searchTerm) ||
-                    doctor.education.toLowerCase().includes(searchTerm) ||
-                    doctor.experience.toLowerCase().includes(searchTerm)
-                );
-                
-                this.renderDoctors(filteredDoctors);
-            }
-        }
-
-        // Initialize the dashboard when the page loads
-        document.addEventListener('DOMContentLoaded', () => {
-            new DashboardApp();
+            // Update fee display when inputs change
+            [minFee, maxFee].forEach(input => {
+                input.addEventListener('input', function() {
+                    minFeeDisplay.textContent = minFee.value || '<%= (int)minFeeValue %>';
+                    maxFeeDisplay.textContent = maxFee.value || '<%= (int)maxFeeValue %>';
+                });
+            });
         });
     </script>
 </body>

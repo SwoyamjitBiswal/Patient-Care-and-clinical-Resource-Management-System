@@ -30,7 +30,7 @@ public class UserRegister extends HttpServlet {
         // Password match check
         if (!password.equals(confirmPassword)) {
             session.setAttribute("errorMsg", "Passwords do not match!");
-            response.sendRedirect("user/user_register.jsp");
+            response.sendRedirect("patient/patient_signup.jsp");
             return;
         }
 
@@ -51,10 +51,10 @@ public class UserRegister extends HttpServlet {
 
         if (f) {
             session.setAttribute("sucMsg", "Registration Successful! You can now login.");
-            response.sendRedirect("user/patient_signup.jsp");
+            response.sendRedirect("patient/patient_signup.jsp");
         } else {
             session.setAttribute("errorMsg", "Something went wrong on the server!");
-            response.sendRedirect("user/patient_signup.jsp");
+            response.sendRedirect("patient/patient_signup.jsp");
         }
     }
 }

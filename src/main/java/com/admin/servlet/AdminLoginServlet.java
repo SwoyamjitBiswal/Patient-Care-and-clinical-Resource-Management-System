@@ -24,6 +24,8 @@ public class AdminLoginServlet extends HttpServlet {
         if (admin != null) {
             HttpSession session = request.getSession();
             session.setAttribute("adminObj", admin);
+            session.setAttribute("userName", admin.getFullName());
+            session.setAttribute("userRole", "Admin");
             response.sendRedirect("admin/index.jsp"); // redirect to admin dashboard
         } else {
             response.sendRedirect("admin_login.jsp?error=Invalid+email+or+password");
