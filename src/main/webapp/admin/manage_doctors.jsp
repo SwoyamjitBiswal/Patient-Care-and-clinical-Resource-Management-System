@@ -1097,17 +1097,20 @@
             padding-right: 3rem; 
         }
         
+        /* ========== MODIFIED CSS FOR .btn-close START ========== */
         .btn-close { 
             box-sizing: content-box; 
             width: 1em; 
             height: 1em; 
             padding: 0.25em 0.25em; 
             color: #000; 
-            background: transparent; 
+            /* This line was modified to include the SVG background image for the 'X' */
+            background: transparent url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23000'%3e%3cpath d='M.293.293a1 1 0 0 1 1.414 0L8 6.586 14.293.293a1 1 0 1 1 1.414 1.414L9.414 8l6.293 6.293a1 1 0 0 1-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 0 1-1.414-1.414L6.586 8 .293 1.707a1 1 0 0 1 0-1.414z'/%3e%3c/svg%3e") center/1em auto no-repeat;
             border: 0; 
             border-radius: 0.25rem; 
             opacity: 0.5; 
         }
+        /* ========== MODIFIED CSS FOR .btn-close END ========== */
         
         .alert-dismissible .btn-close { 
             position: absolute; 
@@ -1509,7 +1512,8 @@
                                                         <i class="fas fa-trash"></i>
                                                     </button>
                                                 </span>
-                                                </div>
+                                                
+                                            </div>
                                             
                                             
                                             <% if (!doctor.isApproved()) { %>
@@ -1571,6 +1575,8 @@
                                                     </div>
                                                 </div>
                                             </div>
+
+
                                             <div class="modal fade" id="editDoctorModal<%= doctor.getId() %>" tabindex="-1" aria-labelledby="editDoctorModalLabel<%= doctor.getId() %>" aria-hidden="true">
                                                 <div class="modal-dialog modal-lg modal-dialog-centered">
                                                     <div class="modal-content">
@@ -2068,9 +2074,7 @@
                  });
              });
 
-            // ========== REMOVED OLD DELETE CONFIRM JAVASCRIPT ==========
-            // const deleteButtons = document.querySelectorAll('.delete-doctor'); ...
-            // This is no longer needed as the modal handles the confirmation.
+            // (No longer need the old .delete-doctor JS confirm)
 
             // Search functionality
             const searchInput = document.getElementById('doctorSearchInput');
