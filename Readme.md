@@ -1,4 +1,4 @@
-# 🏥 Patient Care and Clinical Resource Management System
+# Patient Care and Clinical Resource Management System
 
 A **Java-based Web Application** built using **JSP, Servlets, and MySQL** to streamline patient care, doctor appointments, and admin management.  
 This system efficiently handles **patients, doctors, and appointments** with **role-based dashboards, secure authentication, and data visualization** (charts/tables).
