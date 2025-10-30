@@ -191,9 +191,9 @@ cd Patient-Care-and-Clinical-Resource-Management-System
 
 Configure database in src/main/resources/database.properties
 - **Example:**
-db.url=jdbc:mysql://localhost:3306/patient_care
-db.user=root
-db.password=your_password
+db.url=jdbc:mysql://localhost:3306/patient_care <br>
+db.user=root<br>
+db.password=your_password<br>
 
 # Build and deploy the WAR file
 mvn clean install
