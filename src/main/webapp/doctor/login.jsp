@@ -184,7 +184,7 @@
     }
 
     .btn-close {
-        background: transparent url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23000'%3e%3cpath d='M.293.293a1 1 0 0 1 1.414 0L8 6.586 14.293.293a1 1 0 1 1 1.414 1.414L9.414 8l6.293 6.293a1 1 0 0 1-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 0 1-1.414-1.414L6.586 8 .293 1.707a1 1 0 0 1 0-1.414z'/%3e%3c/svg%3e") center/1em auto no-repeat;
+        background: transparent url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23000'%3e%3cpath d='M.293.293a1 1 0 0 1 1.414 0L8 6.586 14.293.293a1 1 0 1 1 1.414 1.414L9.414 8l6.293 6.293a1 1 0 0 1-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 0 1-1.414-1.414L6.586 8 .293 1.707a1 1 0 0 1 0-1.414z'/%3e%3csvg%3e") center/1em auto no-repeat;
         border: none;
         opacity: 0.7;
         width: 1.5rem;
@@ -287,7 +287,6 @@
 </style>
 </head>
 <body>
-    <!-- Navbar Included -->
     <%@ include file="../includes/navbar.jsp" %>
 
     <div class="auth-container">
@@ -300,11 +299,17 @@
                             <p class="mb-0">Access your doctor dashboard</p>
                         </div>
                         <div class="auth-body">
-                            <!-- Success/Error Messages -->
                             <%
-                                String successMsg = (String) request.getAttribute("successMsg");
-                                String errorMsg = (String) request.getAttribute("errorMsg");
+                                // Retrieve messages from session (set by DoctorAuthServlet)
+                                String successMsg = (String) session.getAttribute("successMsg");
+                                String errorMsg = (String) session.getAttribute("errorMsg");
                                 
+                                // Clear session attributes immediately after retrieval
+                                if (successMsg != null || errorMsg != null) {
+                                    session.removeAttribute("successMsg");
+                                    session.removeAttribute("errorMsg");
+                                }
+
                                 if (successMsg != null) {
                             %>
                                 <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -416,7 +421,6 @@
         </div>
     </div>
 
-    <!-- Footer Included -->
     <%@ include file="../includes/footer.jsp" %>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

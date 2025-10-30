@@ -389,11 +389,6 @@
                                 </div>
 
                                 <div class="text-center">
-                                    <p class="mb-2">
-                                        <a href="${pageContext.request.contextPath}/admin/register.jsp" class="auth-link">
-                                            <i class="fas fa-user-plus me-1"></i>Create admin account
-                                        </a>
-                                    </p>
                                     <p class="mb-0">
                                         <a href="${pageContext.request.contextPath}/index.jsp" class="text-muted-link">
                                             <i class="fas fa-home me-1"></i>Back to home

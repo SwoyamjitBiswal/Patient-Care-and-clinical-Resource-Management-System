@@ -64,12 +64,15 @@ public class DoctorAuthServlet extends HttpServlet {
                 return;
             }
 
+            // Note: Doctor object constructor automatically sets isApproved=false (from Doctor.java)
             Doctor doctor = new Doctor(fullName, email, password, phone, specialization,
                     department, qualification, experience, visitingCharge);
 
             boolean success = doctorDao.registerDoctor(doctor);
 
             if (success) {
+                // Set a message for the user after successful registration
+                request.getSession().setAttribute("successMsg", "Registration successful. Your account is pending admin approval.");
                 response.sendRedirect("login.jsp");
             } else {
                 request.setAttribute("errorMsg", "Registration failed. Please try again.");
@@ -93,30 +96,45 @@ public class DoctorAuthServlet extends HttpServlet {
             String rememberMe = request.getParameter("rememberMe");
 
             Doctor doctor = doctorDao.login(email, password);
+            HttpSession session = request.getSession();
 
             if (doctor != null) {
-                HttpSession session = request.getSession();
-                session.setAttribute("doctorObj", doctor);
+                
+                // ▼▼▼ CORE APPROVAL CHECK LOGIC ▼▼▼
+                if (doctor.isApproved()) {
+                    
+                    // 1. Success: Doctor is approved and can log in.
+                    session.setAttribute("doctorObj", doctor);
 
-                // Remember Me cookies
-                if ("on".equals(rememberMe)) {
-                    Cookie emailCookie = new Cookie("doctorEmail", email);
-                    Cookie passwordCookie = new Cookie("doctorPassword", password);
-                    emailCookie.setMaxAge(7 * 24 * 60 * 60);
-                    passwordCookie.setMaxAge(7 * 24 * 60 * 60);
-                    response.addCookie(emailCookie);
-                    response.addCookie(passwordCookie);
+                    // Remember Me cookies
+                    if ("on".equals(rememberMe)) {
+                        Cookie emailCookie = new Cookie("doctorEmail", email);
+                        Cookie passwordCookie = new Cookie("doctorPassword", password);
+                        emailCookie.setMaxAge(7 * 24 * 60 * 60);
+                        passwordCookie.setMaxAge(7 * 24 * 60 * 60);
+                        response.addCookie(emailCookie);
+                        response.addCookie(passwordCookie);
+                    } else {
+                        // Clear cookies if 'Remember Me' is unchecked or login successful without it
+                        Cookie emailCookie = new Cookie("doctorEmail", "");
+                        Cookie passwordCookie = new Cookie("doctorPassword", "");
+                        emailCookie.setMaxAge(0);
+                        passwordCookie.setMaxAge(0);
+                        response.addCookie(emailCookie);
+                        response.addCookie(passwordCookie);
+                    }
+
+                    response.sendRedirect("dashboard.jsp");
+                    
                 } else {
-                    Cookie emailCookie = new Cookie("doctorEmail", "");
-                    Cookie passwordCookie = new Cookie("doctorPassword", "");
-                    emailCookie.setMaxAge(0);
-                    passwordCookie.setMaxAge(0);
-                    response.addCookie(emailCookie);
-                    response.addCookie(passwordCookie);
+                    // 2. Failure: Doctor is registered but NOT approved.
+                    session.setAttribute("errorMsg", "Login Denied! Your account is pending administrator approval.");
+                    response.sendRedirect("login.jsp");
                 }
-
-                response.sendRedirect("dashboard.jsp");
+                // ▲▲▲ END OF APPROVAL CHECK ▲▲▲
+                
             } else {
+                // 3. Failure: Invalid credentials (email/password mismatch).
                 request.setAttribute("errorMsg", "Invalid email or password");
                 request.getRequestDispatcher("login.jsp").forward(request, response);
             }

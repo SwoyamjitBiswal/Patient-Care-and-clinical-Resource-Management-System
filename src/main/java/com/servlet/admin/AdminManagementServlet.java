@@ -80,7 +80,14 @@ public class AdminManagementServlet extends HttpServlet {
             } else if ("appointment".equals(type)) {
                 deleteAppointment(request, response);
             }
+        } 
+        // ▼▼▼ NEW APPROVAL BLOCK ▼▼▼
+        else if ("approve".equals(action)) {
+            if ("doctor".equals(type)) {
+                approveDoctor(request, response);
+            }
         }
+        // ▲▲▲ END NEW APPROVAL BLOCK ▲▲▲
     }
 
 
@@ -173,7 +180,8 @@ public class AdminManagementServlet extends HttpServlet {
             boolean success = doctorDao.registerDoctor(doctor);
             
             if (success) {
-                request.getSession().setAttribute("successMsg", "Doctor added successfully!");
+                // Doctor is registered but still requires approval
+                request.getSession().setAttribute("successMsg", "Doctor registration received. Pending approval.");
             } else {
                 request.getSession().setAttribute("errorMsg", "Failed to add doctor. Please try again.");
             }
@@ -185,6 +193,28 @@ public class AdminManagementServlet extends HttpServlet {
         
         response.sendRedirect(request.getContextPath() + "/admin/management?action=view&type=doctors");
     }
+
+    // ▼▼▼ NEW METHOD TO APPROVE A DOCTOR ▼▼▼
+    private void approveDoctor(HttpServletRequest request, HttpServletResponse response) 
+            throws ServletException, IOException {
+        try {
+            int doctorId = Integer.parseInt(request.getParameter("id"));
+            boolean success = doctorDao.approveDoctor(doctorId); // Assume this method exists in DoctorDao
+
+            if (success) {
+                request.getSession().setAttribute("successMsg", "Doctor successfully approved and allowed to log in.");
+            } else {
+                request.getSession().setAttribute("errorMsg", "Failed to approve doctor. Please try again.");
+            }
+        } catch (NumberFormatException e) {
+            request.getSession().setAttribute("errorMsg", "Invalid doctor ID for approval.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            request.getSession().setAttribute("errorMsg", "An error occurred during doctor approval.");
+        }
+        response.sendRedirect(request.getContextPath() + "/admin/management?action=view&type=doctors");
+    }
+    // ▲▲▲ END NEW METHOD ▲▲▲
 
     private void updateDoctor(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
@@ -395,4 +425,3 @@ public class AdminManagementServlet extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/admin/management?action=view&type=appointments");
     }
 }
-

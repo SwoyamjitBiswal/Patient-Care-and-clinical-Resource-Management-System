@@ -22,13 +22,13 @@ public class AdminAuthServlet extends HttpServlet {
 
         String action = request.getParameter("action");
 
-        if ("register".equalsIgnoreCase(action)) {
-            registerAdmin(request, response);
-        } else if ("login".equalsIgnoreCase(action)) {
+        // Removed the 'register' block
+        if ("login".equalsIgnoreCase(action)) {
             loginAdmin(request, response);
         } else if ("logout".equalsIgnoreCase(action)) {
             logoutAdmin(request, response);
         } else {
+            // Default action if a POST request comes in without a valid action
             response.sendRedirect("login.jsp");
         }
     }
@@ -45,38 +45,13 @@ public class AdminAuthServlet extends HttpServlet {
         }
     }
 
-    // Admin registration
+    // ⛔ Removed: Admin registration logic is no longer allowed.
+    /*
     private void registerAdmin(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
-        try {
-            String fullName = request.getParameter("fullName");
-            String email = request.getParameter("email");
-            String password = request.getParameter("password");
-
-            if (adminDao.isEmailExists(email)) {
-                request.setAttribute("errorMsg", "Email already exists. Please use a different email.");
-                request.getRequestDispatcher("register.jsp").forward(request, response);
-                return;
-            }
-
-            Admin admin = new Admin(fullName, email, password);
-
-            boolean success = adminDao.registerAdmin(admin);
-
-            if (success) {
-                response.sendRedirect("login.jsp?success=1");
-            } else {
-                request.setAttribute("errorMsg", "Registration failed. Please try again.");
-                request.getRequestDispatcher("register.jsp").forward(request, response);
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            request.setAttribute("errorMsg", "An error occurred during registration.");
-            request.getRequestDispatcher("register.jsp").forward(request, response);
-        }
+        // ... registration code was here ...
     }
+    */
 
     // Admin login
     private void loginAdmin(HttpServletRequest request, HttpServletResponse response)

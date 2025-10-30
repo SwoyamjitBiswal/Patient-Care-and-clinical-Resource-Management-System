@@ -425,6 +425,12 @@
             background-color: var(--info);
             color: var(--dark);
         }
+        
+        .btn-warning {
+            background-color: var(--warning);
+            border-color: var(--warning);
+            color: var(--dark);
+        }
 
         /* Input Group Styles - Fixed */
         .input-group {
@@ -515,6 +521,11 @@
             color: var(--dark); 
         }
         
+        .bg-warning {
+             background-color: var(--warning) !important; 
+             color: var(--dark);
+        }
+
         .text-dark { 
             color: #343a40 !important; 
         }
@@ -1263,8 +1274,12 @@
         </div>
 
         <%
-            String successMsg = (String) request.getAttribute("successMsg");
-            String errorMsg = (String) request.getAttribute("errorMsg");
+            String successMsg = (String) session.getAttribute("successMsg");
+            String errorMsg = (String) session.getAttribute("errorMsg");
+            
+            // Clear session attributes after retrieval
+            session.removeAttribute("successMsg");
+            session.removeAttribute("errorMsg");
 
             if (successMsg != null) {
         %>
@@ -1370,11 +1385,19 @@
                                             <strong class="text-success">$<%= doctor.getVisitingCharge() %></strong>
                                         </td>
                                         <td>
-                                            <span class="badge <%= doctor.isAvailability() ? "bg-success" : "bg-danger" %> text-white">
-                                                <i class="fas fa-circle me-1"></i>
-                                                <%= doctor.isAvailability() ? "Available" : "Not Available" %>
-                                            </span>
-                                        </td>
+                                            <% if (doctor.isApproved()) { %>
+                                                <span class="badge <%= doctor.isAvailability() ? "bg-success" : "bg-danger" %> text-white">
+                                                    <i class="fas fa-circle me-1"></i>
+                                                    <%= doctor.isAvailability() ? "Available" : "Not Available" %>
+                                                </span>
+                                                <br>
+                                                <small class="text-success fw-bold">Approved</small>
+                                            <% } else { %>
+                                                <span class="badge bg-warning text-dark">
+                                                    <i class="fas fa-exclamation-triangle me-1"></i>Pending
+                                                </span>
+                                            <% } %>
+                                            </td>
                                         <td>
                                             <div class="btn-group btn-group-sm" role="group">
                                                 <button type="button" class="btn btn-outline-info"
@@ -1382,11 +1405,25 @@
                                                         data-bs-toggle="tooltip" title="View Details">
                                                     <i class="fas fa-eye"></i>
                                                 </button>
+                                                
                                                 <button type="button" class="btn btn-outline-primary"
                                                         data-bs-toggle="modal" data-bs-target="#editDoctorModal<%= doctor.getId() %>"
                                                         data-bs-toggle="tooltip" title="Edit Doctor">
                                                     <i class="fas fa-edit"></i>
                                                 </button>
+                                                
+                                                <% if (!doctor.isApproved()) { %>
+                                                    <form action="${pageContext.request.contextPath}/admin/management?action=approve&type=doctor"
+                                                          method="post" class="d-inline">
+                                                        <input type="hidden" name="id" value="<%= doctor.getId() %>">
+                                                        <button type="submit" class="btn btn-sm btn-success"
+                                                                data-bs-toggle="tooltip" title="Approve Doctor"
+                                                                onclick="return confirm('Approve Dr. <%= doctor.getFullName() %>? This will allow them to log in.')">
+                                                            <i class="fas fa-check"></i>
+                                                        </button>
+                                                    </form>
+                                                <% } %>
+
                                                 <form action="${pageContext.request.contextPath}/admin/management?action=delete&type=doctor"
                                                       method="post" class="d-inline">
                                                     <input type="hidden" name="id" value="<%= doctor.getId() %>">
@@ -1408,6 +1445,7 @@
                                                         </div>
                                                         <form action="${pageContext.request.contextPath}/admin/management?action=update&type=doctor" method="post" class="needs-validation" novalidate>
                                                             <input type="hidden" name="doctorId" value="<%= doctor.getId() %>">
+                                                            <input type="hidden" name="isApproved" value="<%= doctor.isApproved() %>"> 
                                                             <div class="modal-body">
                                                                 <div class="row g-3">
                                                                     <div class="col-md-6 form-field">
@@ -1529,6 +1567,19 @@
                                                         <div class="modal-body">
                                                             <div class="row mb-3">
                                                                 <div class="col-sm-4">
+                                                                    <strong class="text-muted"><i class="fas fa-shield-alt me-2"></i>Approval Status</strong>
+                                                                </div>
+                                                                <div class="col-sm-8">
+                                                                    <% if (doctor.isApproved()) { %>
+                                                                        <span class="badge bg-success">Approved</span>
+                                                                    <% } else { %>
+                                                                        <span class="badge bg-warning text-dark">Pending Admin Approval</span>
+                                                                    <% } %>
+                                                                </div>
+                                                            </div>
+                                                            <hr>
+                                                            <div class="row mb-3">
+                                                                <div class="col-sm-4">
                                                                     <strong class="text-muted"><i class="fas fa-user me-2"></i>Full Name</strong>
                                                                 </div>
                                                                 <div class="col-sm-8">
@@ -1601,7 +1652,7 @@
                                                             <hr>
                                                             <div class="row mb-3">
                                                                 <div class="col-sm-4">
-                                                                    <strong class="text-muted"><i class="fas fa-toggle-on me-2"></i>Status</strong>
+                                                                    <strong class="text-muted"><i class="fas fa-toggle-on me-2"></i>Availability</strong>
                                                                 </div>
                                                                 <div class="col-sm-8">
                                                                      <span class="badge <%= doctor.isAvailability() ? "bg-success" : "bg-danger" %> text-white">
@@ -1836,8 +1887,8 @@
                          form.appendChild(hiddenInput);
                      }
                      
-                     // 3. If the checkbox is checked, make sure its value is "true" (already done in your HTML)
-                     // No "else" block is needed. The checked box will submit "true" on its own.
+                     // 3. We also need to explicitly ensure the isApproved status is sent correctly
+                     // (Handled by the hidden input in the form, which is correct.)
                  });
              });
 

@@ -14,6 +14,7 @@ public class Doctor {
     private int experience;
     private double visitingCharge;
     private boolean availability;
+    private boolean isApproved;
     private Timestamp createdAt;
 
     public Doctor() {}
@@ -31,6 +32,7 @@ public class Doctor {
         this.experience = experience;
         this.visitingCharge = visitingCharge;
         this.availability = true;
+        this.isApproved = false; // New doctors start as unapproved
     }
     
     public int getId() {
@@ -119,6 +121,14 @@ public class Doctor {
     
     public void setAvailability(boolean availability) {
         this.availability = availability;
+    }
+
+    public boolean isApproved() {
+        return isApproved;
+    }
+
+    public void setApproved(boolean approved) {
+        isApproved = approved;
     }
     
     public Timestamp getCreatedAt() {

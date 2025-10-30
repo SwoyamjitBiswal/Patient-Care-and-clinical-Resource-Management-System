@@ -59,11 +59,11 @@ This system efficiently handles **patients, doctors, and appointments** with **r
 ## 🧍‍♂️ 3️⃣ Admin Module
 
 ### 🔐 Admin Account
-- **Admin Registration + Login** (Multi-admin supported)  
+- **Login** (Multi-admin supported)  
 - **Change Password + Logout**
 
 ### 🗂️ Management Panel
-- **Manage Doctors:** Add, Edit, Delete, and View doctor details  
+- **Manage Doctors:** Add, Edit, Delete, View doctor details  and Approve Doctors
 - **Manage Patients:** View/Edit/Delete patient profiles  
 - **Manage Appointments:** View all appointments, update or delete any  
 - **Admin Dashboard:** View all data with graphical charts and summary tables  
@@ -124,5 +124,5 @@ If you’d like to contribute:
 - **Submit a Pull Request 🎉**
 
 
-Developed with ❤️ and Java by Jagan Parida, Swoyamjit Biswal, Sameer Jena, Biswajit Rout, Arpit Khatua
+Developed with ❤️  by Jagan Parida, Sameer Jena, Swoyamjit Biswal, Biswajit Rout, Arpit Khatua
 
