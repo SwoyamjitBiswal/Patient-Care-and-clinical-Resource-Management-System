@@ -770,6 +770,12 @@
             margin: 1.75rem auto; 
         }
         
+        /* ADDED/MODIFIED FOR SMALL MODAL */
+        .modal-sm { 
+            max-width: 380px; /* Custom small size */
+            margin: 1.75rem auto; 
+        }
+        
         /* Specific modal body style for view */
         .modal-body hr {
             margin-top: 0.75rem;
@@ -962,7 +968,7 @@
             justify-content: space-between !important; 
         }
         
-        .align-items: center { 
+        .align-items-center { 
             align-items: center !important; 
         }
         
@@ -1487,17 +1493,17 @@
                                                     <i class="fas fa-edit"></i>
                                                 </button>
                                                 
+                                                
                                                 <% if (!doctor.isApproved()) { %>
-                                                    <form action="${pageContext.request.contextPath}/admin/management?action=approve&type=doctor"
-                                                          method="post" class="d-inline">
-                                                        <input type="hidden" name="id" value="<%= doctor.getId() %>">
-                                                        <button type="submit" class="btn btn-sm btn-success"
-                                                                data-bs-toggle="tooltip" title="Approve Doctor"
-                                                                onclick="return confirm('Approve Dr. <%= doctor.getFullName() %>? This will allow them to log in.')">
+                                                    <span data-bs-toggle="tooltip" title="Approve Doctor">
+                                                        <button type="button" class="btn btn-sm btn-success"
+                                                                data-bs-toggle="modal"
+                                                                data-bs-target="#approveModal<%= doctor.getId() %>">
                                                             <i class="fas fa-check"></i>
                                                         </button>
-                                                    </form>
+                                                    </span>
                                                 <% } %>
+
 
                                                 <form action="${pageContext.request.contextPath}/admin/management?action=delete&type=doctor"
                                                       method="post" class="d-inline">
@@ -1508,7 +1514,38 @@
                                                     </button>
                                                 </form>
                                             </div>
-
+                                            
+                                            
+                                            <% if (!doctor.isApproved()) { %>
+                                                <div class="modal fade" id="approveModal<%= doctor.getId() %>" tabindex="-1" aria-labelledby="approveModalLabel<%= doctor.getId() %>" aria-hidden="true">
+                                                    <div class="modal-dialog modal-dialog-centered modal-sm">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title" id="approveModalLabel<%= doctor.getId() %>">
+                                                                    <i class="fas fa-check-circle me-2 text-success"></i>Confirm Approval
+                                                                </h5>
+                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                Are you sure you want to approve <strong>Dr. <%= doctor.getFullName() %></strong>?
+                                                                <br><br>
+                                                                <small class="text-muted">This action will allow them to log in and be marked as "Approved".</small>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                                
+                                                                <form action="${pageContext.request.contextPath}/admin/management?action=approve&type=doctor"
+                                                                      method="post" class="d-inline">
+                                                                    <input type="hidden" name="id" value="<%= doctor.getId() %>">
+                                                                    <button type="submit" class="btn btn-success">
+                                                                        <i class="fas fa-check me-1"></i>Yes, Approve
+                                                                    </button>
+                                                                </form>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            <% } %>
                                             <div class="modal fade" id="editDoctorModal<%= doctor.getId() %>" tabindex="-1" aria-labelledby="editDoctorModalLabel<%= doctor.getId() %>" aria-hidden="true">
                                                 <div class="modal-dialog modal-lg modal-dialog-centered">
                                                     <div class="modal-content">
@@ -1838,6 +1875,7 @@
                                     Password does not meet all requirements. Please check the list above.
                                 </div>
                             </div>
+                            
                             <div class="col-md-6 form-field">
                                 <label class="form-label" for="addPhone">Phone Number</label>
                                 <div class="input-group">
