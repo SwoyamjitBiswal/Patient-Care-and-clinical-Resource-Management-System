@@ -183,10 +183,10 @@ Make sure you have the following installed:
 
 ### 2️⃣ Steps to Run
 
-# Clone the repository
+## Clone the repository
 git clone https://github.com/your-username/Patient-Care-and-Clinical-Resource-Management-System.git
 
-# Navigate into the project directory
+## Navigate into the project directory
 cd Patient-Care-and-Clinical-Resource-Management-System
 
 Configure database in src/main/resources/database.properties
@@ -195,10 +195,10 @@ db.url=jdbc:mysql://localhost:3306/patient_care <br>
 db.user=root<br>
 db.password=your_password<br>
 
-# Build and deploy the WAR file
+## Build and deploy the WAR file
 mvn clean install
 
-# Deploy on Apache Tomcat and run the app at:
+## Deploy on Apache Tomcat and run the app at:
 http://localhost:8080/Patient-Care-and-Clinical-Resource-Management-System/
 
 
