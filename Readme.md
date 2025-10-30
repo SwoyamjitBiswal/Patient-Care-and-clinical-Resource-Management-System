@@ -77,7 +77,6 @@ This system efficiently handles **patients, doctors, and appointments** with **r
 
 ## 📁 Project Structure
 
-````bash
 Patient-Care-and-Clinical-Resource-Management-System/
 │
 ├── pom.xml                              # Maven configuration (Servlet, JSP, JSTL, MySQL, BCrypt)
@@ -198,7 +197,7 @@ Make sure you have the following installed:
 - **Maven**
 
 ### 2️⃣ Steps to Run
-```bash
+
 # Clone the repository
 git clone https://github.com/your-username/Patient-Care-and-Clinical-Resource-Management-System.git
 
@@ -233,4 +232,4 @@ Submit a Pull Request 🎉
 
 
 💡 Developed with ❤️ and Java by Jagan Parida, Swayamjit Biswal, Sameer Jena, Biswajit Rout, Arpit Khatua
-````
+
