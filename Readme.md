@@ -189,11 +189,11 @@ git clone https://github.com/your-username/Patient-Care-and-Clinical-Resource-Ma
 # Navigate into the project directory
 cd Patient-Care-and-Clinical-Resource-Management-System
 
-# Configure database in src/main/resources/database.properties
-# Example:
-# db.url=jdbc:mysql://localhost:3306/patient_care
-# db.user=root
-# db.password=your_password
+Configure database in src/main/resources/database.properties
+- **Example:**
+db.url=jdbc:mysql://localhost:3306/patient_care
+db.user=root
+db.password=your_password
 
 # Build and deploy the WAR file
 mvn clean install
@@ -209,7 +209,7 @@ If you’d like to contribute:
 
 - **Fork the repository**
 
-- **Create a new branch (feature/your-feature) **
+- **Create a new branch (feature/your-feature)**
 
 - **Commit your changes**
 
