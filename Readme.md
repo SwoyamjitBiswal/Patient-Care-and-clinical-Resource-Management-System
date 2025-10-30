@@ -216,5 +216,5 @@ If you’d like to contribute:
 - **Submit a Pull Request 🎉**
 
 
-Developed with ❤️ and Java by Jagan Parida, Swayamjit Biswal, Sameer Jena, Biswajit Rout, Arpit Khatua
+Developed with ❤️ and Java by Jagan Parida, Swoyamjit Biswal, Sameer Jena, Biswajit Rout, Arpit Khatua
 
