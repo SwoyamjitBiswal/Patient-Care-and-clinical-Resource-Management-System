@@ -962,7 +962,7 @@
             justify-content: space-between !important; 
         }
         
-        .align-items-center { 
+        .align-items: center { 
             align-items: center !important; 
         }
         
@@ -1141,6 +1141,10 @@
         .was-validated .form-select:invalid ~ .invalid-feedback { 
             display: block; 
         }
+        
+        .form-control.is-invalid ~ .invalid-feedback {
+            display: block;
+        }
 
         /* --- Icon Box --- */
         .icon-box {
@@ -1180,6 +1184,77 @@
             padding-top: 1.5rem;
             border-top: 1px solid var(--border-color);
         }
+        
+        /* --- Password Strength Criteria --- */
+        #password-strength-criteria {
+            padding-left: 0.5rem;
+        }
+        #password-strength-criteria h6 {
+            color: var(--dark);
+            font-weight: 500; /* Use 500 to match form-label */
+            font-size: 0.9rem; /* Match form-label */
+            margin-bottom: 0.75rem;
+        }
+        #password-strength-criteria .list-unstyled {
+            padding-left: 0;
+            margin-bottom: 0;
+            list-style: none;
+        }
+        .criterion {
+            font-size: 0.875rem;
+            margin-bottom: 0.35rem;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .criterion i {
+            font-size: 0.8rem; /* Consistent icon size */
+            transition: var(--transition);
+            width: 16px; /* Align icons */
+            text-align: center;
+        }
+        .criterion.invalid {
+            color: var(--secondary);
+        }
+        .criterion.invalid i {
+            color: #adb5bd; /* Lighter grey for inactive dot */
+        }
+        .criterion.valid {
+            color: var(--success);
+            font-weight: 500;
+        }
+        .criterion.valid i {
+            color: var(--success);
+        }
+        
+        /* --- Show/Hide Password Toggle --- */
+        .password-toggle-icon {
+            position: absolute;
+            right: 0;
+            top: 0;
+            height: 100%;
+            width: 50px; /* Same as input-group-text */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--secondary);
+            cursor: pointer;
+            z-index: 5;
+            transition: var(--transition);
+        }
+        .password-toggle-icon:hover {
+            color: var(--primary);
+        }
+        /* Adjust form-control padding to not overlap with icon */
+        .form-control[type="password"] {
+            padding-right: 50px !important;
+        }
+        /* The .form-control class from .input-group was overriding this */
+        .input-group > .form-control[type="password"] {
+             padding-right: 50px !important;
+        }
+        
     </style>
 </head>
 <body>
@@ -1715,15 +1790,53 @@
                                 </div>
                                 <div class="invalid-feedback">Please enter valid email.</div>
                             </div>
+                            
                             <div class="col-md-6 form-field">
                                 <label class="form-label" for="addPassword">Password</label>
-                                <div class="input-group">
+                                <div class="input-group" style="position: relative;">
                                     <span class="input-group-text">
                                         <i class="fas fa-lock"></i>
                                     </span>
-                                    <input type="password" class="form-control" id="addPassword" name="password" required minlength="6" placeholder="Create password (min 6 chars)">
+                                    <input type="password" class="form-control" id="addPassword" name="password" 
+                                           required 
+                                           minlength="8" 
+                                           pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*]).{8,}"
+                                           placeholder="Create a strong password"
+                                           title="Must be 8+ chars, with uppercase, lowercase, number, and special character.">
+                                    <span class="password-toggle-icon" id="toggleAddPassword">
+                                        <i class="fas fa-eye"></i>
+                                    </span>
                                 </div>
-                                <div class="invalid-feedback">Password must be at least 6 characters.</div>
+                                
+                                <div id="password-strength-criteria" class="mt-2">
+                                    <h6 class="fs-6 fw-medium">Password strength</h6>
+                                    <ul class="list-unstyled">
+                                        <li id="pass-length" class="criterion invalid">
+                                            <i class="fas fa-circle"></i>
+                                            <span>At least 8 characters</span>
+                                        </li>
+                                        <li id="pass-lower" class="criterion invalid">
+                                            <i class="fas fa-circle"></i>
+                                            <span>One lowercase letter</span>
+                                        </li>
+                                        <li id="pass-upper" class="criterion invalid">
+                                            <i class="fas fa-circle"></i>
+                                            <span>One uppercase letter</span>
+                                        </li>
+                                        <li id="pass-num" class="criterion invalid">
+                                            <i class="fas fa-circle"></i>
+                                            <span>One number</span>
+                                        </li>
+                                        <li id="pass-special" class="criterion invalid">
+                                            <i class="fas fa-circle"></i>
+                                            <span>One special character</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            
+                                <div class="invalid-feedback">
+                                    Password does not meet all requirements. Please check the list above.
+                                </div>
                             </div>
                             <div class="col-md-6 form-field">
                                 <label class="form-label" for="addPhone">Phone Number</label>
@@ -1926,6 +2039,65 @@
                     });
                 });
             }
+            
+            // === Password Strength Checker & Toggle ===
+            const passField = document.getElementById('addPassword');
+            const passToggle = document.getElementById('toggleAddPassword');
+            
+            const critLength = document.getElementById('pass-length');
+            const critLower = document.getElementById('pass-lower');
+            const critUpper = document.getElementById('pass-upper');
+            const critNum = document.getElementById('pass-num');
+            const critSpecial = document.getElementById('pass-special');
+
+            const criteria = [
+                { el: critLength,  regex: /.{8,}/ },
+                { el: critLower,   regex: /[a-z]/ },
+                { el: critUpper,   regex: /[A-Z]/ },
+                { el: critNum,     regex: /\d/ },
+                { el: critSpecial, regex: /[!@#$%^&*]/ }
+            ];
+
+            if (passField) {
+                passField.addEventListener('input', function() {
+                    const password = passField.value;
+
+                    criteria.forEach(item => {
+                        if (!item.el) return; // Guard clause
+                        const icon = item.el.querySelector('i');
+                        if (!icon) return; // Guard clause
+                        
+                        if (item.regex.test(password)) {
+                            item.el.classList.remove('invalid');
+                            item.el.classList.add('valid');
+                            icon.classList.remove('fa-circle');
+                            icon.classList.add('fa-check-circle'); // Use checkmark icon
+                        } else {
+                            item.el.classList.remove('valid');
+                            item.el.classList.add('invalid');
+                            icon.classList.remove('fa-check-circle');
+                            icon.classList.add('fa-circle'); // Use circle icon
+                        }
+                    });
+                });
+            }
+
+            if (passToggle) {
+                passToggle.addEventListener('click', function() {
+                    const icon = this.querySelector('i');
+                    if (passField.type === 'password') {
+                        passField.type = 'text';
+                        icon.classList.remove('fa-eye');
+                        icon.classList.add('fa-eye-slash');
+                    } else {
+                        passField.type = 'password';
+                        icon.classList.remove('fa-eye-slash');
+                        icon.classList.add('fa-eye');
+                    }
+                });
+            }
+            // === End Password Strength Checker ===
+            
         });
     </script>
 </body>
