@@ -75,8 +75,95 @@ This system efficiently handles **patients, doctors, and appointments** with **r
 
 ---
 
-## 📁 Project Structure
+# 🏥 Patient Care and Clinical Resource Management System
 
+A **Java-based Web Application** built using **JSP, Servlets, and MySQL** to streamline patient care, doctor appointments, and admin management.  
+This system efficiently handles **patients, doctors, and appointments** with **role-based dashboards, secure authentication, and data visualization** (charts/tables).
+
+---
+
+## 📌 Table of Contents
+- [✨ Features](#-features)
+- [📁 Project Structure](#-project-structure)
+- [🧩 Patient Module](#-1️⃣-patient-module)
+- [👨‍⚕️ Doctor Module](#-2️⃣-doctor-module)
+- [🧍‍♂️ Admin Module](#-3️⃣-admin-module)
+- [🛠️ Technologies Used](#️-technologies-used)
+- [⚙️ Setup & Installation](#️-setup--installation)
+- [📸 Screenshots (optional)](#-screenshots-optional)
+- [🤝 Contributing](#-contributing)
+- [📄 License](#-license)
+
+---
+
+## ✨ Features
+
+✅ **Role-based Access Control** – Separate dashboards for Patients, Doctors, and Admins  
+✅ **Secure Authentication** – Session + Cookie-based “Remember Me” Login  
+✅ **Dynamic Dashboard Visuals** – Charts and tables for easy data visualization  
+✅ **Responsive Design** – Mobile-friendly JSP layouts  
+✅ **Modular Architecture** – DAO, Entity, Servlet, and Filter layers  
+✅ **MySQL Integration** – Persistent data management using JDBC  
+
+---
+
+## 🧩 1️⃣ Patient Module
+
+### 🧍‍♀️ Basic Account Management
+- **Registration:** Full name, email, password, phone, address, gender, blood group, DOB, emergency contact, medical history  
+- **Validation:** Email format + uniqueness check  
+- **Remember Me:** Cookie-based auto-login  
+- **Login & Logout:** Session-based authentication + cookie auto-login  
+- **Profile Management:** View and update personal details  
+- **Change Password:** Verify old password before update  
+
+### 📅 Appointment Management
+- **Book Appointment:**  
+  - Select doctor by department/specialization  
+  - Choose date/time and appointment type (In-person / Online)  
+  - Add reason/notes; default status = Pending  
+- **View Appointments:**  
+  - Separate sections for Upcoming and Past appointments  
+  - Status indicators: Pending / Confirmed / Completed / Cancelled  
+  - Priority color badges  
+- **Edit or Cancel Appointment:** Modify before confirmation or cancel with confirmation modal  
+- **Filter/Search:** By date, doctor, or status  
+
+---
+
+## 👨‍⚕️ 2️⃣ Doctor Module
+
+### 👨‍⚕️ Doctor Account
+- **Registration + Login/Logout:** Cookie & session-based  
+- **Profile Management:** Update specialization, qualification, department, visiting charge, availability  
+- **Change Password:** Old password verification  
+
+### 🩺 Appointment Dashboard
+- **View Appointments:** Filter by status (Pending / Completed / Cancelled / Upcoming)  
+- **Manage Appointment:**  
+  - Confirm, Complete, or Cancel appointments  
+  - Add prescription & follow-up notes  
+- **Search Patients:** By name or ID  
+- **Dashboard Stats:** Total, Completed, Pending, and Upcoming Appointments + Charts  
+
+---
+
+## 🧍‍♂️ 3️⃣ Admin Module
+
+### 🔐 Admin Account
+- **Admin Registration + Login** (Multi-admin supported)  
+- **Change Password + Logout**
+
+### 🗂️ Management Panel
+- **Manage Doctors:** Add, Edit, Delete, and View doctor details  
+- **Manage Patients:** View/Edit/Delete patient profiles  
+- **Manage Appointments:** View all appointments, update or delete any  
+- **Admin Dashboard:** View all data with graphical charts and summary tables  
+
+---
+
+## 📁 Project Structure
+```bash
 Patient-Care-and-Clinical-Resource-Management-System/
 │
 ├── pom.xml                              # Maven configuration (Servlet, JSP, JSTL, MySQL, BCrypt)
@@ -175,6 +262,7 @@ Patient-Care-and-Clinical-Resource-Management-System/
 │
 └── README.md
 
+
 | Category          | Technology                             |
 | ----------------- | -------------------------------------- |
 | **Frontend**      | JSP, HTML5, CSS3, JavaScript           |
@@ -222,14 +310,14 @@ http://localhost:8080/Patient-Care-and-Clinical-Resource-Management-System/
 Pull requests are welcome!
 If you’d like to contribute:
 
-Fork the repository
+- **Fork the repository**
 
-Create a new branch (feature/your-feature)
+- **Create a new branch (feature/your-feature) **
 
-Commit your changes
+- **Commit your changes**
 
-Submit a Pull Request 🎉
+- **Submit a Pull Request 🎉**
 
 
-💡 Developed with ❤️ and Java by Jagan Parida, Swayamjit Biswal, Sameer Jena, Biswajit Rout, Arpit Khatua
+Developed with ❤️ and Java by Jagan Parida, Swayamjit Biswal, Sameer Jena, Biswajit Rout, Arpit Khatua
 
