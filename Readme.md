@@ -190,7 +190,7 @@ git clone https://github.com/your-username/Patient-Care-and-Clinical-Resource-Ma
 cd Patient-Care-and-Clinical-Resource-Management-System
 
 Configure database in src/main/resources/database.properties
-- **Example:**
+- **Example:** <br>
 db.url=jdbc:mysql://localhost:3306/patient_care <br>
 db.user=root<br>
 db.password=your_password<br>
