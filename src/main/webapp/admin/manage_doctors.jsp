@@ -770,9 +770,8 @@
             margin: 1.75rem auto; 
         }
         
-        /* ADDED/MODIFIED FOR SMALL MODAL */
         .modal-sm { 
-            max-width: 380px; /* Custom small size */
+            max-width: 380px; 
             margin: 1.75rem auto; 
         }
         
@@ -1504,16 +1503,13 @@
                                                     </span>
                                                 <% } %>
 
-
-                                                <form action="${pageContext.request.contextPath}/admin/management?action=delete&type=doctor"
-                                                      method="post" class="d-inline">
-                                                    <input type="hidden" name="id" value="<%= doctor.getId() %>">
-                                                    <button type="submit" class="btn btn-outline-danger delete-doctor"
-                                                            data-bs-toggle="tooltip" title="Delete Doctor">
+                                                <span data-bs-toggle="tooltip" title="Delete Doctor">
+                                                    <button type="button" class="btn btn-outline-danger"
+                                                            data-bs-toggle="modal" data-bs-target="#deleteDoctorModal<%= doctor.getId() %>">
                                                         <i class="fas fa-trash"></i>
                                                     </button>
-                                                </form>
-                                            </div>
+                                                </span>
+                                                </div>
                                             
                                             
                                             <% if (!doctor.isApproved()) { %>
@@ -1546,6 +1542,35 @@
                                                     </div>
                                                 </div>
                                             <% } %>
+
+                                            <div class="modal fade" id="deleteDoctorModal<%= doctor.getId() %>" tabindex="-1" aria-labelledby="deleteDoctorModalLabel<%= doctor.getId() %>" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered modal-sm">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title" id="deleteDoctorModalLabel<%= doctor.getId() %>">
+                                                                <i class="fas fa-exclamation-triangle me-2 text-danger"></i>Confirm Deletion
+                                                            </h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            Are you sure you want to <strong>PERMANENTLY DELETE</strong> Dr. <%= doctor.getFullName() %>?
+                                                            <br><br>
+                                                            <small class="text-danger">This action cannot be undone and may affect all associated appointments.</small>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                            
+                                                            <form action="${pageContext.request.contextPath}/admin/management?action=delete&type=doctor"
+                                                                  method="post" class="d-inline">
+                                                                <input type="hidden" name="id" value="<%= doctor.getId() %>">
+                                                                <button type="submit" class="btn btn-danger">
+                                                                    <i class="fas fa-trash me-1"></i>Yes, Delete
+                                                                </button>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                             <div class="modal fade" id="editDoctorModal<%= doctor.getId() %>" tabindex="-1" aria-labelledby="editDoctorModalLabel<%= doctor.getId() %>" aria-hidden="true">
                                                 <div class="modal-dialog modal-lg modal-dialog-centered">
                                                     <div class="modal-content">
@@ -2043,18 +2068,9 @@
                  });
              });
 
-            // Confirm delete actions
-            const deleteButtons = document.querySelectorAll('.delete-doctor');
-            deleteButtons.forEach(button => {
-                 const form = button.closest('form');
-                 if (form) {
-                     form.addEventListener('submit', function(e) {
-                        if (!confirm('Are you sure you want to PERMANENTLY DELETE this doctor? This action cannot be undone and may affect associated appointments.')) {
-                            e.preventDefault();
-                        }
-                     });
-                 }
-            });
+            // ========== REMOVED OLD DELETE CONFIRM JAVASCRIPT ==========
+            // const deleteButtons = document.querySelectorAll('.delete-doctor'); ...
+            // This is no longer needed as the modal handles the confirmation.
 
             // Search functionality
             const searchInput = document.getElementById('doctorSearchInput');
