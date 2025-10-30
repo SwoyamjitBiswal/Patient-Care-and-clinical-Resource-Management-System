@@ -1,23 +1,18 @@
 <%@ page import="com.entity.Patient" %>
-<%@ page import="java.util.List" %> <%-- Keeping imports just in case --%>
+<%@ page import="java.util.List" %>
 <%@ page import="com.entity.Appointment" %>
 
 <%
-    // This is the main user check for the page
+    // Check if the patient is logged in
     Patient currentPatient = (Patient) session.getAttribute("patientObj");
 
-    // --- FIX START ---
-    // If the patient is null, send redirect and stop.
-    // The 'else' block (below) now wraps the ENTIRE HTML page.
     if (currentPatient == null) {
         response.sendRedirect(request.getContextPath() + "/patient/login.jsp");
         return;
-    } else {
-    
-    // This variable is only needed if the patient exists, so it's moved inside the 'else'.
+    } 
+
     String currentUserRole = "patient";
 %>
-<%-- --- FIX END --- --%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -67,7 +62,7 @@
             overflow: hidden;
         }
         
-        /* Light Mode Sidebar */
+        /* Sidebar Styles */
         .sidebar {
             width: var(--sidebar-width);
             flex-shrink: 0;
@@ -288,6 +283,7 @@
             }
         }
         
+        /* Scrollbar styles */
         .sidebar::-webkit-scrollbar,
         .main-content::-webkit-scrollbar {
             width: 6px;
@@ -375,7 +371,7 @@
             display: block;
         }
         
-        /* Updated Input Group Styles */
+        /* Input Group Styles */
         .input-group {
             position: relative;
             display: flex;
@@ -444,6 +440,17 @@
         .btn-primary:hover {
             transform: translateY(-2px);
             box-shadow: 0 7px 14px rgba(79, 70, 229, 0.25);
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #c23838; 
+            transform: translateY(-2px);
+            box-shadow: 0 7px 14px rgba(239, 68, 68, 0.25);
         }
         
         /* Back Link */
@@ -558,28 +565,16 @@
             border-left: 4px solid #ef4444;
         }
         
-        .alert-dismissible {
-            padding-right: 3rem;
+        /* Modal Customization */
+        .modal-header.bg-danger {
+            background-color: var(--danger) !important;
         }
-        
-        .btn-close {
-            box-sizing: content-box;
-            width: 1em;
-            height: 1em;
-            padding: 0.25em 0.25em;
-            color: #000;
-            background: transparent;
-            border: 0;
-            border-radius: 0.25rem;
-            opacity: 0.5;
+        .btn-close-white {
+            /* Standard Bootstrap 5 way to invert close button color */
+            filter: invert(1) grayscale(100%) brightness(200%); 
         }
-        
-        .alert-dismissible .btn-close {
-            position: absolute;
-            top: 0;
-            right: 0;
-            z-index: 2;
-            padding: 1.25rem 1rem;
+        .form-check-label {
+            font-weight: 500;
         }
         
         /* Status Badge */
@@ -626,6 +621,31 @@
             margin-top: 2rem;
             padding-top: 1.5rem;
             border-top: 1px solid #f3f4f6;
+        }
+        
+        /* Danger Zone Styles */
+        .danger-zone-card {
+            border: 1px solid var(--danger);
+            background-color: var(--danger-light);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+        
+        .danger-zone-card:hover {
+            box-shadow: 0 8px 16px rgba(239, 68, 68, 0.1);
+        }
+        
+        .danger-zone-card .card-title {
+            color: var(--danger);
+            font-size: 1.3rem;
+        }
+        
+        .danger-zone-card p {
+            color: #4b5563;
+            margin-bottom: 0;
+            font-size: 0.95rem;
         }
         
         /* Utility Classes */
@@ -726,10 +746,8 @@
                     <i class="fas fa-user-circle"></i>
                 </div>
                 <div class="user-info">
-                    <% if (currentPatient != null) { %>
                     <h6><%= currentPatient.getFullName() %></h6>
                     <span class="badge">Patient</span>
-                    <% } %>
                 </div>
             </div>
             
@@ -816,27 +834,29 @@
                 String successMsg = (String) request.getAttribute("successMsg");
                 String errorMsg = (String) request.getAttribute("errorMsg");
                 
-                if (successMsg != null) {
+                if (successMsg != null && !successMsg.isEmpty()) {
             %>
                 <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
                     <div class="d-flex align-items-center">
                         <i class="fas fa-check-circle me-3 fs-5"></i>
                         <div class="flex-grow-1"><%= successMsg %></div>
                     </div>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             <%
+                    request.removeAttribute("successMsg");
                 }
-                if (errorMsg != null) {
+                if (errorMsg != null && !errorMsg.isEmpty()) {
             %>
                 <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
                     <div class="d-flex align-items-center">
                         <i class="fas fa-exclamation-triangle me-3 fs-5"></i>
                         <div class="flex-grow-1"><%= errorMsg %></div>
                     </div>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             <%
+                    request.removeAttribute("errorMsg");
                 }
             %>
 
@@ -993,7 +1013,24 @@
                             </form>
                         </div>
                     </div>
-                </div>
+
+                    <div class="danger-zone-card mb-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h3 class="card-title mb-1">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    **Danger Zone**
+                                </h3>
+                                <p class="mb-0">
+                                    Permanently delete your account and all associated data. **This action cannot be undone.**
+                                </p>
+                            </div>
+                            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
+                                <i class="fas fa-trash-alt me-2"></i>Delete Account
+                            </button>
+                        </div>
+                    </div>
+                    </div>
 
                 <div class="col-lg-4">
                     <div class="card mb-4">
@@ -1092,6 +1129,37 @@
         </div>
     </main>
 
+    <div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-labelledby="deleteAccountModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="deleteAccountModalLabel"><i class="fas fa-exclamation-triangle me-2"></i>**Confirm Account Deletion**</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>⚠️ **Warning: This action is irreversible.**</p>
+                    <p>Are you absolutely sure you want to **permanently delete** your patient account? All associated data, including medical history and past appointments, will be **removed from our database**.</p>
+                    
+                    <div class="form-check mt-3">
+                        <input class="form-check-input" type="checkbox" value="" id="confirmDeletionCheck">
+                        <label class="form-check-label" for="confirmDeletionCheck">
+                            **I understand that deleting my account cannot be undone.**
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    
+                    <button type="button" class="btn btn-danger" id="confirmDeleteButton" disabled>
+                        <i class="fas fa-user-slash me-2"></i>Delete Permanently
+                    </button>
+                    
+                    <form id="deleteAccountForm" action="${pageContext.request.contextPath}/patient/profile?action=delete" method="POST" style="display:none;">
+                        </form>
+                </div>
+            </div>
+        </div>
+    </div>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const mobileMenuToggle = document.getElementById('mobileMenuToggle');
@@ -1122,11 +1190,8 @@
                     }
                 });
             });
-        });
-    </script>
-    
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
+
+            // --- Form Validation and DOB Logic ---
             const forms = document.querySelectorAll('.needs-validation');
             Array.from(forms).forEach(form => {
                 form.addEventListener('submit', function(event) {
@@ -1138,26 +1203,51 @@
                 }, false);
             });
 
-            // Set max date for date of birth
+            // Set max date for date of birth (18 years ago)
             const dobInput = document.getElementById('dateOfBirth');
             if (dobInput) {
                 const today = new Date();
-                // Set max date to today (or 18 years ago, as you had it)
-                // Let's stick to your original logic of 18 years ago
                 const maxDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
-                
-                // But also set a reasonable min date (e.g., 100 years ago)
                 const minDate = new Date(today.getFullYear() - 100, today.getMonth(), today.getDate());
-
                 dobInput.max = maxDate.toISOString().split('T')[0];
                 dobInput.min = minDate.toISOString().split('T')[0];
+            }
+            
+            // --- ACCOUNT DELETION LOGIC (Controls Modal Confirmation) ---
+            const confirmDeletionCheck = document.getElementById('confirmDeletionCheck');
+            const confirmDeleteButton = document.getElementById('confirmDeleteButton');
+            const deleteAccountForm = document.getElementById('deleteAccountForm');
+            const deleteModal = document.getElementById('deleteAccountModal');
+
+            if (confirmDeletionCheck && confirmDeleteButton && deleteAccountForm && deleteModal) {
+                
+                // 1. Enable/Disable the final delete button based on checkbox state
+                confirmDeletionCheck.addEventListener('change', function() {
+                    confirmDeleteButton.disabled = !this.checked;
+                });
+
+                // 2. Handle the final button click to submit the form
+                confirmDeleteButton.addEventListener('click', function() {
+                    if (confirmDeletionCheck.checked) {
+                        // Prevent multiple clicks and provide feedback
+                        confirmDeleteButton.disabled = true; 
+                        confirmDeleteButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+
+                        // Submit the hidden form to the servlet
+                        deleteAccountForm.submit();
+                    }
+                });
+                
+                // 3. Reset the modal state whenever it is hidden
+                deleteModal.addEventListener('hidden.bs.modal', function () {
+                    // Reset checkbox
+                    confirmDeletionCheck.checked = false;
+                    // Reset button state
+                    confirmDeleteButton.disabled = true;
+                    confirmDeleteButton.innerHTML = '<i class="fas fa-user-slash me-2"></i>Delete Permanently';
+                });
             }
         });
     </script>
 </body>
 </html>
-<%-- --- FIX START --- --%>
-<%
-    } // This closing brace ends the 'else' block from the top
-%>
-<%-- --- FIX END --- --%>

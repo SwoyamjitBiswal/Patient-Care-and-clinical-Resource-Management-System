@@ -7,6 +7,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
 import java.io.IOException;
 import java.sql.Date;
+import java.sql.SQLException; // Import SQLException for DAO call
 
 @WebServlet("/patient/profile")
 public class PatientProfileServlet extends HttpServlet {
@@ -21,12 +22,19 @@ public class PatientProfileServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         
-        HttpSession session = request.getSession();
+        HttpSession session = request.getSession(false); // Use false to avoid creating a new session
+        
+        if (session == null || session.getAttribute("patientObj") == null) {
+             // If session is null or patient object is missing, redirect to login
+            response.sendRedirect(request.getContextPath() + "/patient/login.jsp");
+            return;
+        }
+        
         Patient patient = (Patient) session.getAttribute("patientObj");
         
-        if (patient != null) {
-            // Get fresh data from database
-            Patient freshPatient = patientDao.getPatientById(patient.getId());
+        // Get fresh data from database
+        Patient freshPatient = patientDao.getPatientById(patient.getId());
+        if (freshPatient != null) {
             session.setAttribute("patientObj", freshPatient);
         }
         
@@ -43,6 +51,11 @@ public class PatientProfileServlet extends HttpServlet {
             updateProfile(request, response);
         } else if ("changePassword".equals(action)) {
             changePassword(request, response);
+        } else if ("delete".equals(action)) { // **HANDLE DELETE ACTION**
+            deleteAccount(request, response);
+        } else {
+             // Default action if an unknown action parameter is passed
+            response.sendRedirect(request.getContextPath() + "/patient/dashboard.jsp");
         }
     }
 
@@ -51,7 +64,12 @@ public class PatientProfileServlet extends HttpServlet {
             throws ServletException, IOException {
         
         try {
-            HttpSession session = request.getSession();
+            HttpSession session = request.getSession(false);
+            if (session == null || session.getAttribute("patientObj") == null) {
+                response.sendRedirect(request.getContextPath() + "/patient/login.jsp");
+                return;
+            }
+            
             Patient patient = (Patient) session.getAttribute("patientObj");
             
             String fullName = request.getParameter("fullName");
@@ -95,7 +113,12 @@ public class PatientProfileServlet extends HttpServlet {
             throws ServletException, IOException {
         
         try {
-            HttpSession session = request.getSession();
+            HttpSession session = request.getSession(false);
+            if (session == null || session.getAttribute("patientObj") == null) {
+                response.sendRedirect(request.getContextPath() + "/patient/login.jsp");
+                return;
+            }
+            
             Patient patient = (Patient) session.getAttribute("patientObj");
             
             String currentPassword = request.getParameter("currentPassword");
@@ -132,6 +155,53 @@ public class PatientProfileServlet extends HttpServlet {
             e.printStackTrace();
             request.setAttribute("errorMsg", "An error occurred while changing password.");
             request.getRequestDispatcher("change_password.jsp").forward(request, response);
+        }
+    }
+
+    /**
+     * Handles the permanent deletion of the patient account and related data.
+     */
+    private void deleteAccount(HttpServletRequest request, HttpServletResponse response) 
+            throws ServletException, IOException {
+        
+        HttpSession session = request.getSession(false);
+        
+        // 1. Authorization Check
+        if (session == null || session.getAttribute("patientObj") == null) {
+            response.sendRedirect(request.getContextPath() + "/patient/login.jsp");
+            return;
+        }
+
+        Patient patient = (Patient) session.getAttribute("patientObj");
+        int patientId = patient.getId();
+        boolean success = false;
+        
+        try {
+            // 2. Call transactional DAO method
+            success = patientDao.deletePatient(patientId);
+
+            if (success) {
+                // 3. Deletion successful: Invalidate session and redirect to login
+                session.invalidate(); 
+                
+                // Add success message to be picked up by the login page (via URL parameter)
+                response.sendRedirect(request.getContextPath() + "/patient/login.jsp?successMsg=Your account has been permanently deleted.");
+                
+            } else {
+                // 4. Deletion failed (e.g., patient ID not found, but transaction was clean)
+                request.setAttribute("errorMsg", "Account deletion failed. No records were deleted.");
+                request.getRequestDispatcher("profile.jsp").forward(request, response);
+            }
+            
+        } catch (SQLException e) {
+            // 5. Handle SQL Exception (usually means transaction rollback)
+            e.printStackTrace();
+            request.setAttribute("errorMsg", "An internal error occurred during deletion. No changes were made.");
+            request.getRequestDispatcher("profile.jsp").forward(request, response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            request.setAttribute("errorMsg", "An unknown error occurred.");
+            request.getRequestDispatcher("profile.jsp").forward(request, response);
         }
     }
 }
