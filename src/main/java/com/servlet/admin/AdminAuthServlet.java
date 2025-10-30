@@ -11,32 +11,35 @@ import java.io.IOException;
 public class AdminAuthServlet extends HttpServlet {
     private AdminDao adminDao;
 
+    // 1. Initialization: Instantiates the DAO once when the servlet starts.
     @Override
     public void init() throws ServletException {
-        adminDao = new AdminDao();
+        // Instantiate the DAO using the no-argument constructor
+        adminDao = new AdminDao(); 
     }
 
+    // 2. Handles POST requests (Login, Logout)
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
         String action = request.getParameter("action");
 
-        // Removed the 'register' block
         if ("login".equalsIgnoreCase(action)) {
             loginAdmin(request, response);
         } else if ("logout".equalsIgnoreCase(action)) {
             logoutAdmin(request, response);
         } else {
-            // Default action if a POST request comes in without a valid action
+            // Default action if an unknown POST request comes in
             response.sendRedirect("login.jsp");
         }
     }
 
+    // 3. Handles GET requests (primarily for Logout)
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // Allow logout from GET request too
+        
         String action = request.getParameter("action");
         if ("logout".equalsIgnoreCase(action)) {
             logoutAdmin(request, response);
@@ -45,15 +48,7 @@ public class AdminAuthServlet extends HttpServlet {
         }
     }
 
-    // ⛔ Removed: Admin registration logic is no longer allowed.
-    /*
-    private void registerAdmin(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        // ... registration code was here ...
-    }
-    */
-
-    // Admin login
+    // Admin login logic
     private void loginAdmin(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
@@ -61,32 +56,37 @@ public class AdminAuthServlet extends HttpServlet {
             String email = request.getParameter("email");
             String password = request.getParameter("password");
 
-            Admin admin = adminDao.login(email, password);
+            // Calls the correct login(String, String) method from the Dao
+            Admin admin = adminDao.login(email, password); 
 
             if (admin != null) {
                 HttpSession session = request.getSession();
                 session.setAttribute("adminObj", admin);
-                response.sendRedirect("dashboard.jsp");
+                response.sendRedirect("dashboard.jsp"); // Success redirect
             } else {
+                // Failure: Set error message and forward back to login page
                 request.setAttribute("errorMsg", "Invalid email or password");
                 request.getRequestDispatcher("login.jsp").forward(request, response);
             }
 
         } catch (Exception e) {
+            // Catch any unexpected exceptions (e.g., from DBConnect failure)
             e.printStackTrace();
-            request.setAttribute("errorMsg", "An error occurred during login.");
+            request.setAttribute("errorMsg", "An unexpected error occurred during login. Check server logs.");
             request.getRequestDispatcher("login.jsp").forward(request, response);
         }
     }
 
-    // Admin logout → Redirect to main index page
+    // Admin logout logic
     private void logoutAdmin(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        HttpSession session = request.getSession(false);
+        // Get existing session without creating a new one (false)
+        HttpSession session = request.getSession(false); 
         if (session != null) {
-            session.invalidate();
+            session.invalidate(); // Destroy the session
         }
-        response.sendRedirect(request.getContextPath() + "/index.jsp");
+        // Redirect to the context root (e.g., /PatientCareSystem/index.jsp)
+        response.sendRedirect(request.getContextPath() + "/index.jsp"); 
     }
 }

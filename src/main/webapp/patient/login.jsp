@@ -327,18 +327,25 @@
                                 }
                                 // --- END ---
                                 
-                                if (successMsg != null) {
+                                // FIXED: Updated success message and proper dismissal logic
+                                if (successMsg != null && !successMsg.isEmpty()) {
                             %>
                                 <div class="alert alert-success alert-dismissible fade show" role="alert">
                                     <div class="d-flex align-items-center">
                                         <i class="fas fa-check-circle me-3 fs-5"></i>
-                                        <div class="flex-grow-1"><%= successMsg %></div>
+                                        <div class="flex-grow-1">
+                                            **Registration successful! Please log in with your new credentials.**
+                                        </div>
                                     </div>
                                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                                 </div>
                             <%
+                                    // CRITICAL: Remove attribute after display to prevent re-showing on refresh
+                                    request.removeAttribute("successMsg");
                                 }
-                                if (errorMsg != null) {
+                                
+                                // FIXED: Proper dismissal logic for error message
+                                if (errorMsg != null && !errorMsg.isEmpty()) {
                             %>
                                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
                                     <div class="d-flex align-items-center">
@@ -348,6 +355,8 @@
                                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                                 </div>
                             <%
+                                    // CRITICAL: Remove attribute after display
+                                    request.removeAttribute("errorMsg");
                                 }
                             %>
 
@@ -426,35 +435,29 @@
             const passwordInput = document.getElementById('password');
             const emailInput = document.getElementById('email');
             
-            // --- FIX: Dynamic fill to beat aggressive browser autofill ---
+            // Dynamic fill to beat aggressive browser autofill
             if (patientEmailValue && emailInput) {
                  emailInput.value = patientEmailValue;
             }
             if (patientPasswordValue && passwordInput) {
-                 // Fill the password input using JavaScript after the DOM is fully loaded.
-                 // This often resolves conflicts with browser password managers.
                  passwordInput.value = patientPasswordValue;
             }
-            // --- END FIX ---
             
             if (passwordToggle && passwordInput) {
-                // FIX START: Password Toggle Logic
+                // Password Toggle Logic
                 passwordToggle.addEventListener('click', function() {
                     const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
                     passwordInput.setAttribute('type', type);
                     
                     const icon = this.querySelector('i');
                     if (type === 'password') {
-                        // Show eye for hidden password
                         icon.classList.remove('fa-eye-slash');
                         icon.classList.add('fa-eye');
                     } else {
-                        // Show eye-slash for visible password
                         icon.classList.remove('fa-eye');
                         icon.classList.add('fa-eye-slash');
                     }
                 });
-                // FIX END
             }
 
             // Form validation
@@ -473,43 +476,16 @@
             const alerts = document.querySelectorAll('.alert');
             alerts.forEach(alert => {
                 setTimeout(() => {
-                    // Check if Bootstrap is available and use its Alert object for proper closing
                     if (window.bootstrap && alert.classList.contains('show')) {
-                        const bsAlert = new bootstrap.Alert(alert);
+                        const bsAlert = bootstrap.Alert.getInstance(alert) || new bootstrap.Alert(alert);
                         bsAlert.close();
+                    } else if (alert.classList.contains('show')) {
+                        alert.classList.remove('show');
+                        alert.classList.add('fade');
+                        alert.style.display = 'none'; 
                     }
                 }, 5000);
             });
-
-            // Enhanced input focus effects (Note: The focus class isn't defined in your CSS but the event listeners are still valid)
-            const inputs = document.querySelectorAll('.form-control');
-            inputs.forEach(input => {
-                input.addEventListener('focus', function() {
-                    // The focus-within pseudo-class in the .input-group handles the visual effect, 
-                    // but keeping this for potential future CSS logic.
-                    this.parentElement.classList.add('focus'); 
-                });
-                
-                input.addEventListener('blur', function() {
-                    this.parentElement.classList.remove('focus');
-                });
-            });
-
-            // Remember me functionality enhancement (Note: The remembered class isn't defined in your CSS but the event listener is still valid)
-            const rememberMe = document.getElementById('rememberMe');
-            // Re-declare for scope clarity and avoid conflict with the one above, even though the original was fine
-            const emailInputForRemember = document.getElementById('email'); 
-            const passwordInputField = document.getElementById('password');
-
-            if (rememberMe && emailInputForRemember && passwordInputField) {
-                rememberMe.addEventListener('change', function() {
-                    if (this.checked) {
-                        this.parentElement.classList.add('remembered');
-                    } else {
-                        this.parentElement.classList.remove('remembered');
-                    }
-                });
-            }
         });
     </script>
 </body>

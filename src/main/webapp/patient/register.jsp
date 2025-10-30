@@ -339,7 +339,6 @@
 </style>
 </head>
 <body>
-    <!-- Navbar Included -->
     <%@ include file="../includes/navbar.jsp" %>
 
     <div class="auth-container">
@@ -352,14 +351,13 @@
                             <p class="mb-0">Create your account to book appointments with our healthcare providers</p>
                         </div>
                         <div class="auth-body">
-                            <!-- Success/Error Messages -->
                             <%
                                 String successMsg = (String) request.getAttribute("successMsg");
                                 String errorMsg = (String) request.getAttribute("errorMsg");
                                 
-                                if (successMsg != null) {
+                                if (successMsg != null && !successMsg.isEmpty()) {
                             %>
-                                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                <div class="alert alert-success **alert-dismissible fade show**" role="alert">
                                     <div class="d-flex align-items-center">
                                         <i class="fas fa-check-circle me-3 fs-5"></i>
                                         <div class="flex-grow-1"><%= successMsg %></div>
@@ -367,10 +365,12 @@
                                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                                 </div>
                             <%
+                                    // CRITICAL FIX: Remove attribute so it doesn't show on refresh
+                                    request.removeAttribute("successMsg");
                                 }
-                                if (errorMsg != null) {
+                                if (errorMsg != null && !errorMsg.isEmpty()) {
                             %>
-                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <div class="alert alert-danger **alert-dismissible fade show**" role="alert">
                                     <div class="d-flex align-items-center">
                                         <i class="fas fa-exclamation-triangle me-3 fs-5"></i>
                                         <div class="flex-grow-1"><%= errorMsg %></div>
@@ -378,9 +378,10 @@
                                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                                 </div>
                             <%
+                                    // CRITICAL FIX: Remove attribute so it doesn't show on refresh
+                                    request.removeAttribute("errorMsg");
                                 }
                             %>
-
                             <form action="${pageContext.request.contextPath}/patient/auth?action=register" method="post" class="needs-validation" novalidate id="registrationForm">
                                 <div class="row">
                                     <div class="col-lg-6 mb-3">
@@ -574,7 +575,6 @@
         </div>
     </div>
 
-    <!-- Footer Included -->
     <%@ include file="../includes/footer.jsp" %>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
