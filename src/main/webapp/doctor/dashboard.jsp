@@ -368,7 +368,7 @@
         }
         
         .card-header-modern i {
-            color: var(--primary);
+            color: #fff;
             margin-right: 10px;
             font-size: 1.1rem;
         }
@@ -1054,10 +1054,10 @@
                                 </div>
                                 <div class="col-md-3 text-center">
                                     <div class="icon-box icon-danger mx-auto mb-2">
-                                        <i class="fas fa-dollar-sign"></i>
+                                       <span>&#8377;</span>
                                     </div>
                                     <h6>Fee</h6>
-                                    <p class="text-muted mb-0">$<%= currentDoctor.getVisitingCharge() %></p>
+                                    <p class="text-muted mb-0"><span>&#8377;</span><%= currentDoctor.getVisitingCharge() %></p>
                                 </div>
                             </div>
                         </div>
