@@ -1,6 +1,7 @@
 <%@ include file="../includes/header.jsp" %>
 <title>Patient Care System - Patient Login</title>
 <style>
+    /* [Your existing CSS styles remain unchanged] */
     /* Light Background Styles */
     .auth-container {
         background: #f8fafc;
@@ -167,6 +168,13 @@
         transform: translateY(-2px);
         box-shadow: 0 10px 25px rgba(79, 70, 229, 0.3);
     }
+    .alert-dismissible{
+    display:flex;
+    padding:0;
+    }
+    .alert-dismissible .btn-close{
+    position:relative !important;
+    }
 
     /* Alert Styles */
     .alert {
@@ -189,9 +197,6 @@
         border-left-color: #ef4444;
     }
 
-    .alert-dismissible {
-        padding-right: 3rem;
-    }
 
     .btn-close {
         background: transparent url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23000'%3e%3cpath d='M.293.293a1 1 0 0 1 1.414 0L8 6.586 14.293.293a1 1 0 1 1 1.414 1.414L9.414 8l6.293 6.293a1 1 0 0 1-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 0 1-1.414-1.414L6.586 8 .293 1.707a1 1 0 0 1 0-1.414z'/%3e%3c/svg%3e") center/1em auto no-repeat;
@@ -315,8 +320,7 @@
                                 // --- Get Cookie data ---
                                 Cookie[] cookies = request.getCookies();
                                 String patientEmail = "";
-                                String patientPassword = ""; // This is only used to prefill if cookie exists
-                                boolean rememberMe = false;
+                                boolean rememberMe = false; // This will be true if we find the email cookie
 
                                 if (cookies != null) {
                                     for (Cookie cookie : cookies) {
@@ -324,16 +328,11 @@
                                             patientEmail = cookie.getValue();
                                             rememberMe = true; 
                                         }
-                                        // We prefill password only if email is also remembered
-                                        // Note: Your servlet code was corrected to NOT save passwords in cookies.
-                                        // This code is kept for legacy/remember-me email functionality.
-                                        if ("patientPassword".equals(cookie.getName())) {
-                                            patientPassword = cookie.getValue();
-                                        }
+                                        // **FIX:** Removed the part that looks for "patientPassword"
                                     }
                                 }
                                 
-                                // --- NEW: SUCCESS ALERT BLOCK ---
+                                // --- SUCCESS ALERT BLOCK ---
                                 if (successMsg != null && !successMsg.isEmpty()) {
                             %>
                                 <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -390,8 +389,7 @@
                                         </span>
                                         <input type="password" class="form-control" id="password" name="password" required 
                                                placeholder="Enter your password"
-                                               autocomplete="current-password"
-                                               value="<%= (rememberMe ? patientPassword : "") %>"> <%-- Prefill if remembered --%>
+                                               autocomplete="current-password">
                                         <button type="button" class="password-toggle" id="passwordToggle">
                                             <i class="fas fa-eye"></i> 
                                         </button>
@@ -401,7 +399,7 @@
 
                                 <div class="mb-3 form-check">
                                     <input type="checkbox" class="form-check-input" id="rememberMe" name="rememberMe"
-                                        <%= (rememberMe ? "checked" : "") %>>
+                                           <%= (rememberMe ? "checked" : "") %>>
                                     <label class="form-check-label" for="rememberMe">Remember me on this device</label>
 
                                 </div>
@@ -437,23 +435,19 @@
     <%@ include file="../includes/footer.jsp" %>
 
     <script>
-        // Store cookie values in JS variables for dynamic fill
+        // **FIX:** Store only the email value from the cookie.
         const patientEmailValue = '<%= patientEmail %>';
-        const patientPasswordValue = '<%= (rememberMe ? patientPassword : "") %>'; // Only use if rememberMe is on
         
         document.addEventListener('DOMContentLoaded', function() {
             const passwordToggle = document.getElementById('passwordToggle');
             const passwordInput = document.getElementById('password');
             const emailInput = document.getElementById('email');
             
-            // MODAL SCRIPT HAS BEEN REMOVED
-            
-            // Dynamic fill to beat aggressive browser autofill
+            // **FIX:** Removed the JavaScript that tried to set the password.
+            // The value is already set in the HTML for the email input.
+            // This JS block is good to have in case the browser autofill is aggressive.
             if (patientEmailValue && emailInput) {
                  emailInput.value = patientEmailValue;
-            }
-            if (patientPasswordValue && passwordInput) {
-                 passwordInput.value = patientPasswordValue;
             }
             
             if (passwordToggle && passwordInput) {
