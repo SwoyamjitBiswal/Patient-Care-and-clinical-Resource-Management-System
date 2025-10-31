@@ -917,24 +917,44 @@
     <%@ include file="includes/footer.jsp" %>
 
     <script>
-        // Simple animation for stats counter
         document.addEventListener('DOMContentLoaded', function() {
             const statNumbers = document.querySelectorAll('.hero-stats-card .number');
             
             statNumbers.forEach(stat => {
-                const target = parseInt(stat.textContent);
+                const originalText = stat.textContent; // e.g., "10,000+" or "99%"
+                
+                // 1. Get the target number by cleaning the string
+                //    '10,000+' -> replace ',' -> '10000+' -> replace '+' -> '10000' -> parseInt -> 10000
+                const target = parseInt(originalText.replace(/,/g, '').replace('+', '').replace('%', ''));
+                
+                // 2. Store the suffix
+                const suffix = originalText.includes('%') ? '%' : (originalText.includes('+') ? '+' : '');
+                
                 let current = 0;
-                const increment = target / 50;
+                
+                // 3. Calculate increment for a smooth ~1.5 second animation
+                const duration = 1500; // 1.5 seconds
+                const stepTime = 25; // Animate faster (40fps)
+                const totalSteps = duration / stepTime;
+                const increment = target / totalSteps;
+                
                 const timer = setInterval(() => {
                     current += increment;
+                    
                     if (current >= target) {
-                        current = target;
+                        // Animation finished
                         clearInterval(timer);
+                        // Set the text back to the original to preserve "10,000+" format
+                        stat.textContent = originalText;
+                    } else {
+                        // During animation, show formatted number + suffix
+                        // .toLocaleString() adds the commas back (e.g., "9,500")
+                        stat.textContent = Math.floor(current).toLocaleString() + suffix;
                     }
-                    stat.textContent = Math.floor(current) + (stat.textContent.includes('%') ? '%' : '+');
-                }, 50);
+                }, stepTime); 
             });
         });
     </script>
+
 </body>
 </html>
