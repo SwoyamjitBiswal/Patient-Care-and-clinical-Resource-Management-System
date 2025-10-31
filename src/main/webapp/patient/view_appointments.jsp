@@ -13,15 +13,31 @@
     AppointmentDao appointmentDao = new AppointmentDao();
     List<Appointment> appointments = appointmentDao.getAppointmentsByPatientId(currentPatient.getId());
 
-    // --- START OF FIX ---
-    // This logic now correctly counts 'null' as 'Pending'
     long pendingCount = appointments.stream().filter(a -> a.getStatus() == null || "Pending".equals(a.getStatus())).count();
     long confirmedCount = appointments.stream().filter(a -> "Confirmed".equals(a.getStatus())).count();
     long completedCount = appointments.stream().filter(a -> "Completed".equals(a.getStatus())).count();
     long cancelledCount = appointments.stream().filter(a -> "Cancelled".equals(a.getStatus())).count();
-    // --- END OF FIX ---
 
     String currentUserRole = "patient";
+    
+    // --- ROBUST MESSAGE HANDLING ---
+    String successMsg = (String) session.getAttribute("successMsg");
+    String errorMsg = (String) session.getAttribute("errorMsg");
+
+    if (successMsg != null) {
+        session.removeAttribute("successMsg");
+    }
+    if (errorMsg != null) {
+        session.removeAttribute("errorMsg");
+    }
+
+    if (request.getAttribute("successMsg") != null) {
+        successMsg = (String) request.getAttribute("successMsg");
+    }
+    if (request.getAttribute("errorMsg") != null) {
+        errorMsg = (String) request.getAttribute("errorMsg");
+    }
+    // --- END MESSAGE HANDLING ---
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -54,6 +70,7 @@
             --border-radius: 12px;
             --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
         
         * {
@@ -447,6 +464,16 @@
             color: white;
         }
         
+        .btn-outline-secondary {
+            background-color: transparent;
+            border: 1px solid var(--secondary);
+            color: var(--secondary);
+        }
+        .btn-outline-secondary:hover {
+            background-color: var(--secondary);
+            color: white;
+        }
+        
         /* Alert Styles */
         .alert {
             border-radius: var(--border-radius);
@@ -642,6 +669,64 @@
             gap: 0.5rem;
         }
         
+        /* --- Card-Style Delete Modal --- */
+        .delete-modal-icon {
+            width: 70px; 
+            height: 70px;
+            background-color: var(--danger-light);
+            color: var(--danger);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+        }
+
+        #deleteConfirmModal .modal-content {
+            border-radius: var(--border-radius);
+            border: none;
+            box-shadow: var(--shadow-xl);
+            max-width: 400px;
+            margin: auto; /* Ensures horizontal centering */
+            overflow: hidden;
+        }
+        
+        #deleteConfirmModal .modal-header {
+            border-bottom: none;
+            padding: 1.5rem 1.5rem 0.5rem;
+        }
+        
+        #deleteConfirmModal .modal-header .btn-close {
+            position: absolute; 
+            top: 1rem;
+            right: 1rem;
+        }
+
+        #deleteConfirmModal .modal-body {
+            padding: 0.5rem 2rem 1.5rem;
+            text-align: center;
+        }
+        
+        #deleteConfirmModal .modal-body h4 {
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 0.75rem;
+        }
+        
+        #deleteConfirmModal .modal-footer {
+            border-top: none;
+            padding: 0 2rem 2rem;
+            justify-content: center;
+            gap: 1rem;
+            display:flex;
+        }
+        
+        #deleteConfirmModal .modal-footer .btn {
+            flex-grow: 1;
+            padding: 0.6rem 1rem;
+            font-weight: 500;
+        }
+        
         /* Utility Classes */
         .d-flex { display: flex !important; }
         .d-grid { display: grid !important; }
@@ -653,8 +738,15 @@
         .mb-2 { margin-bottom: 0.5rem !important; }
         .mb-3 { margin-bottom: 1rem !important; }
         .mb-4 { margin-bottom: 1.5rem !important; }
+        .mt-1 { margin-top: 0.25rem !important; }
         .mt-4 { margin-top: 1.5rem !important; }
+        .me-1 { margin-right: 0.25rem !important; }
         .me-2 { margin-right: 0.5rem !important; }
+        .d-inline { display: inline !important; }
+        .d-block { display: block !important; }
+        .text-muted { color: #6b7280 !important; }
+        .text-warning { color: #f59e0b !important; }
+        .text-danger { color: var(--danger) !important; }
         .row { display: flex; flex-wrap: wrap; margin-right: -15px; margin-left: -15px; }
         .col-lg-8, .col-md-6, .col-12, .col-md-3 { position: relative; width: 100%; padding-right: 15px; padding-left: 15px; }
         @media (min-width: 768px) {
@@ -690,6 +782,69 @@
                 gap: 1rem;
             }
         }
+        
+        /* Modal Utilities */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1055;
+            display: none;
+            width: 100%;
+            height: 100%;
+            overflow-x: hidden;
+            overflow-y: auto;
+            outline: 0;
+        }
+        .modal.fade {
+            transition: opacity .15s linear;
+        }
+        .modal-dialog {
+            position: relative;
+            width: auto;
+            margin: .5rem;
+            pointer-events: none;
+        }
+        .modal.fade .modal-dialog {
+            transition: transform .3s ease-out;
+            transform: translate(0,-50px);
+        }
+        .modal.show .modal-dialog {
+            transform: none;
+        }
+        .modal-dialog-centered {
+            display: flex;
+            align-items: center;
+            min-height: calc(100% - 1rem);
+        }
+        .modal-content {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            pointer-events: auto;
+            background-color: #fff;
+            background-clip: padding-box;
+            border: 1px solid rgba(0,0,0,.2);
+            border-radius: .3rem;
+            outline: 0;
+        }
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1050;
+            width: 100vw;
+            height: 100vh;
+            background-color: #000;
+        }
+        .modal-backdrop.fade {
+            opacity: 0;
+        }
+        .modal-backdrop.show {
+            opacity: .5;
+        }
+        .fa-3x { font-size: 3em; }
     </style>
 </head>
 <body>
@@ -698,6 +853,7 @@
     </button>
     
     <div class="sidebar" id="sidebar">
+        <%-- ... [Sidebar code remains unchanged] ... --%>
         <div class="sidebar-sticky">
             <div class="user-section">
                 <div class="user-avatar">
@@ -781,33 +937,33 @@
             </a>
         </div>
 
+        <%-- --- START: UPDATED MESSAGE DISPLAY BLOCK --- --%>
         <%
-            String successMsg = (String) request.getAttribute("successMsg");
-            String errorMsg = (String) request.getAttribute("errorMsg");
-            
-            if (successMsg != null) {
+            if (successMsg != null && !successMsg.isEmpty()) {
         %>
             <div class="alert alert-success alert-dismissible fade show" role="alert">
                 <div class="d-flex align-items-center">
                     <i class="fas fa-check-circle me-3 fs-5"></i>
                     <div class="flex-grow-1"><%= successMsg %></div>
                 </div>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         <%
             }
-            if (errorMsg != null) {
+            if (errorMsg != null && !errorMsg.isEmpty()) {
         %>
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
                 <div class="d-flex align-items-center">
                     <i class="fas fa-exclamation-triangle me-3 fs-5"></i>
                     <div class="flex-grow-1"><%= errorMsg %></div>
                 </div>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         <%
             }
         %>
+        <%-- --- END: UPDATED MESSAGE DISPLAY BLOCK --- --%>
+
 
         <div class="card">
             <div class="card-header">
@@ -852,14 +1008,12 @@
                                         String statusBadgeClass = "";
                                         String statusIcon = "";
                                         
-                                        // --- START OF FIX (Line 852) ---
                                         String status = appointment.getStatus();
                                         if (status == null) {
-                                            status = "Pending"; // Treat null as Pending
+                                            status = "Pending";
                                         }
                                         
                                         switch (status) {
-                                        // --- END OF FIX ---
                                             case "Pending":
                                                 statusBadgeClass = "badge-pending";
                                                 statusIcon = "fas fa-clock";
@@ -876,7 +1030,7 @@
                                                 statusBadgeClass = "badge-cancelled";
                                                 statusIcon = "fas fa-times-circle";
                                                 break;
-                                            default: // This will now never be called unless status is something else
+                                            default:
                                                 statusBadgeClass = "badge-light";
                                                 statusIcon = "fas fa-question-circle";
                                                 break;
@@ -934,7 +1088,6 @@
                                                     View
                                                 </a>
                                                 <%
-                                                    // This 'if' block will now work correctly
                                                     if ("Pending".equals(status)) {
                                                 %>
                                                     <a href="${pageContext.request.contextPath}/patient/appointment?action=edit&id=<%= appointment.getId() %>"
@@ -942,13 +1095,20 @@
                                                         <i class="fas fa-edit"></i>
                                                         Edit
                                                     </a>
-                                                    <form action="${pageContext.request.contextPath}/patient/appointment?action=cancel" method="post" class="d-inline">
+                                                    
+                                                    <%-- --- START: UPDATED CANCEL BUTTON --- --%>
+                                                    <form action="${pageContext.request.contextPath}/patient/appointment?action=cancel" method="post" class="d-inline" id="deleteForm<%= appointment.getId() %>">
                                                         <input type="hidden" name="id" value="<%= appointment.getId() %>">
-                                                        <button type="submit" class="btn btn-outline-danger btn-sm cancel-appointment">
+                                                        <button type="button" class="btn btn-outline-danger btn-sm cancel-appointment-btn"
+                                                                data-bs-toggle="modal" 
+                                                                data-bs-target="#deleteConfirmModal"
+                                                                data-form-id="deleteForm<%= appointment.getId() %>"
+                                                                data-item-name="Appointment #<%= appointment.getId() %>">
                                                             <i class="fas fa-times"></i>
                                                             Cancel
                                                         </button>
                                                     </form>
+                                                    <%-- --- END: UPDATED CANCEL BUTTON --- --%>
                                                 <%
                                                     }
                                                 %>
@@ -963,6 +1123,7 @@
                     </div>
 
                     <div class="stats-grid">
+                        <%-- ... [Stats cards remain unchanged] ... --%>
                         <div class="stats-card stats-pending">
                             <div class="stats-number"><%= pendingCount %></div>
                             <div class="stats-label">Pending</div>
@@ -976,7 +1137,7 @@
                             <div class="stats-label">Completed</div>
                         </div>
                         <div class="stats-card stats-cancelled">
-                            <div classs="stats-number"><%= cancelledCount %></div>
+                            <div class="stats-number"><%= cancelledCount %></div>
                             <div class="stats-label">Cancelled</div>
                         </div>
                     </div>
@@ -986,6 +1147,32 @@
             </div>
         </div>
     </main>
+
+    <%-- --- START: NEW CARD-STYLE DELETE MODAL --- --%>
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 400px; margin: auto;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="delete-modal-icon">
+                        <i class="fas fa-exclamation-triangle fa-3x"></i>
+                    </div>
+                    <h4>Confirm Cancellation</h4>
+                    <p class="mb-0">Are you sure you want to cancel <strong id="itemNameToDelete" class="text-danger">this appointment</strong>?</p>
+                    <p class="text-muted small mt-2">This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Keep It</button>
+                    <button type="button" class="btn btn-danger" id="modalConfirmDeleteButton">
+                        <i class="fas fa-times me-1"></i>Yes, Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <%-- --- END: NEW CARD-STYLE DELETE MODAL --- --%>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -1020,18 +1207,65 @@
         });
     </script>
     
+    <%-- --- START: UPDATED JAVASCRIPT BLOCK --- --%>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Confirm cancellation
-            const cancelButtons = document.querySelectorAll('.cancel-appointment');
-            cancelButtons.forEach(button => {
-                button.addEventListener('click', function(e) {
-                    if (!confirm('Are you sure you want to cancel this appointment? This action cannot be undone.')) {
-                        e.preventDefault();
+            
+            // --- Auto-hide success alerts (Task 1) ---
+            const successAlerts = document.querySelectorAll('.alert-success.alert-dismissible');
+            successAlerts.forEach(function(alert) {
+                setTimeout(function() {
+                    if (typeof bootstrap !== 'undefined' && bootstrap.Alert) {
+                        const bsAlert = bootstrap.Alert.getInstance(alert) || new bootstrap.Alert(alert);
+                        if (bsAlert) {
+                            bsAlert.close();
+                        }
+                    } else {
+                        // Fallback
+                        alert.style.transition = 'opacity 0.5s ease';
+                        alert.style.opacity = '0';
+                        setTimeout(() => alert.style.display = 'none', 500);
                     }
-                });
+                }, 5000); // 5 seconds
             });
+
+            // --- New Card-Style Modal Logic (Task 2) ---
+            const deleteConfirmModal = document.getElementById('deleteConfirmModal');
+            let formToSubmit = null; 
+
+            if (deleteConfirmModal) {
+                // 1. Listen for the modal's "show" event (triggered by data-bs-toggle)
+                deleteConfirmModal.addEventListener('show.bs.modal', function (event) {
+                    // Get the button that triggered the modal
+                    const button = event.relatedTarget;
+                    
+                    // Get the form ID and item name from the button's data attributes
+                    const formId = button.getAttribute('data-form-id');
+                    const itemName = button.getAttribute('data-item-name');
+                    
+                    // Store the form to be submitted
+                    formToSubmit = document.getElementById(formId);
+                    
+                    // Update the modal's text
+                    const modalItemNameElement = document.getElementById('itemNameToDelete');
+                    modalItemNameElement.textContent = itemName ? `${itemName}` : 'this item';
+                });
+
+                // 2. Add click listener to the modal's *actual* confirm button
+                const modalConfirmDeleteButton = document.getElementById('modalConfirmDeleteButton');
+                if (modalConfirmDeleteButton) {
+                    modalConfirmDeleteButton.addEventListener('click', function () {
+                        // When clicked, submit the stored form
+                        if (formToSubmit) {
+                            formToSubmit.submit(); 
+                        }
+                    });
+                }
+            }
+            
+            // --- Old confirm() script removed ---
         });
     </script>
+    <%-- --- END: UPDATED JAVASCRIPT BLOCK --- --%>
 </body>
 </html>
