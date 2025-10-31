@@ -1,16 +1,13 @@
 <%@ page import="com.entity.Admin" %>
 <%@ page import="java.text.SimpleDateFormat" %>
 <%
-    // Renamed 'admin' to 'currentAdmin'
     Admin currentAdmin = (Admin) session.getAttribute("adminObj");
     if (currentAdmin == null) {
-        response.sendRedirect(request.getContextPath() + "/admin/login.jsp"); // Added context path
+        response.sendRedirect(request.getContextPath() + "/admin/login.jsp");
         return;
     }
-    // Variable needed for the sidebar's logout button
     String currentUserRole = "admin";
     
-    // Create date formatter for displaying timestamps
     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     String memberSince = "N/A";
     if (currentAdmin.getCreatedAt() != null) {
@@ -24,13 +21,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Patient Care System - Admin Profile</title>
 
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
+    
     <style>
-        /* --- Base Layout & Color Definitions --- */
         :root {
             --primary: #4361ee;
             --primary-light: #eef2ff;
@@ -41,64 +37,80 @@
             --warning: #ffc107;
             --danger: #dc3545;
             --danger-light: #fbebee;
+            --light: #f8f9fa;
+            --lighter: #fdfdfe;
             --dark: #1a1d29;
             --darker: #12141c;
-            --light: #f8f9fa;
+            --gray-100: #f8f9fa;
+            --gray-200: #e9ecef;
+            --gray-300: #dee2e6;
+            --gray-400: #ced4da;
+            --gray-500: #adb5bd;
+            --gray-600: #6c757d;
+            --gray-700: #495057;
+            --gray-800: #343a40;
+            --gray-900: #212529;
             --sidebar-width: 280px;
             --transition: all 0.3s ease;
-            --border-color: #e2e8f0;
-            --border-radius: 8px;
+            --border-radius: 12px;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --shadow-lg: 0 10px 30px rgba(0,0,0,0.12);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
-
+        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
+        
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--light);
-            color: var(--dark);
+            background-color: var(--gray-100);
+            color: var(--gray-800);
             line-height: 1.6;
             display: flex;
-            height: 100vh;
-            overflow: hidden;
+            min-height: 100vh;
+            overflow-x: hidden;
         }
-
-        /* --- Light Mode Sidebar --- */
+        
+        /* Sidebar Styles */
         .sidebar {
             width: var(--sidebar-width);
             flex-shrink: 0;
-            background-color: #ffffff;
-            color: var(--dark);
+            background: linear-gradient(135deg, #ffffff, #f8fafc);
+            color: var(--gray-700);
             height: 100vh;
+            position: fixed;
             left: 0;
             top: 0;
             overflow-y: auto;
             transition: var(--transition);
-            border-right: 1px solid var(--border-color);
+            box-shadow: var(--shadow-md);
             display: flex;
             flex-direction: column;
+            border-right: 1px solid var(--gray-200);
+            z-index: 1000;
         }
-
+        
         .sidebar-sticky {
             display: flex;
             flex-direction: column;
             min-height: 100%;
             padding: 1.5rem 0;
         }
-
+        
         .user-section {
             text-align: center;
             padding: 1.5rem 1.5rem 2rem;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--gray-200);
             margin-bottom: 1rem;
         }
-
+        
         .user-avatar {
-            width: 70px;
-            height: 70px;
+            width: 80px;
+            height: 80px;
             border-radius: 50%;
             background: linear-gradient(135deg, var(--primary), #5a6ff0);
             display: flex;
@@ -106,131 +118,163 @@
             justify-content: center;
             margin: 0 auto 1rem;
             border: 3px solid var(--primary-light);
-        }
-
-        .user-avatar i {
-            font-size: 2rem;
-            color: white;
-        }
-
-        .user-info h6 {
-            font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: 0.25rem;
-            color: var(--dark);
+            box-shadow: var(--shadow-sm);
         }
         
-        .user-info small {
-            font-size: 0.8rem;
-            color: var(--secondary);
+        .user-avatar i {
+            font-size: 2.5rem;
+            color: white;
         }
-
+        
+        .user-info h6 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            color: var(--gray-800);
+        }
+        
+        .user-info .badge {
+            background: var(--primary-light);
+            color: var(--primary);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            border: 1px solid rgba(67, 97, 238, 0.2);
+        }
+        
         .nav {
             display: flex;
             flex-direction: column;
-            gap: 0.3rem;
+            gap: 0.5rem;
             padding: 0 1rem;
             list-style: none;
         }
-
+        
         .nav-main {
             flex-grow: 1;
         }
-
+        
         .nav-bottom {
             margin-top: auto;
             padding-top: 1rem;
-            border-top: 1px solid var(--border-color);
+            border-top: 1px solid var(--gray-200);
             margin: 1.5rem 0 0 0;
         }
 
         .nav-item {
-            margin-bottom: 0.15rem;
+            margin-bottom: 0.25rem;
         }
-
+        
         .nav-link {
             display: flex;
             align-items: center;
-            gap: 0.8rem;
-            padding: 0.75rem 1rem;
-            color: #4a5568;
+            gap: 1rem;
+            padding: 0.875rem 1.25rem;
+            color: var(--gray-600);
             text-decoration: none;
             border-radius: var(--border-radius);
             transition: var(--transition);
             font-weight: 500;
-            font-size: 0.9rem;
             position: relative;
             overflow: hidden;
         }
-
+        
         .nav-link::before {
             content: '';
             position: absolute;
             left: 0;
-            top: 50%;
-            height: 80%;
-            width: 3px;
+            top: 0;
+            height: 100%;
+            width: 4px;
             background: var(--primary);
-            transform: translateY(-50%) scaleY(0);
+            transform: scaleY(0);
             transition: var(--transition);
             border-radius: 0 4px 4px 0;
         }
-
+        
         .nav-link:hover {
             color: var(--primary);
             background: var(--primary-light);
+            transform: translateX(5px);
         }
-
+        
         .nav-link:hover::before {
-             transform: translateY(-50%) scaleY(1);
+            transform: scaleY(1);
         }
-
+        
         .nav-link.active {
             color: var(--primary);
             background: var(--primary-light);
-            font-weight: 600;
         }
-
+        
         .nav-link.active::before {
-            transform: translateY(-50%) scaleY(1);
+            transform: scaleY(1);
         }
-
+        
         .nav-link i {
-            width: 18px;
+            width: 20px;
             text-align: center;
-            font-size: 1rem;
+            font-size: 1.1rem;
             transition: var(--transition);
-            color: #9ca3af;
         }
-
-        .nav-link:hover i,
+        
         .nav-link.active i {
             color: var(--primary);
         }
-
+        
+        .nav-link:hover i {
+            transform: scale(1.1);
+        }
+        
         .nav-link-logout {
             color: var(--danger);
         }
-
-        .nav-link-logout i {
-            color: var(--danger);
-        }
-
+        
         .nav-link-logout:hover {
             background: var(--danger-light);
             color: var(--danger);
+            transform: translateX(5px);
         }
-
+        
         .nav-link-logout:hover i {
             color: var(--danger);
         }
-
+        
+        .nav-link-logout i {
+            color: var(--danger);
+        }
+        
         .main-content {
             flex-grow: 1;
+            margin-left: var(--sidebar-width);
+            padding: 0;
             min-height: 100vh;
             overflow-y: auto;
+            background: var(--gray-100);
+            transition: var(--transition);
         }
 
+        .mobile-menu-toggle {
+            display: none;
+            position: fixed;
+            top: 1.5rem;
+            left: 1.5rem;
+            z-index: 999;
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 10px;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            cursor: pointer;
+            box-shadow: var(--shadow-lg);
+        }
+        
+        /* Mobile responsiveness */
         @media (max-width: 768px) {
             body {
                 display: block;
@@ -239,139 +283,189 @@
             }
             .sidebar {
                 transform: translateX(-100%);
-                z-index: 1000;
-                position: fixed;
             }
+            
             .sidebar.mobile-open {
                 transform: translateX(0);
             }
+            
             .main-content {
                 margin-left: 0;
+                padding: 1.5rem;
                 padding-top: 6rem;
             }
+            
             .mobile-menu-toggle {
-                position: fixed;
-                top: 1.5rem;
-                left: 1.5rem;
-                z-index: 999;
-                background: var(--primary);
-                color: white;
-                border: none;
-                width: 45px;
-                height: 45px;
-                border-radius: 10px;
                 display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 1.25rem;
-                cursor: pointer;
-                box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
             }
         }
-
+        
+        /* Scrollbar styling */
         .sidebar::-webkit-scrollbar,
         .main-content::-webkit-scrollbar {
             width: 6px;
         }
-
+        
         .sidebar::-webkit-scrollbar-track,
         .main-content::-webkit-scrollbar-track {
             background: rgba(0, 0, 0, 0.05);
         }
-
+        
         .sidebar::-webkit-scrollbar-thumb,
         .main-content::-webkit-scrollbar-thumb {
-            background: rgba(0, 0, 0, 0.2);
+            background: var(--gray-400);
             border-radius: 3px;
         }
-
+        
         .sidebar::-webkit-scrollbar-thumb:hover,
         .main-content::-webkit-scrollbar-thumb:hover {
-            background: rgba(0, 0, 0, 0.3);
+            background: var(--gray-500);
         }
-
+        
+        /* Dashboard Specific Styles */
         .main-content-dashboard {
             padding: 2.5rem;
         }
+        
         @media (max-width: 768px) {
             .main-content-dashboard {
                 padding: 1.5rem;
                 padding-top: 6rem;
             }
         }
-
-        .shadow-custom {
-             box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05) !important;
-             border: 1px solid var(--border-color);
-             border-radius: var(--border-radius);
-             background-color: #ffffff;
-        }
-        .card-header {
-            background-color: #ffffff;
-            border-bottom: 1px solid var(--border-color);
-            padding: 1rem 1.5rem;
-        }
-        .card-header h5 {
-            font-weight: 600;
-            font-size: 1.1rem;
-            color: var(--dark);
-        }
-        .card-body {
-            padding: 1.5rem;
+        
+        .profile-header {
+            background: linear-gradient(135deg, var(--primary), #5a6ff0);
+            color: white;
+            padding: 2.5rem 2.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-md);
         }
         
-        .card.bg-primary, .card.bg-success, .card.bg-info, .card.bg-secondary {
+        .card-modern {
             border: none;
-            color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-md);
+            transition: var(--transition);
+            overflow: hidden;
+            background: white;
         }
-        .card.bg-primary { background-color: var(--primary) !important; }
-        .card.bg-success { background-color: var(--success) !important; }
-        .card.bg-info    { background-color: var(--info) !important; }
-        .card.bg-secondary{ background-color: var(--secondary) !important; }
-
-        .btn {
+        
+        .card-modern:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-3px);
+        }
+        
+        .card-header-modern {
+            background: white;
+            border-bottom: 1px solid var(--gray-200);
+            padding: 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            color: var(--gray-800);
+        }
+        
+        .card-header-modern i {
+            color: var(--primary);
+            margin-right: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .form-label {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--gray-700);
+        }
+        
+        .input-group {
+            position: relative;
+            display: flex;
+            align-items: stretch;
+            width: 100%;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid var(--gray-300);
+            transition: var(--transition);
+            background: white;
+        }
+        
+        .input-group:focus-within {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+        }
+        
+        .input-group-text {
+            background: var(--gray-100);
+            border: none;
+            color: var(--gray-600);
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 50px;
+            flex-shrink: 0;
+            border-right: 1px solid var(--gray-300);
+        }
+        
+        .form-control, .form-select {
+            border: none;
+            padding: 0.75rem 1rem;
+            transition: var(--transition);
+            font-size: 0.95rem;
+            width: 100%;
+            flex: 1;
+            background: transparent;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            box-shadow: none;
+            outline: none;
+            background: transparent;
+        }
+        
+        .btn-modern {
+            border-radius: 10px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            transition: var(--transition);
+            font-size: 0.95rem;
+            text-decoration: none;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
-            padding: 0.6rem 1.2rem;
-            font-weight: 500;
-            border-radius: var(--border-radius);
-            text-decoration: none;
-            transition: var(--transition);
             border: none;
             cursor: pointer;
-            font-size: 0.9rem;
         }
-        .btn-lg {
-             padding: 0.8rem 1.8rem;
-             font-size: 1rem;
-        }
-        .btn-sm {
-            padding: 0.375rem 0.75rem;
-            font-size: 0.8rem;
-        }
-        .btn-primary {
-            background-color: var(--primary);
-            border-color: var(--primary);
+        
+        .btn-primary-modern {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: white;
         }
-        .btn-primary:hover {
-            background-color: var(--primary-dark);
-            border-color: var(--primary-dark);
+        
+        .btn-primary-modern:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(79, 70, 229, 0.2);
+            box-shadow: 0 7px 14px rgba(67, 97, 238, 0.25);
         }
+        
         .btn-outline-secondary {
-            color: #6c757d;
-            border-color: #6c757d;
+            border: 2px solid var(--gray-400);
+            color: var(--gray-600);
+            background: transparent;
+            font-weight: 500;
+            transition: all 0.3s ease;
         }
+        
         .btn-outline-secondary:hover {
-            color: #fff;
-            background-color: #6c757d;
-            border-color: #6c757d;
+            background: var(--gray-600);
+            color: white;
+            border-color: var(--gray-600);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(108, 117, 125, 0.2);
         }
-
+        
+        /* Badge styling */
         .badge {
             display: inline-block;
             padding: 0.4em 0.75em;
@@ -383,66 +477,54 @@
             vertical-align: baseline;
             border-radius: 50px;
         }
-        .bg-success { background-color: var(--success) !important; color: white; }
-
-        .form-label {
+        
+        .badge-success { color: #065f46; background-color: #d1fae5; }
+        
+        /* Back link styling */
+        .back-link {
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
             font-weight: 500;
-            margin-bottom: 0.5rem;
-            color: #4a5568;
-            font-size: 0.9rem;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
         
-        /* Updated Input Group Styles */
-        .input-group {
-            position: relative;
-            display: flex;
-            flex-wrap: wrap;
-            align-items: stretch;
-            width: 100%;
-            border-radius: 10px;
-            overflow: hidden;
-            border: 1px solid var(--border-color);
-            transition: var(--transition);
+        .back-link:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-1px);
+            text-decoration: none;
         }
-
-        .input-group:focus-within {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
-        }
-
-        .input-group-text {
-            background: var(--primary-light);
-            border: none;
-            color: var(--primary);
-            padding: 0.75rem 1rem;
+        
+        /* Icon Box */
+        .icon-box {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            min-width: 50px;
+            font-size: 2rem;
             flex-shrink: 0;
         }
-
-        .form-control, .form-select {
-            border-radius: 0;
-            padding: 0.75rem 1rem;
+        
+        .icon-primary { background-color: var(--primary-light); color: var(--primary); }
+        
+        /* Alert Styles */
+        .alert-modern {
+            border-radius: 10px;
             border: none;
-            transition: var(--transition);
-            font-size: 0.95rem;
-            width: 100%;
-            flex: 1;
-        }
-
-        .form-control:focus, .form-select:focus {
-            box-shadow: none;
-            border: none;
-            outline: none;
-        }
-
-        /* Password input group with toggle button */
-        .password-input-group {
-            position: relative;
+            box-shadow: var(--shadow-sm);
+            padding: 1rem 1.5rem;
         }
         
+        /* Password toggle */
         .password-toggle {
             position: absolute;
             right: 10px;
@@ -453,6 +535,11 @@
             color: var(--secondary);
             cursor: pointer;
             z-index: 5;
+            width: 45px;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
         .password-toggle:hover {
@@ -461,10 +548,10 @@
         
         /* Password strength meter */
         .password-strength-meter {
-            height: 5px;
+            height: 6px;
             margin-top: 8px;
             border-radius: 3px;
-            background-color: #e9ecef;
+            background-color: var(--gray-200);
             overflow: hidden;
         }
         
@@ -476,35 +563,35 @@
         }
         
         .strength-weak {
-            background-color: #dc3545;
+            background-color: var(--danger);
             width: 25%;
         }
         
         .strength-fair {
-            background-color: #fd7e14;
+            background-color: var(--warning);
             width: 50%;
         }
         
         .strength-good {
-            background-color: #ffc107;
+            background-color: #17a2b8;
             width: 75%;
         }
         
         .strength-strong {
-            background-color: #28a745;
+            background-color: var(--success);
             width: 100%;
         }
         
         /* Password requirements list */
         .password-requirements {
             margin-top: 10px;
-            font-size: 0.8rem;
         }
         
         .requirement-item {
             display: flex;
             align-items: center;
-            margin-bottom: 5px;
+            margin-bottom: 6px;
+            font-size: 0.85rem;
         }
         
         .requirement-icon {
@@ -514,86 +601,80 @@
         }
         
         .requirement-met {
-            color: #28a745;
+            color: var(--success);
         }
         
         .requirement-unmet {
-            color: #6c757d;
+            color: var(--gray-500);
         }
-
-        .container-fluid { width: 100%; padding-right: 15px; padding-left: 15px; margin-right: auto; margin-left: auto; }
-        .row { display: flex; flex-wrap: wrap; margin-right: -15px; margin-left: -15px; }
-        .col-lg-6 { position: relative; width: 100%; padding-right: 15px; padding-left: 15px; }
-        .justify-content-center { justify-content: center !important; }
-        @media (min-width: 992px) {
-            .col-lg-6 { flex: 0 0 50%; max-width: 50%; }
+        
+        /* Profile info styles */
+        .profile-info-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--gray-200);
         }
-        .mb-0 { margin-bottom: 0 !important; }
-        .mb-1 { margin-bottom: 0.25rem !important; }
-        .mb-2 { margin-bottom: 0.5rem !important; }
-        .mb-3 { margin-bottom: 1rem !important; }
-        .mb-4 { margin-bottom: 1.5rem !important; }
-        .mt-1 { margin-top: 0.25rem !important; }
-        .mt-4 { margin-top: 1.5rem !important; }
-        .mx-auto { margin-left: auto !important; margin-right: auto !important; }
-        .py-3 { padding-top: 1rem !important; padding-bottom: 1rem !important; }
-        .py-4 { padding-top: 1.5rem !important; padding-bottom: 1.5rem !important; }
-        .d-flex { display: flex !important; }
-        .d-grid { display: grid !important; }
-        .justify-content-between { justify-content: space-between !important; }
-        .align-items-center { align-items: center !important; }
-        .border-bottom { border-bottom: 1px solid var(--border-color) !important; }
-        .h2 { font-size: 1.75rem; font-weight: 600; }
-        .h4 { font-size: 1.5rem; font-weight: 600; }
-        .h5 { font-size: 1.1rem; }
-        .me-2 { margin-right: 0.5rem !important; }
-        .me-1 { margin-right: 0.25rem !important; }
-        .text-primary { color: var(--primary) !important; }
-        .text-success { color: var(--success) !important; }
-        .card { position: relative; display: flex; flex-direction: column; min-width: 0; word-wrap: break-word; background-color: #fff; background-clip: border-box; border: 1px solid var(--border-color); border-radius: 0.5rem; }
-        .card-body { flex: 1 1 auto; padding: 1.5rem; }
-        .text-center { text-align: center !important; }
-        .text-muted { color: #6c757d !important; }
-        .list-group { display: flex; flex-direction: column; padding-left: 0; margin-bottom: 0; border-radius: .25rem; }
-        .list-group-flush { border-radius: 0; }
-        .list-group-flush>.list-group-item { border-width: 0 0 1px; }
-        .list-group-flush>.list-group-item:last-child { border-bottom-width: 0; }
-        .list-group-item { position: relative; display: block; padding: .75rem 0; color: #212529; text-decoration: none; background-color: #fff; border: 1px solid rgba(0,0,0,.125); border-width: 0 0 1px; }
-        .list-unstyled { padding-left: 0; list-style: none; }
-
-        .alert { position: relative; padding: 1rem 1rem; margin-bottom: 1rem; border: 1px solid transparent; border-radius: var(--border-radius); }
-        .alert-success { color: #0f5132; background-color: #d1e7dd; border-color: #badbcc; }
-        .alert-danger { color: #842029; background-color: #f8d7da; border-color: #f5c2c7; }
-        .alert-dismissible { padding-right: 3rem; }
-        .btn-close { box-sizing: content-box; width: 1em; height: 1em; padding: 0.25em 0.25em; color: #000; background: transparent; border: 0; border-radius: 0.25rem; opacity: 0.5; }
-        .alert-dismissible .btn-close { position: absolute; top: 0; right: 0; z-index: 2; padding: 1.25rem 1rem; }
-        .fade { transition: opacity 0.15s linear; }
-        .show { opacity: 1; }
-        .was-validated .form-control:invalid, .form-control.is-invalid { border-color: #dc3545; }
-        .was-validated .form-control:invalid:focus, .form-control.is-invalid:focus { border-color: #dc3545; box-shadow: 0 0 0 0.25rem rgba(220,53,69,.25); }
-        .invalid-feedback { display: none; width: 100%; margin-top: 0.25rem; font-size: .875em; color: #dc3545; }
-        .was-validated .form-control:invalid ~ .invalid-feedback,
-        .was-validated .form-select:invalid ~ .invalid-feedback { display: block; }
-        .form-text { margin-top: 0.25rem; font-size: 0.875em; color: #6c757d; }
-
-        .icon-box {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
+        
+        .profile-info-item:last-child {
+            border-bottom: none;
+        }
+        
+        .info-label {
+            font-weight: 500;
+            color: var(--gray-700);
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            flex-shrink: 0;
+            gap: 0.5rem;
         }
-        .icon-primary { background-color: var(--primary-light); color: var(--primary); }
+        
+        .info-value {
+            color: var(--gray-600);
+            text-align: right;
+        }
+        
+        /* Security tips */
+        .security-tips {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .security-tips li {
+            padding: 0.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .security-tips i {
+            color: var(--success);
+            font-size: 0.9rem;
+        }
+        
+        /* Header improvements */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        @media (max-width: 768px) {
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
     </style>
 </head>
 <body>
-    <button class="mobile-menu-toggle" id="mobileMenuToggle" style="display: none;">
+    <button class="mobile-menu-toggle" id="mobileMenuToggle">
         <i class="fas fa-bars"></i>
     </button>
-
+    
     <div class="sidebar" id="sidebar">
         <div class="sidebar-sticky">
             <div class="user-section">
@@ -603,7 +684,7 @@
                 <div class="user-info">
                    <% if (currentAdmin != null) { %>
                     <h6><%= currentAdmin.getFullName() %></h6>
-                    <small>Administrator</small>
+                    <span class="badge">Administrator</span>
                    <% } %>
                 </div>
             </div>
@@ -611,36 +692,31 @@
             <div class="nav-main">
                 <ul class="nav">
                     <li class="nav-item">
-                        <a class="nav-link <%= request.getRequestURI().contains("dashboard.jsp") ? "active" : "" %>"
-                           href="${pageContext.request.contextPath}/admin/dashboard.jsp">
+                        <a class="nav-link" href="${pageContext.request.contextPath}/admin/dashboard.jsp">
                             <i class="fas fa-tachometer-alt"></i>
                             <span>Dashboard</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link <%= request.getRequestURI().contains("profile") ? "active" : "" %>"
-                           href="${pageContext.request.contextPath}/admin/profile.jsp">
+                        <a class="nav-link active" href="${pageContext.request.contextPath}/admin/profile.jsp">
                             <i class="fas fa-user"></i>
                             <span>My Profile</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link <%= request.getRequestURI().contains("management") && request.getQueryString() != null && request.getQueryString().contains("type=doctors") ? "active" : "" %>"
-                           href="${pageContext.request.contextPath}/admin/management?action=view&type=doctors">
+                        <a class="nav-link" href="${pageContext.request.contextPath}/admin/management?action=view&type=doctors">
                             <i class="fas fa-user-md"></i>
                             <span>Manage Doctors</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link <%= request.getRequestURI().contains("management") && request.getQueryString() != null && request.getQueryString().contains("type=patients") ? "active" : "" %>"
-                           href="${pageContext.request.contextPath}/admin/management?action=view&type=patients">
+                        <a class="nav-link" href="${pageContext.request.contextPath}/admin/management?action=view&type=patients">
                             <i class="fas fa-users"></i>
                             <span>Manage Patients</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link <%= request.getRequestURI().contains("management") && request.getQueryString() != null && request.getQueryString().contains("type=appointments") ? "active" : "" %>"
-                           href="${pageContext.request.contextPath}/admin/management?action=view&type=appointments">
+                        <a class="nav-link" href="${pageContext.request.contextPath}/admin/management?action=view&type=appointments">
                             <i class="fas fa-calendar-alt"></i>
                             <span>Manage Appointments</span>
                         </a>
@@ -657,7 +733,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link nav-link-logout" href="${pageContext.request.contextPath}/<%= currentUserRole %>/auth?action=logout">
+                        <a class="nav-link nav-link-logout" href="${pageContext.request.contextPath}/admin/auth?action=logout">
                             <i class="fas fa-sign-out-alt"></i>
                             <span>Logout</span>
                         </a>
@@ -666,242 +742,245 @@
             </div>
         </div>
     </div>
-
-    <main class="main-content main-content-dashboard">
-        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-3 mb-4 border-bottom">
-            <h1 class="h2">
-                <i class="fas fa-user-shield me-2 text-primary"></i>
-                Admin Profile
-            </h1>
-            <div class="btn-toolbar mb-2 mb-md-0">
-                <a href="${pageContext.request.contextPath}/admin/dashboard.jsp" class="btn btn-sm btn-outline-secondary">
-                    <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
-                </a>
+    
+    <main class="main-content">
+        <div class="profile-header">
+            <div class="page-header">
+                <div>
+                    <h1 class="h2 mb-2">
+                        <i class="fas fa-user-shield me-2"></i>
+                        Admin Profile
+                    </h1>
+                    <p class="mb-0 opacity-75">Manage your account settings and security preferences</p>
+                </div>
+                <div>
+                    <a href="${pageContext.request.contextPath}/admin/dashboard.jsp" class="back-link">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                    </a>
+                </div>
             </div>
         </div>
 
-        <%
-            String successMsg = (String) request.getAttribute("successMsg");
-            String errorMsg = (String) request.getAttribute("errorMsg");
+        <div class="main-content-dashboard">
+            <%-- Success/Error Messages --%>
+            <%
+                String successMsg = (String) request.getAttribute("successMsg");
+                String errorMsg = (String) request.getAttribute("errorMsg");
 
-            if (successMsg != null) {
-        %>
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <i class="fas fa-check-circle me-2"></i><%= successMsg %>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        <%
-            }
-            if (errorMsg != null) {
-        %>
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="fas fa-exclamation-triangle me-2"></i><%= errorMsg %>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        <%
-            }
-        %>
-
-        <div class="row">
-            <div class="col-lg-6 mb-4 mb-lg-0">
-                <div class="card shadow-custom h-100">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="fas fa-user-shield me-2"></i>Admin Information
-                        </h5>
+                if (successMsg != null) {
+            %>
+                <div class="alert alert-success alert-modern alert-dismissible fade show mb-4" role="alert">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-check-circle me-3 fs-5"></i>
+                        <div class="flex-grow-1"><%= successMsg %></div>
                     </div>
-                    <div class="card-body d-flex flex-column">
-                        <div class="text-center mb-4">
-                            <div class="icon-box icon-primary mx-auto mb-3">
-                                <i class="fas fa-user-shield fa-2x"></i>
-                            </div>
-                            <h4><%= currentAdmin.getFullName() %></h4>
-                            <p class="text-muted mb-0">System Administrator</p>
-                        </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            <%
+                }
+                if (errorMsg != null) {
+            %>
+                <div class="alert alert-danger alert-modern alert-dismissible fade show mb-4" role="alert">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-exclamation-triangle me-3 fs-5"></i>
+                        <div class="flex-grow-1"><%= errorMsg %></div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            <%
+                }
+            %>
 
-                        <div class="list-group list-group-flush mt-auto">
-                            <div class="list-group-item d-flex justify-content-between align-items-center px-0">
-                                <span>
-                                    <i class="fas fa-envelope text-primary me-2"></i>Email Address
-                                </span>
-                                <span class="text-muted"><%= currentAdmin.getEmail() %></span>
+            <div class="row">
+                <div class="col-lg-6 mb-4">
+                    <div class="card card-modern h-100">
+                        <div class="card-header-modern">
+                            <i class="fas fa-user-shield"></i>
+                            <span>Admin Information</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="text-center mb-4">
+                                <div class="icon-box icon-primary mx-auto mb-3">
+                                    <i class="fas fa-user-shield"></i>
+                                </div>
+                                <h4 class="mb-2"><%= currentAdmin.getFullName() %></h4>
+                                <p class="text-muted mb-0">System Administrator</p>
                             </div>
-                            <div class="list-group-item d-flex justify-content-between align-items-center px-0">
-                                <span>
-                                    <i class="fas fa-calendar text-primary me-2"></i>Member Since
-                                </span>
-                                <span class="text-muted"><%= memberSince %></span>
-                            </div>
-                            <div class="list-group-item d-flex justify-content-between align-items-center px-0">
-                                <span>
-                                    <i class="fas fa-key text-primary me-2"></i>Last Password Change
-                                </span>
-                                <span class="text-muted">Never</span>
-                            </div>
-                            <div class="list-group-item d-flex justify-content-between align-items-center px-0">
-                                <span>
-                                    <i class="fas fa-shield-alt text-primary me-2"></i>Account Status
-                                </span>
-                                <span class="badge bg-success">Active</span>
+
+                            <div class="profile-info-list">
+                                <div class="profile-info-item">
+                                    <span class="info-label">
+                                        <i class="fas fa-envelope text-primary"></i>
+                                        Email Address
+                                    </span>
+                                    <span class="info-value"><%= currentAdmin.getEmail() %></span>
+                                </div>
+                                <div class="profile-info-item">
+                                    <span class="info-label">
+                                        <i class="fas fa-calendar text-primary"></i>
+                                        Member Since
+                                    </span>
+                                    <span class="info-value"><%= memberSince %></span>
+                                </div>
+                                <div class="profile-info-item">
+                                    <span class="info-label">
+                                        <i class="fas fa-key text-primary"></i>
+                                        Last Password Change
+                                    </span>
+                                    <span class="info-value">Never</span>
+                                </div>
+                                <div class="profile-info-item">
+                                    <span class="info-label">
+                                        <i class="fas fa-shield-alt text-primary"></i>
+                                        Account Status
+                                    </span>
+                                    <span class="badge badge-success">Active</span>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="col-lg-6">
-                <div class="card shadow-custom mb-4">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="fas fa-key me-2"></i>Change Password
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <form action="${pageContext.request.contextPath}/admin/profile?action=changePassword" method="post" class="needs-validation" novalidate id="passwordForm">
-                            <div class="mb-3">
-                                <label for="currentPassword" class="form-label">
-                                    <i class="fas fa-lock me-1 text-primary"></i>Current Password
-                                </label>
-                                <div class="input-group">
-                                    <span class="input-group-text">
-                                        <i class="fas fa-lock"></i>
-                                    </span>
-                                    <input type="password" class="form-control" id="currentPassword" name="currentPassword" required>
-                                    <button type="button" class="password-toggle" id="toggleCurrentPassword">
-                                        <i class="fas fa-eye"></i>
+                <div class="col-lg-6">
+                    <div class="card card-modern mb-4">
+                        <div class="card-header-modern">
+                            <i class="fas fa-key"></i>
+                            <span>Change Password</span>
+                        </div>
+                        <div class="card-body">
+                            <form action="${pageContext.request.contextPath}/admin/profile?action=changePassword" method="post" class="needs-validation" novalidate id="passwordForm">
+                                <div class="mb-3">
+                                    <label for="currentPassword" class="form-label">Current Password</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-lock"></i>
+                                        </span>
+                                        <input type="password" class="form-control" id="currentPassword" name="currentPassword" required>
+                                        <button type="button" class="password-toggle" id="toggleCurrentPassword">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                    <div class="invalid-feedback">Please enter your current password.</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="newPassword" class="form-label">New Password</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-key"></i>
+                                        </span>
+                                        <input type="password" class="form-control" id="newPassword" name="newPassword" required minlength="8">
+                                        <button type="button" class="password-toggle" id="toggleNewPassword">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                    <div class="password-strength-meter mt-2">
+                                        <div class="password-strength-meter-fill" id="passwordStrength"></div>
+                                    </div>
+                                    <div class="password-requirements mt-3">
+                                        <small class="text-muted d-block mb-2">Password must contain:</small>
+                                        <div class="requirement-item">
+                                            <span class="requirement-icon" id="lengthIcon"><i class="fas fa-times"></i></span>
+                                            <span id="lengthText">At least 8 characters</span>
+                                        </div>
+                                        <div class="requirement-item">
+                                            <span class="requirement-icon" id="uppercaseIcon"><i class="fas fa-times"></i></span>
+                                            <span id="uppercaseText">One uppercase letter</span>
+                                        </div>
+                                        <div class="requirement-item">
+                                            <span class="requirement-icon" id="lowercaseIcon"><i class="fas fa-times"></i></span>
+                                            <span id="lowercaseText">One lowercase letter</span>
+                                        </div>
+                                        <div class="requirement-item">
+                                            <span class="requirement-icon" id="numberIcon"><i class="fas fa-times"></i></span>
+                                            <span id="numberText">One number</span>
+                                        </div>
+                                        <div class="requirement-item">
+                                            <span class="requirement-icon" id="specialIcon"><i class="fas fa-times"></i></span>
+                                            <span id="specialText">One special character</span>
+                                        </div>
+                                    </div>
+                                    <div class="invalid-feedback">Password does not meet requirements.</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="confirmPassword" class="form-label">Confirm New Password</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-key"></i>
+                                        </span>
+                                        <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required minlength="8">
+                                        <button type="button" class="password-toggle" id="toggleConfirmPassword">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                    <div class="invalid-feedback" id="confirmPasswordFeedback">Passwords do not match.</div>
+                                </div>
+
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary-modern" id="submitButton" disabled>
+                                        <i class="fas fa-save me-2"></i>Update Password
                                     </button>
                                 </div>
-                                <div class="invalid-feedback">Please enter your current password.</div>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="newPassword" class="form-label">
-                                    <i class="fas fa-key me-1 text-primary"></i>New Password
-                                </label>
-                                <div class="input-group">
-                                    <span class="input-group-text">
-                                        <i class="fas fa-key"></i>
-                                    </span>
-                                    <input type="password" class="form-control" id="newPassword" name="newPassword" required minlength="8">
-                                    <button type="button" class="password-toggle" id="toggleNewPassword">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                </div>
-                                <div class="password-strength-meter mt-2">
-                                    <div class="password-strength-meter-fill" id="passwordStrength"></div>
-                                </div>
-                                <div class="password-requirements">
-                                    <p class="form-text mb-2">Password must contain:</p>
-                                    <div class="requirement-item">
-                                        <span class="requirement-icon" id="lengthIcon"><i class="fas fa-times"></i></span>
-                                        <span id="lengthText">At least 8 characters</span>
-                                    </div>
-                                    <div class="requirement-item">
-                                        <span class="requirement-icon" id="uppercaseIcon"><i class="fas fa-times"></i></span>
-                                        <span id="uppercaseText">One uppercase letter</span>
-                                    </div>
-                                    <div class="requirement-item">
-                                        <span class="requirement-icon" id="lowercaseIcon"><i class="fas fa-times"></i></span>
-                                        <span id="lowercaseText">One lowercase letter</span>
-                                    </div>
-                                    <div class="requirement-item">
-                                        <span class="requirement-icon" id="numberIcon"><i class="fas fa-times"></i></span>
-                                        <span id="numberText">One number</span>
-                                    </div>
-                                    <div class="requirement-item">
-                                        <span class="requirement-icon" id="specialIcon"><i class="fas fa-times"></i></span>
-                                        <span id="specialText">One special character</span>
-                                    </div>
-                                </div>
-                                <div class="invalid-feedback">Password does not meet requirements.</div>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="confirmPassword" class="form-label">
-                                    <i class="fas fa-key me-1 text-primary"></i>Confirm New Password
-                                </label>
-                                <div class="input-group">
-                                    <span class="input-group-text">
-                                        <i class="fas fa-key"></i>
-                                    </span>
-                                    <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required minlength="8">
-                                    <button type="button" class="password-toggle" id="toggleConfirmPassword">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                </div>
-                                <div class="invalid-feedback" id="confirmPasswordFeedback">Passwords do not match.</div>
-                            </div>
-
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-primary" id="submitButton" disabled>
-                                    <i class="fas fa-save me-2"></i>Update Password
-                                </button>
-                            </div>
-                        </form>
+                            </form>
+                        </div>
                     </div>
-                </div>
 
-                <div class="card shadow-custom">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="fas fa-shield-alt me-2"></i>Security Tips
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <ul class="list-unstyled mb-0">
-                            <li class="mb-2 d-flex align-items-center">
-                                <i class="fas fa-check text-success me-2"></i>
-                                <span>Use a strong, unique password</span>
-                            </li>
-                            <li class="mb-2 d-flex align-items-center">
-                                <i class="fas fa-check text-success me-2"></i>
-                                <span>Change password regularly</span>
-                            </li>
-                            <li class="mb-2 d-flex align-items-center">
-                                <i class="fas fa-check text-success me-2"></i>
-                                <span>Never share your credentials</span>
-                            </li>
-                            <li class="mb-0 d-flex align-items-center">
-                                <i class="fas fa-check text-success me-2"></i>
-                                <span>Log out when not using the system</span>
-                            </li>
-                        </ul>
+                    <div class="card card-modern">
+                        <div class="card-header-modern">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Security Tips</span>
+                        </div>
+                        <div class="card-body">
+                            <ul class="security-tips">
+                                <li>
+                                    <i class="fas fa-check"></i>
+                                    <span>Use a strong, unique password</span>
+                                </li>
+                                <li>
+                                    <i class="fas fa-check"></i>
+                                    <span>Change password regularly</span>
+                                </li>
+                                <li>
+                                    <i class="fas fa-check"></i>
+                                    <span>Never share your credentials</span>
+                                </li>
+                                <li>
+                                    <i class="fas fa-check"></i>
+                                    <span>Log out when not using the system</span>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </main>
 
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Mobile menu toggle
             const mobileMenuToggle = document.getElementById('mobileMenuToggle');
             const sidebar = document.getElementById('sidebar');
-
-            function checkScreenSize() {
-                if (window.innerWidth <= 768) {
-                    mobileMenuToggle.style.display = 'flex';
-                    sidebar.classList.remove('mobile-open');
-                } else {
-                    mobileMenuToggle.style.display = 'none';
-                    sidebar.classList.add('mobile-open');
-                    sidebar.classList.remove('mobile-open');
-                }
+            
+            if (mobileMenuToggle && sidebar) {
+                mobileMenuToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('mobile-open');
+                });
             }
 
-            checkScreenSize();
-            window.addEventListener('resize', checkScreenSize);
-
-            mobileMenuToggle.addEventListener('click', function() {
-                sidebar.classList.toggle('mobile-open');
-            });
-
-            const navLinks = document.querySelectorAll('.nav-link');
-            navLinks.forEach(link => {
-                link.addEventListener('click', function() {
-                    if (window.innerWidth <= 768) {
-                        sidebar.classList.remove('mobile-open');
+            // Auto-hide alerts
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                setTimeout(() => {
+                    if (alert && alert.classList.contains('show')) {
+                        const bsAlert = new bootstrap.Alert(alert);
+                        bsAlert.close();
                     }
-                });
+                }, 5000);
             });
             
             // Password toggle functionality
