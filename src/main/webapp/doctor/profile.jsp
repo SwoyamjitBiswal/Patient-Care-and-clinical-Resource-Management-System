@@ -924,7 +924,7 @@
                                             <label for="visitingCharge" class="form-label">Visiting Charge</label>
                                             <div class="input-group">
                                                 <span class="input-group-text">
-                                                    <i class="fas fa-dollar-sign text-primary"></i>
+                                                    <i class="fa-solid fa-inr"></i>
                                                 </span>
                                                 <input type="number" class="form-control" id="visitingCharge" name="visitingCharge"
                                                        value="<%= currentDoctor.getVisitingCharge() %>" required min="0" step="0.01">
