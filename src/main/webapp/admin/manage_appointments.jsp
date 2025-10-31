@@ -1,14 +1,17 @@
 <%@ page import="com.entity.Admin" %>
 <%@ page import="com.dao.AppointmentDao" %>
+<%@ page import="com.dao.DoctorDao" %>
+<%@ page import="com.dao.PatientDao" %>
 <%@ page import="com.entity.Appointment" %>
+<%@ page import="com.entity.Doctor" %>
+<%@ page import="com.entity.Patient" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Set" %>
 <%@ page import="java.util.HashSet" %>
 <%@ page import="java.text.SimpleDateFormat" %>
+<%@ page import="java.util.Map" %>
+<%@ page import="java.util.LinkedHashMap" %>
 <%
-    // All action logic (update, delete) has been moved to the AdminManagementServlet.
-    // This scriptlet now only prepares data for display.
-
     // Admin authentication
     Admin currentAdmin = (Admin) session.getAttribute("adminObj");
     if (currentAdmin == null) {
@@ -16,14 +19,37 @@
         return;
     }
 
-    // Get messages from servlet (if any)
-    String successMsg = (String) request.getAttribute("successMsg");
-    String errorMsg = (String) request.getAttribute("errorMsg");
+    // Message handling
+    String successMsg = (String) session.getAttribute("successMsg");
+    String errorMsg = (String) session.getAttribute("errorMsg");
 
+    if (successMsg != null) {
+        session.removeAttribute("successMsg");
+    }
+    if (errorMsg != null) {
+        session.removeAttribute("errorMsg");
+    }
+
+    if (request.getAttribute("successMsg") != null) {
+        successMsg = (String) request.getAttribute("successMsg");
+    }
+    if (request.getAttribute("errorMsg") != null) {
+        errorMsg = (String) request.getAttribute("errorMsg");
+    }
+
+    // Data initialization
     AppointmentDao appointmentDao = new AppointmentDao();
+    DoctorDao doctorDao = new DoctorDao();
+    PatientDao patientDao = new PatientDao();
+
+    int[] appointmentStats = appointmentDao.getAppointmentStats();
+    int totalDoctors = doctorDao.getTotalDoctors();
+    int totalPatients = patientDao.getTotalPatients();
+    
     List<Appointment> appointments = appointmentDao.getAllAppointments();
 
-    long pendingCount = appointments.stream().filter(a -> "Pending".equals(a.getStatus())).count();
+    // Calculate counts
+    long pendingCount = appointments.stream().filter(a -> a.getStatus() == null || "Pending".equals(a.getStatus())).count();
     long confirmedCount = appointments.stream().filter(a -> "Confirmed".equals(a.getStatus())).count();
     long completedCount = appointments.stream().filter(a -> "Completed".equals(a.getStatus())).count();
     long cancelledCount = appointments.stream().filter(a -> "Cancelled".equals(a.getStatus())).count();
@@ -31,7 +57,6 @@
 
     String currentUserRole = "admin";
     
-    // Create date formatter for displaying timestamps
     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm");
 %>
@@ -42,12 +67,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Patient Care System - Manage Appointments</title>
 
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
+    
     <style>
-        /* --- Light Mode Variables & Base Styles --- */
         :root {
             --primary: #4361ee;
             --primary-light: #eef2ff;
@@ -77,6 +102,7 @@
             --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
             --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
             --shadow-lg: 0 10px 30px rgba(0,0,0,0.12);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
         
         * {
@@ -91,17 +117,18 @@
             color: var(--gray-800);
             line-height: 1.6;
             display: flex;
-            height: 100vh;
-            overflow: hidden;
+            min-height: 100vh;
+            overflow-x: hidden;
         }
         
-        /* --- Light Mode Sidebar --- */
+        /* Sidebar Styles */
         .sidebar {
             width: var(--sidebar-width);
             flex-shrink: 0;
             background: linear-gradient(135deg, #ffffff, #f8fafc);
             color: var(--gray-700);
             height: 100vh;
+            position: fixed;
             left: 0;
             top: 0;
             overflow-y: auto;
@@ -110,6 +137,7 @@
             display: flex;
             flex-direction: column;
             border-right: 1px solid var(--gray-200);
+            z-index: 1000;
         }
         
         .sidebar-sticky {
@@ -265,15 +293,16 @@
         
         .main-content {
             flex-grow: 1;
+            margin-left: var(--sidebar-width);
             padding: 0;
             min-height: 100vh;
             overflow-y: auto;
             background: var(--gray-100);
+            transition: var(--transition);
         }
 
-        /* --- REFINEMENT: CSS-driven mobile toggle --- */
         .mobile-menu-toggle {
-            display: none; /* Hidden by default on desktop */
+            display: none;
             position: fixed;
             top: 1.5rem;
             left: 1.5rem;
@@ -300,8 +329,6 @@
             }
             .sidebar {
                 transform: translateX(-100%);
-                z-index: 1000;
-                position: fixed;
             }
             
             .sidebar.mobile-open {
@@ -315,7 +342,7 @@
             }
             
             .mobile-menu-toggle {
-                display: flex; /* Show toggle button on mobile */
+                display: flex;
             }
         }
         
@@ -330,23 +357,18 @@
             background: rgba(0, 0, 0, 0.05);
         }
         
-        .sidebar::-webkit-scrollbar-thumb {
-            background: var(--gray-400);
-            border-radius: 3px;
-        }
+        .sidebar::-webkit-scrollbar-thumb,
         .main-content::-webkit-scrollbar-thumb {
             background: var(--gray-400);
             border-radius: 3px;
         }
         
-        .sidebar::-webkit-scrollbar-thumb:hover {
-            background: var(--gray-500);
-        }
+        .sidebar::-webkit-scrollbar-thumb:hover,
         .main-content::-webkit-scrollbar-thumb:hover {
             background: var(--gray-500);
         }
         
-        /* --- Dashboard Specific Styles --- */
+        /* Dashboard Specific Styles */
         .main-content-dashboard {
             padding: 2.5rem;
         }
@@ -402,7 +424,6 @@
             color: var(--gray-700);
         }
         
-        /* UPDATED: Enhanced Input Group Styles */
         .input-group {
             position: relative;
             display: flex;
@@ -449,7 +470,6 @@
             background: transparent;
         }
         
-        /* Textarea specific styling */
         .input-group-text.align-items-start {
             align-items: flex-start;
             padding-top: 0.875rem;
@@ -480,7 +500,6 @@
             box-shadow: 0 7px 14px rgba(67, 97, 238, 0.25);
         }
         
-        /* UPDATED: Enhanced Button Variants */
         .btn-outline-primary {
             border: 2px solid var(--primary);
             color: var(--primary);
@@ -523,7 +542,6 @@
             box-shadow: 0 4px 12px rgba(220, 53, 69, 0.2);
         }
         
-        /* UPDATED: Enhanced Clear Filter Button */
         .btn-outline-secondary {
             border: 2px solid var(--gray-400);
             color: var(--gray-600);
@@ -603,11 +621,26 @@
             text-align: center;
             transition: var(--transition);
             height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
         
         .stats-card:hover {
             transform: translateY(-5px);
             box-shadow: var(--shadow-lg);
+        }
+        
+        .stats-card h4 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+        
+        .stats-card small {
+            font-size: 0.9rem;
+            font-weight: 500;
+            opacity: 0.9;
         }
         
         .stats-card-primary { background: linear-gradient(135deg, var(--primary), #5a6ff0); }
@@ -652,7 +685,7 @@
         }
         
         .icon-primary { background-color: var(--primary-light); color: var(--primary); }
-        .icon-success { background-color: #d1fae5; color: #065f46); }
+        .icon-success { background-color: #d1fae5; color: #065f46; }
         
         /* Alert Styles */
         .alert-modern {
@@ -662,91 +695,22 @@
             padding: 1rem 1.5rem;
         }
         
-        /* --- REFINEMENT: Alert auto-fade animation --- */
-        @keyframes fadeOut {
-            from { opacity: 1; }
-            to { opacity: 0; transform: translateY(-10px); visibility: hidden; }
-        }
-        
-        .alert-fading {
-            animation: fadeOut 0.5s ease-out forwards;
-            animation-delay: 4.5s; /* Start fading after 4.5s */
-        }
-        
         /* Modal Styles */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1050;
-            padding: 1rem;
-            opacity: 0;
-            visibility: hidden;
-            transition: var(--transition);
-        }
-        
-        .modal-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
-        
         .modal-content {
-            background: white;
             border-radius: var(--border-radius);
+            border: none;
             box-shadow: var(--shadow-lg);
-            width: 100%;
-            max-width: 800px;
-            max-height: 90vh;
-            overflow-y: auto;
-            transform: translateY(-20px);
-            transition: var(--transition);
-        }
-        
-        .modal-overlay.active .modal-content {
-            transform: translateY(0);
         }
         
         .modal-header {
             padding: 1.5rem;
             border-bottom: 1px solid var(--gray-200);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
         }
         
         .modal-title {
             font-size: 1.5rem;
             font-weight: 600;
             color: var(--gray-800);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .modal-close {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            color: var(--gray-500);
-            cursor: pointer;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: var(--transition);
-        }
-        
-        .modal-close:hover {
-            background: var(--gray-100);
-            color: var(--danger);
         }
         
         .modal-body {
@@ -756,12 +720,67 @@
         .modal-footer {
             padding: 1.5rem;
             border-top: 1px solid var(--gray-200);
-            display: flex;
-            justify-content: flex-end;
             gap: 0.75rem;
         }
         
-        /* UPDATED: Compact Appointment Details Layout */
+        /* Delete Modal */
+        .delete-modal-icon {
+            width: 70px; 
+            height: 70px;
+            background-color: var(--danger-light);
+            color: var(--danger);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+        }
+
+        #deleteConfirmModal .modal-content {
+            border-radius: var(--border-radius);
+            border: none;
+            box-shadow: var(--shadow-xl);
+            max-width: 400px;
+            margin: auto;
+            overflow: hidden;
+        }
+        
+        #deleteConfirmModal .modal-header {
+            border-bottom: none;
+            padding: 1.5rem 1.5rem 0.5rem;
+        }
+        
+        #deleteConfirmModal .modal-header .btn-close {
+            position: absolute; 
+            top: 1rem;
+            right: 1rem;
+        }
+
+        #deleteConfirmModal .modal-body {
+            padding: 0.5rem 2rem 1.5rem;
+            text-align: center;
+        }
+        
+        #deleteConfirmModal .modal-body h4 {
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 0.75rem;
+        }
+
+        #deleteConfirmModal .modal-footer {
+            border-top: none;
+            padding: 0 2rem 2rem;
+            justify-content: center;
+            gap: 1rem;
+        }
+        
+        #deleteConfirmModal .modal-footer .btn {
+            flex-grow: 1;
+            padding: 0.6rem 1rem;
+            font-weight: 500;
+        }
+        
+        /* Appointment Details Layout */
         .appointment-details {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -769,7 +788,7 @@
         }
         
         .detail-section {
-            background: var(--gray-50);
+            background: var(--gray-100);
             border-radius: var(--border-radius);
             padding: 1.25rem;
         }
@@ -835,59 +854,36 @@
             margin-bottom: 1.25rem;
         }
         
-        /* Bootstrap utilities */
-        .row { display: flex; flex-wrap: wrap; margin-right: -15px; margin-left: -15px; }
-        .col-lg-8, .col-lg-4, .col-md-6, .col-md-4, .col-md-3, .col-md-2, .col-12 { position: relative; width: 100%; padding-right: 15px; padding-left: 15px; }
-        @media (min-width: 768px) {
-            .col-md-6 { flex: 0 0 50%; max-width: 50%; }
-            .col-md-4 { flex: 0 0 33.333333%; max-width: 33.333333%; }
-            .col-md-3 { flex: 0 0 25%; max-width: 25%; }
-            .col-md-2 { flex: 0 0 16.666667%; max-width: 16.666667%; }
+        /* Action buttons container */
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
         }
-        @media (min-width: 992px) {
-            .col-lg-8 { flex: 0 0 66.666667%; max-width: 66.666667%; }
-            .col-lg-4 { flex: 0 0 33.333333%; max-width: 33.333333%; }
+        
+        /* Status indicator */
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
         }
-        .col-12 { flex: 0 0 100%; max-width: 100%; }
-        .mb-0 { margin-bottom: 0 !important; }
-        .mb-1 { margin-bottom: 0.25rem !important; }
-        .mb-2 { margin-bottom: 0.5rem !important; }
-        .mb-3 { margin-bottom: 1rem !important; }
-        .mb-4 { margin-bottom: 1.5rem !important; }
-        .mt-1 { margin-top: 0.25rem !important; }
-        .mt-2 { margin-top: 0.5rem !important; }
-        .mt-4 { margin-top: 1.5rem !important; }
-        .p-4 { padding: 1.5rem !important; }
-        .py-3 { padding-top: 1rem !important; padding-bottom: 1rem !important; }
-        .py-4 { padding-top: 1.5rem !important; padding-bottom: 1.5rem !important; }
-        .d-flex { display: flex !important; }
-        .d-grid { display: grid !important; }
-        .d-block { display: block !important; }
-        .d-inline { display: inline !important; }
-        .justify-content-between { justify-content: space-between !important; }
-        .align-items-center { align-items: center !important; }
-        .align-items-end { align-items: flex-end !important; }
-        .text-center { text-align: center !important; }
-        .text-muted { color: var(--gray-600) !important; }
-        .text-primary { color: var(--primary) !important; }
-        .h2 { font-size: 2rem; font-weight: 600; }
-        .h4 { font-size: 1.5rem; }
-        .h5 { font-size: 1.1rem; }
-        .fs-5 { font-size: 1.25rem !important; }
-        .fw-bold { font-weight: 700 !important; }
-        .fw-medium { font-weight: 500 !important; }
-        .me-1 { margin-right: 0.25rem !important; }
-        .me-2 { margin-right: 0.5rem !important; }
-        .me-3 { margin-right: 1rem !important; }
-        .gap-1 { gap: 0.25rem !important; }
-        .gap-2 { gap: 0.5rem !important; }
-        .g-3 { gap: 1rem !important; }
-        .w-100 { width: 100% !important; }
-        /* REFINEMENT: Add btn-sm utility for action buttons */
-        .btn-sm {
-            padding: 0.25rem 0.5rem;
-            font-size: 0.875rem;
-            border-radius: 0.2rem;
+        
+        /* Loading state */
+        .loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+        
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+        }
+        
+        .empty-state i {
+            font-size: 4rem;
+            color: var(--gray-400);
+            margin-bottom: 1rem;
         }
     </style>
 </head>
@@ -900,56 +896,51 @@
         <div class="sidebar-sticky">
             <div class="user-section">
                 <div class="user-avatar">
-                    <i class="fas fa-user-shield"></i>
+                   <i class="fas fa-user-shield"></i>
                 </div>
                 <div class="user-info">
-                    <% if (currentAdmin != null) { %>
+                   <% if (currentAdmin != null) { %>
                     <h6><%= currentAdmin.getFullName() %></h6>
                     <span class="badge">Administrator</span>
-                    <% } %>
+                   <% } %>
                 </div>
             </div>
-            
+
             <div class="nav-main">
                 <ul class="nav">
                     <li class="nav-item">
-                        <a class="nav-link <%= request.getRequestURI().contains("dashboard.jsp") ? "active" : "" %>" 
-                           href="${pageContext.request.contextPath}/admin/dashboard.jsp">
+                        <a class="nav-link" href="${pageContext.request.contextPath}/admin/dashboard.jsp">
                             <i class="fas fa-tachometer-alt"></i>
                             <span>Dashboard</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link <%= request.getRequestURI().contains("profile.jsp") ? "active" : "" %>" 
-                           href="${pageContext.request.contextPath}/admin/profile.jsp">
+                        <a class="nav-link" href="${pageContext.request.contextPath}/admin/profile.jsp">
                             <i class="fas fa-user"></i>
                             <span>My Profile</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link <%= request.getRequestURI().contains("management") && request.getQueryString() != null && request.getQueryString().contains("type=doctors") ? "active" : "" %>" 
-                           href="${pageContext.request.contextPath}/admin/management?action=view&type=doctors">
+                        <a class="nav-link" href="${pageContext.request.contextPath}/admin/management?action=view&type=doctors">
                             <i class="fas fa-user-md"></i>
                             <span>Manage Doctors</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link <%= request.getRequestURI().contains("management") && request.getQueryString() != null && request.getQueryString().contains("type=patients") ? "active" : "" %>" 
-                           href="${pageContext.request.contextPath}/admin/management?action=view&type=patients">
+                        <a class="nav-link" href="${pageContext.request.contextPath}/admin/management?action=view&type=patients">
                             <i class="fas fa-users"></i>
                             <span>Manage Patients</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link <%= request.getRequestURI().contains("management") && request.getQueryString() != null && request.getQueryString().contains("type=appointments") ? "active" : "" %>" 
-                           href="${pageContext.request.contextPath}/admin/management?action=view&type=appointments">
+                        <a class="nav-link active" href="${pageContext.request.contextPath}/admin/management?action=view&type=appointments">
                             <i class="fas fa-calendar-alt"></i>
                             <span>Manage Appointments</span>
                         </a>
                     </li>
                 </ul>
             </div>
-            
+
             <div class="nav-bottom">
                  <ul class="nav">
                      <li class="nav-item">
@@ -988,32 +979,61 @@
         </div>
 
         <div class="main-content-dashboard">
+            <%-- Success/Error Messages --%>
             <%
-                // Display success/error messages
-                if (successMsg != null) {
+                if (successMsg != null && !successMsg.isEmpty()) {
             %>
-                <div class="alert alert-success alert-modern alert-autofade alert-dismissible fade show mb-4" role="alert">
+                <div class="alert alert-success alert-modern alert-dismissible fade show mb-4" role="alert">
                     <div class="d-flex align-items-center">
                         <i class="fas fa-check-circle me-3 fs-5"></i>
                         <div class="flex-grow-1"><%= successMsg %></div>
                     </div>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             <%
                 }
-                if (errorMsg != null) {
+                if (errorMsg != null && !errorMsg.isEmpty()) {
             %>
-                <div class="alert alert-danger alert-modern alert-autofade alert-dismissible fade show mb-4" role="alert">
+                <div class="alert alert-danger alert-modern alert-dismissible fade show mb-4" role="alert">
                     <div class="d-flex align-items-center">
                         <i class="fas fa-exclamation-triangle me-3 fs-5"></i>
                         <div class="flex-grow-1"><%= errorMsg %></div>
                     </div>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             <%
                 }
             %>
 
+            <%-- Stats Cards --%>
+            <div class="row mb-4">
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="stats-card stats-card-primary">
+                        <h4 class="mb-1"><%= appointments.size() %></h4>
+                        <small>Total Appointments</small>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="stats-card stats-card-warning">
+                        <h4 class="mb-1"><%= pendingCount %></h4>
+                        <small>Pending</small>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="stats-card stats-card-success">
+                        <h4 class="mb-1"><%= confirmedCount %></h4>
+                        <small>Confirmed</small>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="stats-card stats-card-info">
+                        <h4 class="mb-1"><%= completedCount %></h4>
+                        <small>Completed</small>
+                    </div>
+                </div>
+            </div>
+
+            <%-- Filter Card --%>
             <div class="card card-modern mb-4">
                 <div class="card-header-modern">
                     <i class="fas fa-filter"></i>
@@ -1076,18 +1096,26 @@
                 </div>
             </div>
 
+            <%-- Appointments Table --%>
             <div class="card card-modern">
-                <div class="card-header-modern">
-                    <i class="fas fa-list"></i>
-                    <span>All Appointments</span>
-                    <span class="badge bg-primary ms-2"><%= appointments.size() %> Total</span>
+                <div class="card-header-modern d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="fas fa-list"></i>
+                        <span>All Appointments</span>
+                        <span class="badge bg-primary ms-2"><%= appointments.size() %> Total</span>
+                    </div>
+                    <div>
+                        <button class="btn btn-sm btn-outline-primary" id="exportBtn">
+                            <i class="fas fa-download me-1"></i>Export
+                        </button>
+                    </div>
                 </div>
                 <div class="card-body p-4">
                     <%
                         if (appointments.isEmpty()) {
                     %>
-                        <div class="text-center py-5">
-                            <i class="fas fa-calendar-times fa-4x text-muted mb-3"></i>
+                        <div class="empty-state">
+                            <i class="fas fa-calendar-times"></i>
                             <h4 class="text-muted">No Appointments Found</h4>
                             <p class="text-muted">No appointments match the current filters or none exist.</p>
                         </div>
@@ -1112,10 +1140,6 @@
                                         for (Appointment appointment : appointments) {
                                             String statusBadgeClass = "";
                                             String statusIcon = "";
-
-                                            // ======================================================
-                                            // START OF FIX (v2): Default null/invalid status to "Pending"
-                                            // ======================================================
                                             String status = appointment.getStatus();
 
                                             if ("Confirmed".equals(status)) {
@@ -1128,16 +1152,11 @@
                                                 statusBadgeClass = "badge-cancelled";
                                                 statusIcon = "fas fa-times-circle";
                                             } else {
-                                                // Default to "Pending" if status is null, "Pending", or anything else
-                                                status = "Pending"; // This is the key change
+                                                status = "Pending";
                                                 statusBadgeClass = "badge-pending";
                                                 statusIcon = "fas fa-clock";
                                             }
-                                            // ======================================================
-                                            // END OF FIX
-                                            // ======================================================
                                             
-                                            // Format createdAt timestamp
                                             String createdAtFormatted = "";
                                             if (appointment.getCreatedAt() != null) {
                                                 createdAtFormatted = dateFormat.format(appointment.getCreatedAt());
@@ -1186,66 +1205,45 @@
                                                 </span>
                                             </td>
                                             <td>
-                                                <span class="badge <%= statusBadgeClass %>">
-                                                    <i class="<%= statusIcon %> me-1"></i>
-                                                    <%= status %>
-                                                </span>
-                                                <%
-                                                    if (appointment.isFollowUpRequired()) {
-                                                %>
-                                                    <br>
-                                                    <small class="text-warning d-block mt-1">
-                                                        <i class="fas fa-redo me-1"></i>Follow-up
-                                                    </small>
-                                                <%
-                                                    }
-                                                %>
+                                                <div class="status-indicator">
+                                                    <span class="badge <%= statusBadgeClass %>">
+                                                        <i class="<%= statusIcon %> me-1"></i>
+                                                        <%= status %>
+                                                    </span>
+                                                    <%
+                                                        if (appointment.isFollowUpRequired()) {
+                                                    %>
+                                                        <i class="fas fa-redo text-warning" title="Follow-up Required"></i>
+                                                    <%
+                                                        }
+                                                    %>
+                                                </div>
                                             </td>
                                             <td>
-                                                <div class="d-flex gap-1" role="group">
-                                                    <button type="button" class="btn btn-sm btn-outline-primary view-appointment"
-                                                            data-bs-toggle="tooltip" title="View Details"
-                                                            data-appt-id="<%= appointment.getId() %>"
-                                                            data-patient-name="<%= appointment.getPatientName() %>"
-                                                            data-patient-id="<%= appointment.getPatientId() %>"
-                                                            data-doctor-name="<%= appointment.getDoctorName() %>"
-                                                            data-doctor-specialization="<%= appointment.getDoctorSpecialization() %>"
-                                                            data-date="<%= appointment.getAppointmentDate() %>"
-                                                            data-time="<%= appointment.getAppointmentTime() %>"
-                                                            data-type="<%= appointment.getAppointmentType() %>"
-                                                            data-reason="<%= appointment.getReason() %>"
-                                                            data-notes="<%= appointment.getNotes() != null ? appointment.getNotes() : "" %>"
-                                                            data-status="<%= status %>"
-                                                            data-created-at="<%= createdAtFormatted %>"
-                                                            data-follow-up="<%= appointment.isFollowUpRequired() %>">
+                                                <div class="action-buttons">
+                                                    <button type="button" class="btn btn-sm btn-outline-primary view-btn"
+                                                            data-bs-toggle="modal" 
+                                                            data-bs-target="#viewModal<%= appointment.getId() %>"
+                                                            title="View Details">
                                                         <i class="fas fa-eye"></i>
                                                     </button>
-                                                    <button type="button" class="btn btn-sm btn-outline-warning edit-appointment"
-                                                            data-bs-toggle="tooltip" title="Edit Appointment"
-                                                            data-appt-id="<%= appointment.getId() %>"
-                                                            data-patient-name="<%= appointment.getPatientName() %>"
-                                                            data-patient-id="<%= appointment.getPatientId() %>"
-                                                            data-doctor-name="<%= appointment.getDoctorName() %>"
-                                                            data-doctor-specialization="<%= appointment.getDoctorSpecialization() %>"
-                                                            data-date="<%= appointment.getAppointmentDate() %>"
-                                                            data-time="<%= appointment.getAppointmentTime() %>"
-                                                            data-type="<%= appointment.getAppointmentType() %>"
-                                                            data-reason="<%= appointment.getReason() %>"
-                                                            data-notes="<%= appointment.getNotes() != null ? appointment.getNotes() : "" %>"
-                                                            data-status="<%= status %>"
-                                                            data-follow-up="<%= appointment.isFollowUpRequired() %>">
+                                                    
+                                                    <button type="button" class="btn btn-sm btn-outline-warning edit-btn"
+                                                            data-bs-toggle="modal" 
+                                                            data-bs-target="#editModal<%= appointment.getId() %>"
+                                                            title="Edit Appointment">
                                                         <i class="fas fa-edit"></i>
                                                     </button>
-                                                    
-                                                    <form action="${pageContext.request.contextPath}/admin/management" method="post" class="d-inline">
-                                                        <input type="hidden" name="action" value="delete">
-                                                        <input type="hidden" name="type" value="appointment">
-                                                        <input type="hidden" name="id" value="<%= appointment.getId() %>">
-                                                        <button type="submit" class="btn btn-sm btn-outline-danger delete-appointment"
-                                                                data-bs-toggle="tooltip" title="Delete Appointment">
-                                                            <i class="fas fa-trash"></i>
-                                                        </button>
-                                                    </form>
+
+                                                    <button type="button" class="btn btn-sm btn-outline-danger delete-btn"
+                                                            data-bs-toggle="modal" 
+                                                            data-bs-target="#deleteConfirmModal"
+                                                            data-appointment-id="<%= appointment.getId() %>"
+                                                            data-patient-name="<%= appointment.getPatientName() %>"
+                                                            data-doctor-name="<%= appointment.getDoctorName() %>"
+                                                            title="Delete Appointment">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
                                                 </div>
                                             </td>
                                         </tr>
@@ -1255,45 +1253,6 @@
                                 </tbody>
                             </table>
                         </div>
-
-                        <div class="row mt-4">
-                            <div class="col-6 col-md-2">
-                                <div class="stats-card stats-card-primary">
-                                    <h4 class="mb-1"><%= appointments.size() %></h4>
-                                    <small>Total</small>
-                                </div>
-                            </div>
-                            <div class="col-6 col-md-2">
-                                <div class="stats-card stats-card-warning">
-                                    <h4 class="mb-1"><%= pendingCount %></h4>
-                                    <small>Pending</small>
-                                </div>
-                            </div>
-                            <div class="col-6 col-md-2">
-                                <div class="stats-card stats-card-success">
-                                    <h4 class="mb-1"><%= confirmedCount %></h4>
-                                    <small>Confirmed</small>
-                                </div>
-                            </div>
-                            <div class="col-6 col-md-2">
-                                <div class="stats-card stats-card-info">
-                                    <h4 class="mb-1"><%= completedCount %></h4>
-                                    <small>Completed</small>
-                                </div>
-                            </div>
-                            <div class="col-6 col-md-2">
-                                <div class="stats-card stats-card-secondary">
-                                    <h4 class="mb-1"><%= cancelledCount %></h4>
-                                    <small>Cancelled</small>
-                                </div>
-                            </div>
-                            <div class="col-6 col-md-2">
-                                <div class="stats-card stats-card-danger">
-                                    <h4 class="mb-1"><%= followUpCount %></h4>
-                                    <small>Follow-up</small>
-                                </div>
-                            </div>
-                        </div>
                     <%
                         }
                     %>
@@ -1302,257 +1261,283 @@
         </div>
     </main>
 
-    <div class="modal-overlay" id="viewModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">
-                    <i class="fas fa-calendar-alt text-primary"></i>
-                    Appointment Details
-                </h3>
-                <button type="button" class="modal-close" id="closeViewModal">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="appointment-details">
-                    <div class="detail-section">
-                        <h5><i class="fas fa-info-circle"></i> Basic Information</h5>
-                        <div class="detail-item">
-                            <span class="detail-label">Appointment ID:</span>
-                            <span class="detail-value" id="viewApptId">#12345</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Status:</span>
-                            <span class="detail-value" id="viewStatus">
-                                <span class="badge badge-pending">Pending</span>
-                            </span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Appointment Type:</span>
-                            <span class="detail-value" id="viewType">In-person</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Follow-up Required:</span>
-                            <span class="detail-value" id="viewFollowUp">No</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Created On:</span>
-                            <span class="detail-value" id="viewCreatedAt">2023-10-15</span>
+    <%-- Modals --%>
+    <%
+        for (Appointment appointment : appointments) {
+            String status = appointment.getStatus();
+            if (status == null) status = "Pending";
+            
+            String createdAtFormatted = "";
+            if (appointment.getCreatedAt() != null) {
+                createdAtFormatted = dateFormat.format(appointment.getCreatedAt());
+            }
+    %>
+        <%-- View Modal --%>
+        <div class="modal fade" id="viewModal<%= appointment.getId() %>" tabindex="-1" aria-labelledby="viewModalLabel<%= appointment.getId() %>" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 class="modal-title">
+                            <i class="fas fa-calendar-alt text-primary me-2"></i>
+                            Appointment Details
+                        </h3>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="appointment-details">
+                            <div class="detail-section">
+                                <h5><i class="fas fa-info-circle"></i> Basic Information</h5>
+                                <div class="detail-item">
+                                    <span class="detail-label">Appointment ID:</span>
+                                    <span class="detail-value">#<%= appointment.getId() %></span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Status:</span>
+                                    <span class="detail-value">
+                                        <span class="badge <%= "Pending".equals(status) ? "badge-pending" : "Confirmed".equals(status) ? "badge-confirmed" : "Completed".equals(status) ? "badge-completed" : "badge-cancelled" %>">
+                                            <i class="fas <%= "Pending".equals(status) ? "fa-clock" : "Confirmed".equals(status) ? "fa-check-circle" : "Completed".equals(status) ? "fa-calendar-check" : "fa-times-circle" %> me-1"></i>
+                                            <%= status %>
+                                        </span>
+                                    </span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Appointment Type:</span>
+                                    <span class="detail-value"><%= appointment.getAppointmentType() %></span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Follow-up Required:</span>
+                                    <span class="detail-value"><%= appointment.isFollowUpRequired() ? "Yes" : "No" %></span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Created On:</span>
+                                    <span class="detail-value"><%= createdAtFormatted %></span>
+                                </div>
+                            </div>
+                            
+                            <div class="detail-section">
+                                <h5><i class="fas fa-user"></i> Patient Information</h5>
+                                <div class="detail-item">
+                                    <span class="detail-label">Patient Name:</span>
+                                    <span class="detail-value"><%= appointment.getPatientName() %></span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Patient ID:</span>
+                                    <span class="detail-value">PAT<%= appointment.getPatientId() %></span>
+                                </div>
+                            </div>
+                            
+                            <div class="detail-section">
+                                <h5><i class="fas fa-user-md"></i> Doctor Information</h5>
+                                <div class="detail-item">
+                                    <span class="detail-label">Doctor Name:</span>
+                                    <span class="detail-value">Dr. <%= appointment.getDoctorName() %></span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Specialization:</span>
+                                    <span class="detail-value"><%= appointment.getDoctorSpecialization() %></span>
+                                </div>
+                            </div>
+                            
+                            <div class="detail-section">
+                                <h5><i class="fas fa-clock"></i> Schedule</h5>
+                                <div class="detail-item">
+                                    <span class="detail-label">Date:</span>
+                                    <span class="detail-value"><%= appointment.getAppointmentDate() %></span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Time:</span>
+                                    <span class="detail-value"><%= appointment.getAppointmentTime() %></span>
+                                </div>
+                            </div>
+                            
+                            <div class="detail-section">
+                                <h5><i class="fas fa-sticky-note"></i> Additional Information</h5>
+                                <div class="detail-item">
+                                    <span class="detail-label">Reason:</span>
+                                    <span class="detail-value"><%= appointment.getReason() %></span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Notes:</span>
+                                    <span class="detail-value"><%= appointment.getNotes() != null ? appointment.getNotes() : "No notes available" %></span>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    
-                    <div class="detail-section">
-                        <h5><i class="fas fa-user"></i> Patient Information</h5>
-                        <div class="detail-item">
-                            <span class="detail-label">Patient Name:</span>
-                            <span class="detail-value" id="viewPatientName">John Doe</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Patient ID:</span>
-                            <span class="detail-value" id="viewPatientId">PAT001</span>
-                        </div>
-                    </div>
-                    
-                    <div class="detail-section">
-                        <h5><i class="fas fa-user-md"></i> Doctor Information</h5>
-                        <div class="detail-item">
-                            <span class="detail-label">Doctor Name:</span>
-                            <span class="detail-value" id="viewDoctorName">Dr. Smith</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Specialization:</span>
-                            <span class="detail-value" id="viewDoctorSpecialization">Cardiology</span>
-                        </div>
-                    </div>
-                    
-                    <div class="detail-section">
-                        <h5><i class="fas fa-clock"></i> Schedule</h5>
-                        <div class="detail-item">
-                            <span class="detail-label">Date:</span>
-                            <span class="detail-value" id="viewDate">2023-11-20</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Time:</span>
-                            <span class="detail-value" id="viewTime">10:30 AM</span>
-                        </div>
-                    </div>
-                    
-                    <div class="detail-section">
-                        <h5><i class="fas fa-sticky-note"></i> Additional Information</h5>
-                        <div class="detail-item">
-                            <span class="detail-label">Reason:</span>
-                            <span class="detail-value" id="viewReason">Regular checkup</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Notes:</span>
-                            <span class="detail-value" id="viewNotes">No specific notes</span>
-                        </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                     </div>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" id="closeViewModalBtn">Close</button>
+        </div>
+
+        <%-- Edit Modal --%>
+        <div class="modal fade" id="editModal<%= appointment.getId() %>" tabindex="-1" aria-labelledby="editModalLabel<%= appointment.getId() %>" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 class="modal-title">
+                            <i class="fas fa-edit text-primary me-2"></i>
+                            Edit Appointment
+                        </h3>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form action="${pageContext.request.contextPath}/admin/management" method="post" id="editForm<%= appointment.getId() %>">
+                        <input type="hidden" name="action" value="update">
+                        <input type="hidden" name="type" value="appointment">
+                        <input type="hidden" name="id" value="<%= appointment.getId() %>">
+                        
+                        <div class="modal-body">
+                            <div class="form-section">
+                                <h4 class="section-title">Appointment Information</h4>
+                                <div class="row form-row-spaced">
+                                    <div class="col-md-6">
+                                        <label for="editStatus<%= appointment.getId() %>" class="form-label">Status</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">
+                                                <i class="fas fa-tag text-primary"></i>
+                                            </span>
+                                            <select class="form-select" id="editStatus<%= appointment.getId() %>" name="status" required>
+                                                <option value="Pending" <%= "Pending".equals(status) ? "selected" : "" %>>Pending</option>
+                                                <option value="Confirmed" <%= "Confirmed".equals(status) ? "selected" : "" %>>Confirmed</option>
+                                                <option value="Completed" <%= "Completed".equals(status) ? "selected" : "" %>>Completed</option>
+                                                <option value="Cancelled" <%= "Cancelled".equals(status) ? "selected" : "" %>>Cancelled</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="editType<%= appointment.getId() %>" class="form-label">Appointment Type</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">
+                                                <i class="fas fa-calendar text-primary"></i>
+                                            </span>
+                                            <select class="form-select" id="editType<%= appointment.getId() %>" name="appointmentType" required>
+                                                <option value="In-person" <%= "In-person".equals(appointment.getAppointmentType()) ? "selected" : "" %>>In-person</option>
+                                                <option value="Online" <%= "Online".equals(appointment.getAppointmentType()) ? "selected" : "" %>>Online</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row form-row-spaced">
+                                    <div class="col-md-6">
+                                        <label for="editDate<%= appointment.getId() %>" class="form-label">Appointment Date</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">
+                                                <i class="fas fa-calendar-day text-primary"></i>
+                                            </span>
+                                            <input type="date" class="form-control" id="editDate<%= appointment.getId() %>" name="appointmentDate" value="<%= appointment.getAppointmentDate() %>" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="editTime<%= appointment.getId() %>" class="form-label">Appointment Time</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">
+                                                <i class="fas fa-clock text-primary"></i>
+                                            </span>
+                                            <input type="time" class="form-control" id="editTime<%= appointment.getId() %>" name="appointmentTime" value="<%= timeFormat.format(appointment.getAppointmentTime()) %>" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="editFollowUp<%= appointment.getId() %>" name="followUpRequired" <%= appointment.isFollowUpRequired() ? "checked" : "" %>>
+                                        <label class="form-check-label" for="editFollowUp<%= appointment.getId() %>">
+                                            Follow-up Required
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-section">
+                                <h4 class="section-title">Additional Information</h4>
+                                <div class="mb-3">
+                                    <label for="editReason<%= appointment.getId() %>" class="form-label">Reason for Visit</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text align-items-start">
+                                            <i class="fas fa-sticky-note text-primary"></i>
+                                        </span>
+                                        <textarea class="form-control" id="editReason<%= appointment.getId() %>" name="reason" rows="3" required><%= appointment.getReason() %></textarea>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="editNotes<%= appointment.getId() %>" class="form-label">Additional Notes</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text align-items-start">
+                                            <i class="fas fa-file-medical text-primary"></i>
+                                        </span>
+                                        <textarea class="form-control" id="editNotes<%= appointment.getId() %>" name="notes" rows="3"><%= appointment.getNotes() != null ? appointment.getNotes() : "" %></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Update Appointment</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    <%
+        }
+    %>
+
+    <%-- Delete Confirmation Modal --%>
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-bottom-0">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <div class="delete-modal-icon">
+                        <i class="fas fa-exclamation-triangle fa-2x"></i>
+                    </div>
+                    <h4 class="mb-3">Are you sure?</h4>
+                    <p class="mb-3">You are about to delete an appointment for <strong id="deletePatientName" class="text-danger"></strong> with <strong id="deleteDoctorName" class="text-danger"></strong>.</p>
+                    <p class="text-muted small">This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer border-top-0 justify-content-center">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <form id="deleteForm" method="post" action="${pageContext.request.contextPath}/admin/management" style="display: inline;">
+                        <input type="hidden" name="action" value="delete">
+                        <input type="hidden" name="type" value="appointment">
+                        <input type="hidden" name="id" id="deleteAppointmentId">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash me-1"></i>Delete Appointment
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="modal-overlay" id="editModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">
-                    <i class="fas fa-edit text-primary"></i>
-                    Edit Appointment
-                </h3>
-                <button type="button" class="modal-close" id="closeEditModal">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <form action="${pageContext.request.contextPath}/admin/management" method="post" id="editForm">
-                <input type="hidden" name="action" value="update">
-                <input type="hidden" name="type" value="appointment">
-                <input type="hidden" name="id" id="editApptId">
-                
-                <div class="modal-body">
-                    <div class="form-section">
-                        <h4 class="section-title">Appointment Information</h4>
-                        <div class="row form-row-spaced">
-                            <div class="col-md-6">
-                                <label for="editStatus" class="form-label">Status</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">
-                                        <i class="fas fa-tag text-primary"></i>
-                                    </span>
-                                    <select class="form-select" id="editStatus" name="status" required>
-                                        <option value="Pending">Pending</option>
-                                        <option value="Confirmed">Confirmed</option>
-                                        <option value="Completed">Completed</option>
-                                        <option value="Cancelled">Cancelled</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="editType" class="form-label">Appointment Type</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">
-                                        <i class="fas fa-calendar text-primary"></i>
-                                    </span>
-                                    <select class="form-select" id="editType" name="appointmentType" required>
-                                        <option value="In-person">In-person</option>
-                                        <option value="Online">Online</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="row form-row-spaced">
-                            <div class="col-md-6">
-                                <label for="editDate" class="form-label">Appointment Date</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">
-                                        <i class="fas fa-calendar-day text-primary"></i>
-                                    </span>
-                                    <input type="date" class="form-control" id="editDate" name="appointmentDate" required>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="editTime" class="form-label">Appointment Time</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">
-                                        <i class="fas fa-clock text-primary"></i>
-                                    </span>
-                                    <input type="time" class="form-control" id="editTime" name="appointmentTime" required>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="editFollowUp" name="followUpRequired">
-                                <label class="form-check-label" for="editFollowUp">
-                                    Follow-up Required
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="form-section">
-                        <h4 class="section-title">Additional Information</h4>
-                        <div class="mb-3">
-                            <label for="editReason" class="form-label">Reason for Visit</label>
-                            <div class="input-group">
-                                <span class="input-group-text align-items-start">
-                                    <i class="fas fa-sticky-note text-primary"></i>
-                                </span>
-                                <textarea class="form-control" id="editReason" name="reason" rows="3" required></textarea>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="editNotes" class="form-label">Additional Notes</label>
-                            <div class="input-group">
-                                <span class="input-group-text align-items-start">
-                                    <i class="fas fa-file-medical text-primary"></i>
-                                </span>
-                                <textarea class="form-control" id="editNotes" name="notes" rows="3"></textarea>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" id="closeEditModalBtn">Cancel</button>
-                    <button type="submit" class="btn btn-primary-modern">Update Appointment</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const mobileMenuToggle = document.getElementById('mobileMenuToggle');
-            const sidebar = document.getElementById('sidebar');
-            
-            // Mobile toggle click listener remains
-            mobileMenuToggle.addEventListener('click', function() {
-                sidebar.classList.toggle('mobile-open');
-            });
-            
-            // Close sidebar on nav link click on mobile
-            const navLinks = document.querySelectorAll('.nav-link');
-            navLinks.forEach(link => {
-                link.addEventListener('click', function() {
-                    if (window.innerWidth <= 768) {
-                        sidebar.classList.remove('mobile-open');
-                    }
-                });
-            });
-        });
-    </script>
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize tooltips
-            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-            const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-                if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
-                    return new bootstrap.Tooltip(tooltipTriggerEl);
-                }
-                return null;
-            }).filter(tooltip => tooltip !== null);
-
-            // REFINEMENT: Auto-fade alerts
-            const autoFadeAlerts = document.querySelectorAll('.alert-autofade');
-            autoFadeAlerts.forEach(alert => {
-                alert.classList.add('alert-fading');
-                // Remove from DOM after fade-out to prevent layout shifts
-                alert.addEventListener('animationend', () => {
-                    // We check for Bootstrap's 'dispose' method to safely remove it
-                    const bsAlert = bootstrap.Alert.getInstance(alert);
-                    if (bsAlert) {
-                        bsAlert.close();
-                    } else {
-                        alert.remove();
-                    }
+            // Mobile menu toggle
+            const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+            const sidebar = document.getElementById('sidebar');
+            
+            if (mobileMenuToggle && sidebar) {
+                mobileMenuToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('mobile-open');
                 });
+            }
+
+            // Auto-hide alerts
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                setTimeout(() => {
+                    if (alert && alert.classList.contains('show')) {
+                        const bsAlert = new bootstrap.Alert(alert);
+                        bsAlert.close();
+                    }
+                }, 5000);
             });
 
             // Filter functionality
@@ -1560,20 +1545,19 @@
             const doctorFilter = document.getElementById('doctorFilter');
             const dateFilter = document.getElementById('dateFilter');
             const clearFilters = document.getElementById('clearFilters');
-            const tableBody = document.querySelector('#appointmentsTable tbody');
-            const tableRows = tableBody ? tableBody.querySelectorAll('tr') : [];
+            const tableRows = document.querySelectorAll('#appointmentsTable tbody tr');
 
             function filterAppointments() {
-                const statusValue = statusFilter.value;
-                const doctorValue = doctorFilter.value;
-                const dateValue = dateFilter.value;
+                const statusValue = statusFilter ? statusFilter.value : 'all';
+                const doctorValue = doctorFilter ? doctorFilter.value : 'all';
+                const dateValue = dateFilter ? dateFilter.value : '';
 
                 tableRows.forEach(row => {
                     const status = row.getAttribute('data-status');
                     const doctor = row.getAttribute('data-doctor');
                     const date = row.getAttribute('data-date');
 
-                    const statusMatch = statusValue === 'all' || status === statusValue;
+                    const statusMatch = statusValue === 'all' || status === statusValue.toLowerCase();
                     const doctorMatch = doctorValue === 'all' || doctor === doctorValue;
                     const dateMatch = dateValue === '' || date === dateValue;
 
@@ -1585,197 +1569,95 @@
                 });
             }
 
-            if(statusFilter) statusFilter.addEventListener('change', filterAppointments);
-            if(doctorFilter) doctorFilter.addEventListener('change', filterAppointments);
-            if(dateFilter) dateFilter.addEventListener('change', filterAppointments);
-            if(clearFilters) {
+            if (statusFilter) statusFilter.addEventListener('change', filterAppointments);
+            if (doctorFilter) doctorFilter.addEventListener('change', filterAppointments);
+            if (dateFilter) dateFilter.addEventListener('change', filterAppointments);
+            if (clearFilters) {
                 clearFilters.addEventListener('click', function() {
-                    if(statusFilter) statusFilter.value = 'all';
-                    if(doctorFilter) doctorFilter.value = 'all';
-                    if(dateFilter) dateFilter.value = '';
+                    if (statusFilter) statusFilter.value = 'all';
+                    if (doctorFilter) doctorFilter.value = 'all';
+                    if (dateFilter) dateFilter.value = '';
                     filterAppointments();
                 });
             }
 
-            // Modal functionality
-            const viewModal = document.getElementById('viewModal');
-            const editModal = document.getElementById('editModal');
+            // Delete confirmation modal
+            const deleteModal = document.getElementById('deleteConfirmModal');
+            const deleteButtons = document.querySelectorAll('.delete-btn');
             
-            // View Modal Elements
-            const closeViewModal = document.getElementById('closeViewModal');
-            const closeViewModalBtn = document.getElementById('closeViewModalBtn');
-            
-            // Edit Modal Elements
-            const closeEditModal = document.getElementById('closeEditModal');
-            const closeEditModalBtn = document.getElementById('closeEditModalBtn');
-            
-            // Open View Modal
-            const viewButtons = document.querySelectorAll('.view-appointment');
-            viewButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const appointmentId = this.getAttribute('data-appt-id');
-                    const patientName = this.getAttribute('data-patient-name');
-                    const patientId = this.getAttribute('data-patient-id');
-                    const doctorName = this.getAttribute('data-doctor-name');
-                    const doctorSpecialization = this.getAttribute('data-doctor-specialization');
-                    const date = this.getAttribute('data-date');
-                    const time = this.getAttribute('data-time');
-                    const type = this.getAttribute('data-type');
-                    const reason = this.getAttribute('data-reason');
-                    const notes = this.getAttribute('data-notes');
-                    const status = this.getAttribute('data-status');
-                    const createdAt = this.getAttribute('data-created-at');
-                    const followUp = this.getAttribute('data-follow-up');
-                    
-                    // Populate view modal
-                    document.getElementById('viewApptId').textContent = '#' + appointmentId;
-                    document.getElementById('viewPatientName').textContent = patientName;
-                    document.getElementById('viewPatientId').textContent = 'PAT' + patientId;
-                    document.getElementById('viewDoctorName').textContent = 'Dr. ' + doctorName;
-                    document.getElementById('viewDoctorSpecialization').textContent = doctorSpecialization;
-                    document.getElementById('viewDate').textContent = date;
-                    document.getElementById('viewTime').textContent = time;
-                    document.getElementById('viewType').textContent = type;
-                    document.getElementById('viewReason').textContent = reason;
-                    document.getElementById('viewNotes').textContent = notes || 'No notes available';
-                    document.getElementById('viewCreatedAt').textContent = createdAt;
-                    document.getElementById('viewFollowUp').textContent = followUp === 'true' ? 'Yes' : 'No';
-                    
-                    // Update status badge
-                    const statusElement = document.getElementById('viewStatus');
-                    statusElement.innerHTML = '';
-                    let statusBadgeClass = '';
-                    let statusIcon = '';
-                    
-                    // ======================================================
-                    // START OF JAVASCRIPT FIX: Add default case
-                    // ======================================================
-                    switch(status) {
-                        case 'Confirmed':
-                            statusBadgeClass = 'badge-confirmed';
-                            statusIcon = 'fas fa-check-circle';
-                            break;
-                        case 'Completed':
-                            statusBadgeClass = 'badge-completed';
-                            statusIcon = 'fas fa-calendar-check';
-                            break;
-                        case 'Cancelled':
-                            statusBadgeClass = 'badge-cancelled';
-                            statusIcon = 'fas fa-times-circle';
-                            break;
-                        case 'Pending':
-                        default: // This handles "Pending" and any unexpected cases
-                            statusBadgeClass = 'badge-pending';
-                            statusIcon = 'fas fa-clock';
-                            break;
-                    }
-                    // ======================================================
-                    // END OF JAVASCRIPT FIX
-                    // ======================================================
-                    
-                    const badge = document.createElement('span');
-                    badge.className = `badge ${statusBadgeClass}`;
-                    badge.innerHTML = `<i class="${statusIcon} me-1"></i>${status}`;
-                    statusElement.appendChild(badge);
-                    
-                    // Show modal
-                    viewModal.classList.add('active');
-                    document.body.style.overflow = 'hidden';
+            if (deleteModal) {
+                deleteButtons.forEach(button => {
+                    button.addEventListener('click', function() {
+                        const appointmentId = this.getAttribute('data-appointment-id');
+                        const patientName = this.getAttribute('data-patient-name');
+                        const doctorName = this.getAttribute('data-doctor-name');
+                        
+                        document.getElementById('deleteAppointmentId').value = appointmentId;
+                        document.getElementById('deletePatientName').textContent = patientName;
+                        document.getElementById('deleteDoctorName').textContent = 'Dr. ' + doctorName;
+                    });
                 });
-            });
-            
-            // Open Edit Modal
-            const editButtons = document.querySelectorAll('.edit-appointment');
-            editButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const appointmentId = this.getAttribute('data-appt-id');
-                    const date = this.getAttribute('data-date');
-                    const time = this.getAttribute('data-time');
-                    const type = this.getAttribute('data-type');
-                    const reason = this.getAttribute('data-reason');
-                    const notes = this.getAttribute('data-notes');
-                    const status = this.getAttribute('data-status');
-                    const followUp = this.getAttribute('data-follow-up');
+            }
+
+            // Export functionality
+            const exportBtn = document.getElementById('exportBtn');
+            if (exportBtn) {
+                exportBtn.addEventListener('click', function() {
+                    // Simple export implementation - could be enhanced with CSV/Excel export
+                    const table = document.getElementById('appointmentsTable');
+                    const rows = Array.from(table.querySelectorAll('tr'));
+                    const csvContent = rows.map(row => {
+                        const cells = Array.from(row.querySelectorAll('th, td'));
+                        return cells.map(cell => {
+                            // Remove action buttons and icons for export
+                            if (cell.querySelector('.action-buttons')) {
+                                return '';
+                            }
+                            return '"' + cell.textContent.replace(/"/g, '""') + '"';
+                        }).join(',');
+                    }).join('\n');
                     
-                    // Populate edit form
-                    document.getElementById('editApptId').value = appointmentId;
-                    document.getElementById('editStatus').value = status;
-                    document.getElementById('editType').value = type;
-                    document.getElementById('editDate').value = date;
-                    
-                    // Format time for input[type="time"]
-                    let timeValue = time;
-                    if (timeValue && timeValue.length > 5) {
-                        timeValue = timeValue.substring(0, 5);
-                    }
-                    document.getElementById('editTime').value = timeValue;
-                    
-                    document.getElementById('editReason').value = reason;
-                    document.getElementById('editNotes').value = notes || '';
-                    document.getElementById('editFollowUp').checked = followUp === 'true';
-                    
-                    // Show modal
-                    editModal.classList.add('active');
-                    document.body.style.overflow = 'hidden';
+                    const blob = new Blob([csvContent], { type: 'text/csv' });
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'appointments.csv';
+                    a.click();
+                    window.URL.revokeObjectURL(url);
                 });
-            });
-            
-            // Close View Modal
-            function closeViewModalFunc() {
-                if (viewModal.classList.contains('active')) {
-                    viewModal.classList.remove('active');
-                    document.body.style.overflow = 'auto';
-                }
             }
-            
-            if(closeViewModal) closeViewModal.addEventListener('click', closeViewModalFunc);
-            if(closeViewModalBtn) closeViewModalBtn.addEventListener('click', closeViewModalFunc);
-            
-            // Close Edit Modal
-            function closeEditModalFunc() {
-                if (editModal.classList.contains('active')) {
-                    editModal.classList.remove('active');
-                    document.body.style.overflow = 'auto';
-                }
-            }
-            
-            if(closeEditModal) closeEditModal.addEventListener('click', closeEditModalFunc);
-            if(closeEditModalBtn) closeEditModalBtn.addEventListener('click', closeEditModalFunc);
-            
-            // Close modals when clicking outside
-            window.addEventListener('click', function(event) {
-                if (event.target === viewModal) {
-                    closeViewModalFunc();
-                }
-                if (event.target === editModal) {
-                    closeEditModalFunc();
-                }
-            });
 
-            // REFINEMENT: Add Escape key listener for modals
-            document.addEventListener('keydown', function(event) {
-                if (event.key === 'Escape') {
-                    if (viewModal.classList.contains('active')) {
-                        closeViewModalFunc();
-                    }
-                    if (editModal.classList.contains('active')) {
-                        closeEditModalFunc();
-                    }
-                }
-            });
-
-            // Confirm delete actions
-            const deleteButtons = document.querySelectorAll('.delete-appointment');
-            deleteButtons.forEach(button => {
-                // Find the parent form
-                const form = button.closest('form');
-                if (form) {
-                    form.addEventListener('submit', function(e) {
-                        if (!confirm('Are you sure you want to PERMANENTLY DELETE this appointment? This action cannot be undone.')) {
-                            e.preventDefault(); // Stop the form from submitting
+            // Form validation
+            const forms = document.querySelectorAll('form');
+            forms.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    const requiredFields = form.querySelectorAll('[required]');
+                    let valid = true;
+                    
+                    requiredFields.forEach(field => {
+                        if (!field.value.trim()) {
+                            valid = false;
+                            field.classList.add('is-invalid');
+                        } else {
+                            field.classList.remove('is-invalid');
                         }
                     });
-                }
+                    
+                    if (!valid) {
+                        e.preventDefault();
+                        // Show error message
+                        const alertDiv = document.createElement('div');
+                        alertDiv.className = 'alert alert-danger alert-modern mt-3';
+                        alertDiv.innerHTML = '<i class="fas fa-exclamation-circle me-2"></i>Please fill in all required fields.';
+                        form.insertBefore(alertDiv, form.firstChild);
+                    }
+                });
+            });
+
+            // Initialize tooltips
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+            const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
             });
         });
     </script>
