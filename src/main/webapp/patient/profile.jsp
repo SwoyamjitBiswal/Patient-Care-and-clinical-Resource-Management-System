@@ -22,7 +22,7 @@
     
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <style>
@@ -570,7 +570,6 @@
             background-color: var(--danger) !important;
         }
         .btn-close-white {
-            /* Standard Bootstrap 5 way to invert close button color */
             filter: invert(1) grayscale(100%) brightness(200%); 
         }
         .form-check-label {
@@ -623,7 +622,7 @@
             border-top: 1px solid #f3f4f6;
         }
         
-        /* Danger Zone Styles */
+        /* Danger Zone Styles (New/Enhanced) */
         .danger-zone-card {
             border: 1px solid var(--danger);
             background-color: var(--danger-light);
@@ -1013,16 +1012,16 @@
                             </form>
                         </div>
                     </div>
-
+                    
                     <div class="danger-zone-card mb-4">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <h3 class="card-title mb-1">
                                     <i class="fas fa-exclamation-triangle me-2"></i>
-                                    **Danger Zone**
+                                    <b>Danger Zone</b>
                                 </h3>
                                 <p class="mb-0">
-                                    Permanently delete your account and all associated data. **This action cannot be undone.**
+                                    Permanently delete your account and all associated data. <b>This action cannot be undone.</b>
                                 </p>
                             </div>
                             <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
@@ -1133,17 +1132,17 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title" id="deleteAccountModalLabel"><i class="fas fa-exclamation-triangle me-2"></i>**Confirm Account Deletion**</h5>
+                    <h5 class="modal-title" id="deleteAccountModalLabel"><i class="fas fa-exclamation-triangle me-2"></i>Confirm Account Deletion</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <p>⚠️ **Warning: This action is irreversible.**</p>
-                    <p>Are you absolutely sure you want to **permanently delete** your patient account? All associated data, including medical history and past appointments, will be **removed from our database**.</p>
+                    <p><i class="fas fa-exclamation-triangle text-danger me-1"></i> <b>Warning: This action is irreversible.</b></p>
+                    <p>Are you absolutely sure you want to <b>permanently delete</b> your patient account? All associated data, including medical history and past appointments, will be <b>removed</b> from our database.</p>
                     
                     <div class="form-check mt-3">
                         <input class="form-check-input" type="checkbox" value="" id="confirmDeletionCheck">
                         <label class="form-check-label" for="confirmDeletionCheck">
-                            **I understand that deleting my account cannot be undone.**
+                            <b>I understand that deleting my account cannot be undone.</b>
                         </label>
                     </div>
                 </div>
