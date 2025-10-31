@@ -41,12 +41,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Patient Care System - Admin Dashboard</title>
 
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
+    
     <style>
         :root {
             --primary: #4361ee;
@@ -58,63 +58,80 @@
             --warning: #ffc107;
             --danger: #dc3545;
             --danger-light: #fbebee;
+            --light: #f8f9fa;
+            --lighter: #fdfdfe;
             --dark: #1a1d29;
             --darker: #12141c;
-            --light: #f8f9fa;
+            --gray-100: #f8f9fa;
+            --gray-200: #e9ecef;
+            --gray-300: #dee2e6;
+            --gray-400: #ced4da;
+            --gray-500: #adb5bd;
+            --gray-600: #6c757d;
+            --gray-700: #495057;
+            --gray-800: #343a40;
+            --gray-900: #212529;
             --sidebar-width: 280px;
             --transition: all 0.3s ease;
-            --border-color: #e2e8f0;
-            --border-radius: 8px;
+            --border-radius: 12px;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --shadow-lg: 0 10px 30px rgba(0,0,0,0.12);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
-
+        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
+        
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--light);
-            color: var(--dark);
+            background-color: var(--gray-100);
+            color: var(--gray-800);
             line-height: 1.6;
             display: flex;
-            height: 100vh;
-            overflow: hidden;
+            min-height: 100vh;
+            overflow-x: hidden;
         }
-
+        
+        /* Sidebar Styles */
         .sidebar {
             width: var(--sidebar-width);
             flex-shrink: 0;
-            background-color: #ffffff;
-            color: var(--dark);
+            background: linear-gradient(135deg, #ffffff, #f8fafc);
+            color: var(--gray-700);
             height: 100vh;
+            position: fixed;
             left: 0;
             top: 0;
             overflow-y: auto;
             transition: var(--transition);
-            border-right: 1px solid var(--border-color);
+            box-shadow: var(--shadow-md);
             display: flex;
             flex-direction: column;
+            border-right: 1px solid var(--gray-200);
+            z-index: 1000;
         }
-
+        
         .sidebar-sticky {
             display: flex;
             flex-direction: column;
             min-height: 100%;
             padding: 1.5rem 0;
         }
-
+        
         .user-section {
             text-align: center;
             padding: 1.5rem 1.5rem 2rem;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--gray-200);
             margin-bottom: 1rem;
         }
-
+        
         .user-avatar {
-            width: 70px;
-            height: 70px;
+            width: 80px;
+            height: 80px;
             border-radius: 50%;
             background: linear-gradient(135deg, var(--primary), #5a6ff0);
             display: flex;
@@ -122,127 +139,163 @@
             justify-content: center;
             margin: 0 auto 1rem;
             border: 3px solid var(--primary-light);
+            box-shadow: var(--shadow-sm);
         }
-
+        
         .user-avatar i {
-            font-size: 2rem;
+            font-size: 2.5rem;
             color: white;
         }
-
+        
         .user-info h6 {
-            font-size: 1rem;
+            font-size: 1.1rem;
             font-weight: 600;
             margin-bottom: 0.25rem;
-            color: var(--dark);
+            color: var(--gray-800);
         }
-
-        .user-info small {
-            font-size: 0.8rem;
-            color: var(--secondary);
+        
+        .user-info .badge {
+            background: var(--primary-light);
+            color: var(--primary);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            border: 1px solid rgba(67, 97, 238, 0.2);
         }
-
+        
         .nav {
             display: flex;
             flex-direction: column;
-            gap: 0.3rem;
+            gap: 0.5rem;
             padding: 0 1rem;
             list-style: none;
         }
-
+        
         .nav-main {
             flex-grow: 1;
         }
-
+        
         .nav-bottom {
             margin-top: auto;
             padding-top: 1rem;
-            border-top: 1px solid var(--border-color);
+            border-top: 1px solid var(--gray-200);
             margin: 1.5rem 0 0 0;
         }
 
         .nav-item {
-            margin-bottom: 0.15rem;
+            margin-bottom: 0.25rem;
         }
-
+        
         .nav-link {
             display: flex;
             align-items: center;
-            gap: 0.8rem;
-            padding: 0.75rem 1rem;
-            color: #4a5568;
+            gap: 1rem;
+            padding: 0.875rem 1.25rem;
+            color: var(--gray-600);
             text-decoration: none;
             border-radius: var(--border-radius);
             transition: var(--transition);
             font-weight: 500;
-            font-size: 0.9rem;
             position: relative;
             overflow: hidden;
         }
-
+        
         .nav-link::before {
             content: '';
             position: absolute;
             left: 0;
-            top: 50%;
-            height: 80%;
-            width: 3px;
+            top: 0;
+            height: 100%;
+            width: 4px;
             background: var(--primary);
-            transform: translateY(-50%) scaleY(0);
+            transform: scaleY(0);
             transition: var(--transition);
             border-radius: 0 4px 4px 0;
         }
-
+        
         .nav-link:hover {
             color: var(--primary);
             background: var(--primary-light);
+            transform: translateX(5px);
         }
-
+        
         .nav-link:hover::before {
-             transform: translateY(-50%) scaleY(1);
+            transform: scaleY(1);
         }
-
+        
         .nav-link.active {
             color: var(--primary);
             background: var(--primary-light);
-            font-weight: 600;
         }
-
+        
         .nav-link.active::before {
-            transform: translateY(-50%) scaleY(1);
+            transform: scaleY(1);
         }
-
+        
         .nav-link i {
-            width: 18px;
+            width: 20px;
             text-align: center;
-            font-size: 1rem;
+            font-size: 1.1rem;
             transition: var(--transition);
-            color: #9ca3af;
         }
-
-        .nav-link:hover i,
+        
         .nav-link.active i {
             color: var(--primary);
         }
-
+        
+        .nav-link:hover i {
+            transform: scale(1.1);
+        }
+        
         .nav-link-logout {
             color: var(--danger);
         }
-
-        .nav-link-logout i {
-            color: var(--danger);
-        }
-
+        
         .nav-link-logout:hover {
             background: var(--danger-light);
             color: var(--danger);
+            transform: translateX(5px);
         }
-
+        
+        .nav-link-logout:hover i {
+            color: var(--danger);
+        }
+        
+        .nav-link-logout i {
+            color: var(--danger);
+        }
+        
         .main-content {
             flex-grow: 1;
+            margin-left: var(--sidebar-width);
+            padding: 0;
             min-height: 100vh;
             overflow-y: auto;
+            background: var(--gray-100);
+            transition: var(--transition);
         }
 
+        .mobile-menu-toggle {
+            display: none;
+            position: fixed;
+            top: 1.5rem;
+            left: 1.5rem;
+            z-index: 999;
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 10px;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            cursor: pointer;
+            box-shadow: var(--shadow-lg);
+        }
+        
+        /* Mobile responsiveness */
         @media (max-width: 768px) {
             body {
                 display: block;
@@ -251,166 +304,191 @@
             }
             .sidebar {
                 transform: translateX(-100%);
-                z-index: 1000;
-                position: fixed;
             }
+            
             .sidebar.mobile-open {
                 transform: translateX(0);
             }
+            
             .main-content {
                 margin-left: 0;
+                padding: 1.5rem;
                 padding-top: 6rem;
             }
+            
             .mobile-menu-toggle {
-                position: fixed;
-                top: 1.5rem;
-                left: 1.5rem;
-                z-index: 999;
-                background: var(--primary);
-                color: white;
-                border: none;
-                width: 45px;
-                height: 45px;
-                border-radius: 10px;
                 display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 1.25rem;
-                cursor: pointer;
-                box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
             }
         }
-
+        
+        /* Scrollbar styling */
+        .sidebar::-webkit-scrollbar,
+        .main-content::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .sidebar::-webkit-scrollbar-track,
+        .main-content::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+        }
+        
+        .sidebar::-webkit-scrollbar-thumb,
+        .main-content::-webkit-scrollbar-thumb {
+            background: var(--gray-400);
+            border-radius: 3px;
+        }
+        
+        .sidebar::-webkit-scrollbar-thumb:hover,
+        .main-content::-webkit-scrollbar-thumb:hover {
+            background: var(--gray-500);
+        }
+        
+        /* Dashboard Specific Styles */
         .main-content-dashboard {
             padding: 2.5rem;
         }
-
+        
         @media (max-width: 768px) {
             .main-content-dashboard {
                 padding: 1.5rem;
                 padding-top: 6rem;
             }
         }
-
-        .shadow-custom {
-             box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05) !important;
-             border: 1px solid var(--border-color);
-             border-radius: var(--border-radius);
-             background-color: #ffffff;
-        }
-
-        .card-header {
-            background-color: #ffffff;
-            border-bottom: 1px solid var(--border-color);
-            padding: 1rem 1.5rem;
-        }
-
-        .card-header h5 {
-            font-weight: 600;
-            font-size: 1.1rem;
-            color: var(--dark);
-        }
-
-        .card-body {
-            padding: 1.5rem;
-        }
-
-        .stats-card {
+        
+        .dashboard-header {
+            background: linear-gradient(135deg, var(--primary), #5a6ff0);
             color: white;
+            padding: 2.5rem 2.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-md);
+        }
+        
+        .card-modern {
+            border: none;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-md);
+            transition: var(--transition);
+            overflow: hidden;
+            background: white;
+        }
+        
+        .card-modern:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-3px);
+        }
+        
+        .card-header-modern {
+            background: white;
+            border-bottom: 1px solid var(--gray-200);
             padding: 1.5rem;
+            font-weight: 600;
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            color: var(--gray-800);
+        }
+        
+        .card-header-modern i {
+            color: var(--primary);
+            margin-right: 10px;
+            font-size: 1.1rem;
+        }
+        
+        /* Stats Cards */
+        .stats-card {
             border-radius: var(--border-radius);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            transition: all 0.3s ease;
+            padding: 1.5rem;
+            color: white;
+            text-align: center;
+            transition: var(--transition);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
             position: relative;
             overflow: hidden;
         }
-
+        
         .stats-card::before {
             content: '';
             position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0));
             z-index: 1;
         }
-
+        
         .stats-card > * {
             position: relative;
             z-index: 2;
         }
-
+        
         .stats-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            box-shadow: var(--shadow-lg);
         }
-
-        .stats-card i {
-            font-size: 2.5rem;
-            opacity: 0.9;
-        }
-
-        .stats-card > div {
-             text-align: right;
-        }
-
-        .stats-card .number {
+        
+        .stats-card h4 {
             font-size: 2rem;
             font-weight: 700;
-            margin-bottom: 0.1rem;
+            margin-bottom: 0.25rem;
         }
-
-        .stats-card .label {
+        
+        .stats-card small {
             font-size: 0.9rem;
             font-weight: 500;
             opacity: 0.9;
         }
-
-        .stats-total { background: linear-gradient(135deg, #0d6efd, #0a58ca); }
-        .stats-pending { background: linear-gradient(135deg, #6f42c1, #5a359d); }
-        .stats-confirmed { background: linear-gradient(135deg, #198754, #146c43); }
-        .stats-completed { background: linear-gradient(135deg, #ffc107, #d39e00); }
-
-        .btn {
+        
+        .stats-card-primary { background: linear-gradient(135deg, var(--primary), #5a6ff0); }
+        .stats-card-warning { background: linear-gradient(135deg, var(--warning), #ffd54f); color: var(--gray-800); }
+        .stats-card-success { background: linear-gradient(135deg, var(--success), #20c997); }
+        .stats-card-info { background: linear-gradient(135deg, var(--info), #0dcaf0); color: var(--gray-800); }
+        .stats-card-secondary { background: linear-gradient(135deg, var(--secondary), #6c757d); }
+        .stats-card-danger { background: linear-gradient(135deg, var(--danger), #e63946); }
+        
+        /* Button Styles */
+        .btn-modern {
+            border-radius: 10px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            transition: var(--transition);
+            font-size: 0.95rem;
+            text-decoration: none;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
-            padding: 0.6rem 1.2rem;
-            font-weight: 500;
-            border-radius: var(--border-radius);
-            text-decoration: none;
-            transition: var(--transition);
             border: none;
             cursor: pointer;
-            font-size: 0.9rem;
         }
-
-        .btn-primary {
-            background-color: var(--primary);
-            border-color: var(--primary);
+        
+        .btn-primary-modern {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: white;
         }
-
-        .btn-primary:hover {
-            background-color: var(--primary-dark);
-            border-color: var(--primary-dark);
+        
+        .btn-primary-modern:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(79, 70, 229, 0.2);
+            box-shadow: 0 7px 14px rgba(67, 97, 238, 0.25);
         }
-
+        
         .btn-outline-primary {
-            border: 1px solid var(--primary);
+            border: 2px solid var(--primary);
             color: var(--primary);
-            background-color: transparent;
+            background: transparent;
+            font-weight: 500;
         }
-
+        
         .btn-outline-primary:hover {
-            background-color: var(--primary);
+            background: var(--primary);
             color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.2);
         }
-
+        
+        /* Badge styling */
         .badge {
             display: inline-block;
             padding: 0.4em 0.75em;
@@ -422,19 +500,22 @@
             vertical-align: baseline;
             border-radius: 50px;
         }
-
-        .bg-primary { background-color: var(--primary) !important; }
-        .bg-success { background-color: var(--success) !important; }
-        .bg-warning { background-color: var(--warning) !important; }
-        .bg-info { background-color: var(--info) !important; }
-        .bg-secondary { background-color: var(--secondary) !important; }
-        .bg-danger { background-color: var(--danger) !important; }
-
+        
+        .badge-pending { color: #92400e; background-color: #fef3c7; }
+        .badge-confirmed { color: #065f46; background-color: #d1fae5; }
+        .badge-completed { color: #1e40af; background-color: #dbeafe; }
+        .badge-cancelled { color: #991b1b; background-color: #fee2e2; }
+        .badge-success { color: #065f46; background-color: #d1fae5; }
+        .badge-warning { color: #92400e; background-color: #fef3c7; }
+        .badge-danger { color: #991b1b; background-color: #fee2e2; }
+        .badge-info { color: #1e40af; background-color: #dbeafe; }
+        
+        /* Table Styles */
         .table-responsive {
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
         }
-
+        
         .table {
             width: 100%;
             margin-bottom: 1rem;
@@ -442,64 +523,39 @@
             vertical-align: middle;
             border-collapse: collapse;
         }
-
+        
         .table>:not(caption)>*>* {
             padding: 0.8rem 0.8rem;
             background-color: transparent;
             border-bottom-width: 1px;
             box-shadow: inset 0 0 0 9999px transparent;
-            border-color: var(--border-color);
+            border-color: var(--gray-300);
         }
-
+        
         .table>thead th {
             font-weight: 600;
-            color: #6b7280;
+            color: var(--gray-600);
             text-transform: uppercase;
             font-size: 0.8rem;
             letter-spacing: 0.05em;
             border-bottom-width: 2px;
-            border-color: var(--border-color);
+            border-color: var(--gray-300);
         }
-
-        .container-fluid { width: 100%; padding-right: 15px; padding-left: 15px; margin-right: auto; margin-left: auto; }
-        .row { display: flex; flex-wrap: wrap; margin-right: -15px; margin-left: -15px; }
-        .col-xl-3, .col-lg-8, .col-lg-4, .col-md-6, .col-12, .col-md-3 { position: relative; width: 100%; padding-right: 15px; padding-left: 15px; }
         
-        @media (min-width: 768px) {
-            .col-md-6 { flex: 0 0 50%; max-width: 50%; }
-            .col-md-3 { flex: 0 0 25%; max-width: 25%; }
+        .table-hover>tbody>tr:hover>* {
+            background-color: var(--gray-100);
+            color: var(--gray-900);
         }
-        @media (min-width: 992px) {
-            .col-lg-8 { flex: 0 0 66.666667%; max-width: 66.666667%; }
-            .col-lg-4 { flex: 0 0 33.333333%; max-width: 33.333333%; }
+        
+        /* Alert Styles */
+        .alert-modern {
+            border-radius: 10px;
+            border: none;
+            box-shadow: var(--shadow-sm);
+            padding: 1rem 1.5rem;
         }
-        @media (min-width: 1200px) {
-            .col-xl-3 { flex: 0 0 25%; max-width: 25%; }
-        }
-
-        .mb-0 { margin-bottom: 0 !important; }
-        .mb-1 { margin-bottom: 0.25rem !important; }
-        .mb-2 { margin-bottom: 0.5rem !important; }
-        .mb-3 { margin-bottom: 1rem !important; }
-        .mb-4 { margin-bottom: 1.5rem !important; }
-        .mt-4 { margin-top: 1.5rem !important; }
-        .p-4 { padding: 1.5rem !important; }
-        .d-flex { display: flex !important; }
-        .d-grid { display: grid !important; }
-        .justify-content-between { justify-content: space-between !important; }
-        .align-items-center { align-items: center !important; }
-        .text-center { text-align: center !important; }
-        .text-muted { color: #6c757d !important; }
-        .text-primary { color: var(--primary) !important; }
-        .text-success { color: var(--success) !important; }
-        .text-warning { color: var(--warning) !important; }
-        .text-info { color: var(--info) !important; }
-        .h2 { font-size: 1.75rem; font-weight: 600; }
-        .h3 { font-size: 1.5rem; font-weight: 600; }
-        .h5 { font-size: 1.1rem; }
-        .me-2 { margin-right: 0.5rem !important; }
-        .gap-2 { gap: 0.5rem !important; }
-
+        
+        /* Chart containers */
         .chart-container { 
             position: relative; 
             height: 300px; 
@@ -512,20 +568,24 @@
             width: 100%;
         }
 
+        /* Activity items */
         .activity-item {
             padding: 0.75rem 0;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--gray-300);
         }
 
         .activity-item:last-child {
             border-bottom: none;
         }
 
-        .status-badge {
-            font-size: 0.75rem;
-            padding: 0.25rem 0.5rem;
+        /* Status indicators */
+        .status-indicator {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
         }
-
+        
+        /* Doctor rank */
         .doctor-rank {
             width: 30px;
             height: 30px;
@@ -538,13 +598,70 @@
             font-size: 0.8rem;
             font-weight: 600;
         }
+        
+        /* Quick actions grid */
+        .quick-actions-grid {
+            display: grid;
+            gap: 1rem;
+        }
+        
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 2rem 1rem;
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            color: var(--gray-400);
+            margin-bottom: 1rem;
+        }
+        
+        /* Card header with flex layout */
+        .card-header-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        /* Welcome badge */
+        .welcome-badge {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        
+        /* System info list */
+        .system-info-list .list-group-item {
+            border: none;
+            padding: 0.75rem 0;
+            background: transparent;
+        }
+        
+        /* Responsive improvements */
+        @media (max-width: 768px) {
+            .table-responsive {
+                border: 1px solid var(--gray-300);
+                border-radius: var(--border-radius);
+            }
+            
+            .card-header-flex {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
     </style>
 </head>
 <body>
-    <button class="mobile-menu-toggle" id="mobileMenuToggle" style="display: none;">
+    <button class="mobile-menu-toggle" id="mobileMenuToggle">
         <i class="fas fa-bars"></i>
     </button>
-
+    
     <div class="sidebar" id="sidebar">
         <div class="sidebar-sticky">
             <div class="user-section">
@@ -554,7 +671,7 @@
                 <div class="user-info">
                    <% if (currentAdmin != null) { %>
                     <h6><%= currentAdmin.getFullName() %></h6>
-                    <small>Administrator</small>
+                    <span class="badge">Administrator</span>
                    <% } %>
                 </div>
             </div>
@@ -612,136 +729,354 @@
             </div>
         </div>
     </div>
-
-    <main class="main-content main-content-dashboard">
-        <!-- Header -->
-        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-3 mb-4 border-bottom">
-            <h1 class="h2">
-                <i class="fas fa-tachometer-alt text-primary me-2"></i>
-                Admin Dashboard
-            </h1>
-            <div class="btn-toolbar mb-2 mb-md-0">
-                <div class="btn-group me-2">
-                    <span class="btn btn-sm btn-outline-secondary">
-                        <i class="fas fa-user-shield me-1"></i>Welcome, <%= currentAdmin.getFullName() %>
+    
+    <main class="main-content">
+        <div class="dashboard-header">
+            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                <div class="mb-2 mb-md-0">
+                    <h1 class="h2 mb-2">
+                        <i class="fas fa-tachometer-alt me-2"></i>
+                        Admin Dashboard
+                    </h1>
+                    <p class="mb-0 opacity-75">Welcome back, <%= currentAdmin.getFullName() %>. Here's what's happening today.</p>
+                </div>
+                <div>
+                    <span class="welcome-badge">
+                        <i class="fas fa-user-shield me-2"></i>Administrator
                     </span>
                 </div>
             </div>
         </div>
 
-        <!-- Stats Cards -->
-        <div class="row mb-4">
-            <div class="col-xl-3 col-md-6 mb-4">
-                <div class="stats-card stats-total">
-                    <i class="fas fa-calendar-check"></i>
-                    <div>
-                        <div class="number"><%= appointmentStats[0] %></div>
-                        <div class="label">Total Appointments</div>
+        <div class="main-content-dashboard">
+            <%-- Success/Error Messages --%>
+            <%
+                String successMsg = (String) session.getAttribute("successMsg");
+                String errorMsg = (String) session.getAttribute("errorMsg");
+                
+                if (successMsg != null) {
+                    session.removeAttribute("successMsg");
+            %>
+                <div class="alert alert-success alert-modern alert-dismissible fade show mb-4" role="alert">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-check-circle me-3 fs-5"></i>
+                        <div class="flex-grow-1"><%= successMsg %></div>
                     </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
-            </div>
-            <div class="col-xl-3 col-md-6 mb-4">
-                <div class="stats-card stats-pending">
-                    <i class="fas fa-user-md"></i>
-                    <div>
-                        <div class="number"><%= totalDoctors %></div>
-                        <div class="label">Total Doctors</div>
+            <%
+                }
+                if (errorMsg != null) {
+                    session.removeAttribute("errorMsg");
+            %>
+                <div class="alert alert-danger alert-modern alert-dismissible fade show mb-4" role="alert">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-exclamation-triangle me-3 fs-5"></i>
+                        <div class="flex-grow-1"><%= errorMsg %></div>
                     </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
-            </div>
-            <div class="col-xl-3 col-md-6 mb-4">
-                <div class="stats-card stats-confirmed">
-                    <i class="fas fa-users"></i>
-                     <div>
-                        <div class="number"><%= totalPatients %></div>
-                        <div class="label">Total Patients</div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-3 col-md-6 mb-4">
-                <div class="stats-card stats-completed">
-                    <i class="fas fa-clock"></i>
-                     <div>
-                        <div class="number"><%= appointmentStats[1] %></div>
-                        <div class="label">Pending Appointments</div>
-                    </div>
-                </div>
-            </div>
-        </div>
+            <%
+                }
+            %>
 
-        <!-- Charts and Quick Actions -->
-        <div class="row">
-            <div class="col-lg-8 mb-4">
-                <div class="card shadow-custom">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="fas fa-chart-bar me-2"></i>Appointment Analytics
-                        </h5>
+            <%-- Stats Cards --%>
+            <div class="row mb-4">
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="stats-card stats-card-primary">
+                        <h4 class="mb-1"><%= appointmentStats[0] %></h4>
+                        <small>Total Appointments</small>
                     </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6 mb-4">
-                                <div class="chart-container">
-                                    <h6 class="text-center mb-3">Weekly Appointments</h6>
-                                    <canvas id="weeklyChart"></canvas>
+                </div>
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="stats-card stats-card-success">
+                        <h4 class="mb-1"><%= totalDoctors %></h4>
+                        <small>Total Doctors</small>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="stats-card stats-card-info">
+                        <h4 class="mb-1"><%= totalPatients %></h4>
+                        <small>Total Patients</small>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="stats-card stats-card-warning">
+                        <h4 class="mb-1"><%= appointmentStats[1] %></h4>
+                        <small>Pending Appointments</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-8 mb-4">
+                    <div class="card card-modern">
+                        <div class="card-header-modern card-header-flex">
+                            <div>
+                                <i class="fas fa-chart-bar"></i>
+                                <span>Appointment Analytics</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-4">
+                                    <div class="chart-container">
+                                        <h6 class="text-center mb-3">Weekly Appointments</h6>
+                                        <canvas id="weeklyChart"></canvas>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-4">
+                                    <div class="chart-container">
+                                        <h6 class="text-center mb-3">Status Distribution</h6>
+                                        <canvas id="statusChart"></canvas>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="col-md-6 mb-4">
-                                <div class="chart-container">
-                                    <h6 class="text-center mb-3">Status Distribution</h6>
-                                    <canvas id="statusChart"></canvas>
+                            
+                            <div class="mt-4">
+                                <h6 class="mb-3">Top Performing Doctors</h6>
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Rank</th>
+                                                <th>Doctor</th>
+                                                <th>Specialization</th>
+                                                <th>Appointments</th>
+                                                <th>Rating</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <%
+                                                int rank = 1;
+                                                if (doctorAppointmentStats != null && !doctorAppointmentStats.isEmpty()) {
+                                                    for (Map.Entry<String, Integer> entry : doctorAppointmentStats.entrySet()) {
+                                                        if (rank > 5) break;
+                                                        String[] doctorInfo = entry.getKey().split("\\|");
+                                                        if (doctorInfo.length >= 2) {
+                                            %>
+                                            <tr>
+                                                <td><div class="doctor-rank"><%= rank++ %></div></td>
+                                                <td><strong><%= doctorInfo[0] %></strong></td>
+                                                <td><%= doctorInfo[1] %></td>
+                                                <td><span class="badge bg-primary"><%= entry.getValue() %></span></td>
+                                                <td>
+                                                    <%
+                                                        // Calculate rating based on appointment count (4.0 to 5.0 scale)
+                                                        double rating = 4.0 + (entry.getValue() / 100.0);
+                                                        if (rating > 5.0) rating = 5.0;
+                                                    %>
+                                                    <span class="text-warning">
+                                                        <i class="fas fa-star"></i> <%= String.format("%.1f", rating) %>
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                            <%
+                                                        }
+                                                    }
+                                                } else {
+                                            %>
+                                            <tr>
+                                                <td colspan="5" class="text-center text-muted py-3">
+                                                    <div class="empty-state">
+                                                        <i class="fas fa-user-md"></i>
+                                                        <p>No doctor data available</p>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <%
+                                                }
+                                            %>
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
                         </div>
-                        
-                        <!-- Doctor Performance -->
-                        <div class="mt-4">
-                            <h6 class="mb-3">Top Performing Doctors</h6>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="card card-modern mb-4">
+                        <div class="card-header-modern">
+                            <i class="fas fa-bolt"></i>
+                            <span>Quick Actions</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="quick-actions-grid">
+                                <a href="${pageContext.request.contextPath}/admin/management?action=view&type=doctors"
+                                   class="btn btn-primary-modern">
+                                    <i class="fas fa-user-md me-2"></i>Manage Doctors
+                                </a>
+                                <a href="${pageContext.request.contextPath}/admin/management?action=view&type=patients"
+                                   class="btn btn-outline-primary">
+                                    <i class="fas fa-users me-2"></i>Manage Patients
+                                </a>
+                                <a href="${pageContext.request.contextPath}/admin/management?action=view&type=appointments"
+                                   class="btn btn-outline-primary">
+                                    <i class="fas fa-calendar-alt me-2"></i>Manage Appointments
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card card-modern mb-4">
+                        <div class="card-header-modern">
+                            <i class="fas fa-calendar-day"></i>
+                            <span>Today's Appointments</span>
+                        </div>
+                        <div class="card-body">
+                            <%
+                                if (todayAppointments != null && !todayAppointments.isEmpty()) {
+                                    // Limit to 5 appointments for display
+                                    int displayCount = Math.min(todayAppointments.size(), 5);
+                                    for (int i = 0; i < displayCount; i++) {
+                                        Appointment appt = todayAppointments.get(i);
+                                        
+                                        // Status handling
+                                        String statusToday = appt.getStatus();
+                                        String badgeClassToday = "badge-secondary";
+                                    
+                                        if (statusToday == null || "Pending".equals(statusToday)) {
+                                            statusToday = "Pending";
+                                            badgeClassToday = "badge-warning";
+                                        } else if ("Confirmed".equals(statusToday)) {
+                                            badgeClassToday = "badge-success";
+                                        } else if ("Completed".equals(statusToday)) {
+                                            badgeClassToday = "badge-info";
+                                        } else if ("Cancelled".equals(statusToday)) {
+                                            badgeClassToday = "badge-danger";
+                                        }
+                            %>
+                            <div class="activity-item">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <strong><%= appt.getPatientName() != null ? appt.getPatientName() : "N/A" %></strong>
+                                        <br>
+                                        <small class="text-muted">With Dr. <%= appt.getDoctorName() != null ? appt.getDoctorName() : "N/A" %></small>
+                                        <br>
+                                        <small><%= appt.getAppointmentTime() != null ? appt.getAppointmentTime().toString().substring(0, 5) : "N/A" %></small>
+                                    </div>
+                                    <span class="badge <%= badgeClassToday %>">
+                                        <%= statusToday %>
+                                    </span>
+                                </div>
+                            </div>
+                            <%
+                                    }
+                                } else {
+                            %>
+                            <div class="empty-state">
+                                <i class="fas fa-calendar-times"></i>
+                                <h6 class="text-muted">No Appointments</h6>
+                                <p class="text-muted mb-0">No appointments scheduled for today</p>
+                            </div>
+                            <%
+                                }
+                            %>
+                        </div>
+                    </div>
+
+                    <div class="card card-modern">
+                        <div class="card-header-modern">
+                            <i class="fas fa-info-circle"></i>
+                            <span>System Information</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="system-info-list">
+                                <div class="list-group list-group-flush">
+                                    <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                        <span class="text-muted">System Version</span>
+                                        <strong>v1.0.0</strong>
+                                    </div>
+                                    <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                        <span class="text-muted">Last Backup</span>
+                                        <strong><%= new SimpleDateFormat("MMM dd, yyyy").format(new Date()) %></strong>
+                                    </div>
+                                    <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                        <span class="text-muted">Active Users</span>
+                                        <strong><%= totalDoctors + totalPatients %></strong>
+                                    </div>
+                                    <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                        <span class="text-muted">System Status</span>
+                                        <span class="badge badge-success">Online</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card card-modern">
+                        <div class="card-header-modern card-header-flex">
+                            <div>
+                                <i class="fas fa-history"></i>
+                                <span>Recent Activity</span>
+                            </div>
+                            <small class="text-muted">Latest 10 activities</small>
+                        </div>
+                        <div class="card-body">
                             <div class="table-responsive">
-                                <table class="table table-sm">
+                                <table class="table table-sm table-hover">
                                     <thead>
                                         <tr>
-                                            <th>Rank</th>
+                                            <th>Date & Time</th>
+                                            <th>Patient</th>
                                             <th>Doctor</th>
-                                            <th>Specialization</th>
-                                            <th>Appointments</th>
-                                            <th>Rating</th>
+                                            <th>Status</th>
+                                            <th>Details</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <%
-                                            int rank = 1;
-                                            if (doctorAppointmentStats != null && !doctorAppointmentStats.isEmpty()) {
-                                                for (Map.Entry<String, Integer> entry : doctorAppointmentStats.entrySet()) {
-                                                    if (rank > 5) break;
-                                                    String[] doctorInfo = entry.getKey().split("\\|");
-                                                    if (doctorInfo.length >= 2) {
+                                            if (recentAppointments != null && !recentAppointments.isEmpty()) {
+                                                for (Appointment appt : recentAppointments) {
+                                                    
+                                                    // Status handling
+                                                    String statusRecent = appt.getStatus();
+                                                    String badgeClassRecent = "badge-secondary";
+                                                
+                                                    if (statusRecent == null || "Pending".equals(statusRecent)) {
+                                                        statusRecent = "Pending";
+                                                        badgeClassRecent = "badge-warning";
+                                                    } else if ("Confirmed".equals(statusRecent)) {
+                                                        badgeClassRecent = "badge-success";
+                                                    } else if ("Completed".equals(statusRecent)) {
+                                                        badgeClassRecent = "badge-info";
+                                                    } else if ("Cancelled".equals(statusRecent)) {
+                                                        badgeClassRecent = "badge-danger";
+                                                    }
                                         %>
                                         <tr>
-                                            <td><div class="doctor-rank"><%= rank++ %></div></td>
-                                            <td><strong><%= doctorInfo[0] %></strong></td>
-                                            <td><%= doctorInfo[1] %></td>
-                                            <td><span class="badge bg-primary"><%= entry.getValue() %></span></td>
                                             <td>
-                                                <%
-                                                    // Calculate rating based on appointment count (4.0 to 5.0 scale)
-                                                    double rating = 4.0 + (entry.getValue() / 100.0);
-                                                    if (rating > 5.0) rating = 5.0;
-                                                %>
-                                                <span class="text-warning">
-                                                    <i class="fas fa-star"></i> <%= String.format("%.1f", rating) %>
+                                                <small><%= appt.getAppointmentDate() != null ? appt.getAppointmentDate() : "N/A" %></small>
+                                                <br>
+                                                <small class="text-muted"><%= appt.getAppointmentTime() != null ? appt.getAppointmentTime().toString().substring(0, 5) : "N/A" %></small>
+                                            </td>
+                                            <td><%= appt.getPatientName() != null ? appt.getPatientName() : "N/A" %></td>
+                                            <td>Dr. <%= appt.getDoctorName() != null ? appt.getDoctorName() : "N/A" %></td>
+                                            <td>
+                                                <span class="badge <%= badgeClassRecent %>">
+                                                    <%= statusRecent %>
                                                 </span>
+                                            </td>
+                                            <td>
+                                                <small class="text-muted"><%= appt.getDoctorSpecialization() != null ? appt.getDoctorSpecialization() : "General" %></small>
                                             </td>
                                         </tr>
                                         <%
-                                                    }
                                                 }
                                             } else {
                                         %>
                                         <tr>
                                             <td colspan="5" class="text-center text-muted py-3">
-                                                <i class="fas fa-user-md fa-2x mb-2"></i>
-                                                <p>No doctor data available</p>
+                                                <div class="empty-state">
+                                                    <i class="fas fa-inbox"></i>
+                                                    <h6 class="text-muted">No Recent Activity</h6>
+                                                    <p class="text-muted mb-0">No recent appointments found</p>
+                                                </div>
                                             </td>
                                         </tr>
                                         <%
@@ -754,201 +1089,33 @@
                     </div>
                 </div>
             </div>
-
-            <div class="col-lg-4">
-                <!-- Quick Actions -->
-                <div class="card shadow-custom mb-4">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="fas fa-bolt me-2"></i>Quick Actions
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="d-grid gap-2">
-                            <a href="${pageContext.request.contextPath}/admin/management?action=view&type=doctors"
-                               class="btn btn-primary">
-                                <i class="fas fa-user-md me-2"></i>Manage Doctors
-                            </a>
-                            <a href="${pageContext.request.contextPath}/admin/management?action=view&type=patients"
-                               class="btn btn-outline-primary">
-                                <i class="fas fa-users me-2"></i>Manage Patients
-                            </a>
-                            <a href="${pageContext.request.contextPath}/admin/management?action=view&type=appointments"
-                               class="btn btn-outline-primary">
-                                <i class="fas fa-calendar-alt me-2"></i>Manage Appointments
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Today's Appointments -->
-                <div class="card shadow-custom mb-4">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="fas fa-calendar-day me-2"></i>Today's Appointments
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <%
-                            if (todayAppointments != null && !todayAppointments.isEmpty()) {
-                                // Limit to 5 appointments for display
-                                int displayCount = Math.min(todayAppointments.size(), 5);
-                                for (int i = 0; i < displayCount; i++) {
-                                    Appointment appt = todayAppointments.get(i);
-                        %>
-                        <div class="activity-item">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <strong><%= appt.getPatientName() != null ? appt.getPatientName() : "N/A" %></strong>
-                                    <br>
-                                    <small class="text-muted">With Dr. <%= appt.getDoctorName() != null ? appt.getDoctorName() : "N/A" %></small>
-                                    <br>
-                                    <small><%= appt.getAppointmentTime() != null ? appt.getAppointmentTime().toString().substring(0, 5) : "N/A" %></small>
-                                </div>
-                                <span class="badge 
-                                    <%= "Pending".equals(appt.getStatus()) ? "bg-warning" : 
-                                       "Confirmed".equals(appt.getStatus()) ? "bg-success" : 
-                                       "Completed".equals(appt.getStatus()) ? "bg-info" : 
-                                       "Cancelled".equals(appt.getStatus()) ? "bg-danger" : "bg-secondary" %>">
-                                    <%= appt.getStatus() != null ? appt.getStatus() : "Unknown" %>
-                                </span>
-                            </div>
-                        </div>
-                        <%
-                                }
-                            } else {
-                        %>
-                        <div class="text-center text-muted py-3">
-                            <i class="fas fa-calendar-times fa-2x mb-2"></i>
-                            <p>No appointments for today</p>
-                        </div>
-                        <%
-                            }
-                        %>
-                    </div>
-                </div>
-
-                <!-- System Information -->
-                <div class="card shadow-custom">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="fas fa-info-circle me-2"></i>System Information
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="list-group list-group-flush">
-                            <div class="list-group-item d-flex justify-content-between align-items-center px-0">
-                                <span class="text-muted">System Version</span>
-                                <strong>v1.0.0</strong>
-                            </div>
-                            <div class="list-group-item d-flex justify-content-between align-items-center px-0">
-                                <span class="text-muted">Last Backup</span>
-                                <strong><%= new SimpleDateFormat("MMM dd, yyyy").format(new Date()) %></strong>
-                            </div>
-                            <div class="list-group-item d-flex justify-content-between align-items-center px-0">
-                                <span class="text-muted">Active Users</span>
-                                <strong><%= totalDoctors + totalPatients %></strong>
-                            </div>
-                            <div class="list-group-item d-flex justify-content-between align-items-center px-0">
-                                <span class="text-muted">System Status</span>
-                                <span class="badge bg-success">Online</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Recent Activity -->
-        <div class="row mt-4">
-            <div class="col-12">
-                <div class="card shadow-custom">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">
-                            <i class="fas fa-history me-2"></i>Recent Activity
-                        </h5>
-                        <small class="text-muted">Latest 10 activities</small>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-sm table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Date & Time</th>
-                                        <th>Patient</th>
-                                        <th>Doctor</th>
-                                        <th>Status</th>
-                                        <th>Details</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <%
-                                        if (recentAppointments != null && !recentAppointments.isEmpty()) {
-                                            for (Appointment appt : recentAppointments) {
-                                    %>
-                                    <tr>
-                                        <td>
-                                            <small><%= appt.getAppointmentDate() != null ? appt.getAppointmentDate() : "N/A" %></small>
-                                            <br>
-                                            <small class="text-muted"><%= appt.getAppointmentTime() != null ? appt.getAppointmentTime().toString().substring(0, 5) : "N/A" %></small>
-                                        </td>
-                                        <td><%= appt.getPatientName() != null ? appt.getPatientName() : "N/A" %></td>
-                                        <td>Dr. <%= appt.getDoctorName() != null ? appt.getDoctorName() : "N/A" %></td>
-                                        <td>
-                                            <span class="badge 
-                                                <%= "Pending".equals(appt.getStatus()) ? "bg-warning" : 
-                                                   "Confirmed".equals(appt.getStatus()) ? "bg-success" : 
-                                                   "Completed".equals(appt.getStatus()) ? "bg-info" : 
-                                                   "Cancelled".equals(appt.getStatus()) ? "bg-danger" : "bg-secondary" %>">
-                                                <%= appt.getStatus() != null ? appt.getStatus() : "Unknown" %>
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <small class="text-muted"><%= appt.getDoctorSpecialization() != null ? appt.getDoctorSpecialization() : "General" %></small>
-                                        </td>
-                                    </tr>
-                                    <%
-                                            }
-                                        } else {
-                                    %>
-                                    <tr>
-                                        <td colspan="5" class="text-center text-muted py-3">
-                                            <i class="fas fa-inbox fa-2x mb-2"></i>
-                                            <p>No recent activity found</p>
-                                        </td>
-                                    </tr>
-                                    <%
-                                        }
-                                    %>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
     </main>
 
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Mobile menu toggle
             const mobileMenuToggle = document.getElementById('mobileMenuToggle');
             const sidebar = document.getElementById('sidebar');
-
-            function checkScreenSize() {
-                if (window.innerWidth <= 768) {
-                    mobileMenuToggle.style.display = 'flex';
-                    sidebar.classList.remove('mobile-open');
-                } else {
-                    mobileMenuToggle.style.display = 'none';
-                    sidebar.classList.remove('mobile-open');
-                }
+            
+            if (mobileMenuToggle && sidebar) {
+                mobileMenuToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('mobile-open');
+                });
             }
 
-            checkScreenSize();
-            window.addEventListener('resize', checkScreenSize);
-
-            mobileMenuToggle.addEventListener('click', function() {
-                sidebar.classList.toggle('mobile-open');
+            // Auto-hide alerts
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                setTimeout(() => {
+                    if (alert && alert.classList.contains('show')) {
+                        const bsAlert = new bootstrap.Alert(alert);
+                        bsAlert.close();
+                    }
+                }, 5000);
             });
 
             // Weekly Appointments Chart - USING REAL DATA
