@@ -8,6 +8,7 @@
         --warning: #f59e0b;
         --info: #0ea5e9;
         --danger: #ef4444;
+        --danger-light: #fef2f2;
         --dark: #1f2937;
         --light: #f9fafb;
         --transition: all 0.3s ease;
@@ -16,14 +17,17 @@
         --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     }
 
-        .navbar {
-            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(229, 231, 235, 0.8);
-            padding: 1rem 0 !important;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            transition: var(--transition);
-        }
+    .navbar {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid rgba(229, 231, 235, 0.8);
+        padding: 0.5rem 0 !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        transition: var(--transition);
+        position: sticky;
+        top: 0;
+        z-index: 1030;
+    }
 
     .navbar-brand {
         font-weight: 700;
@@ -33,30 +37,40 @@
         align-items: center;
         gap: 0.5rem;
         transition: var(--transition);
+        text-decoration: none;
     }
 
     .navbar-brand:hover {
         transform: translateY(-1px);
+        color: var(--primary) !important;
     }
 
     .navbar-brand i {
         color: var(--primary);
         font-size: 1.75rem;
+        transition: var(--transition);
+    }
+
+    .navbar-brand:hover i {
+        transform: scale(1.1);
     }
 
     .nav-link {
         font-weight: 500;
-        color: #414449 !important;
-        padding: 0.5rem 1rem !important;
+        color: #6b7280 !important;
+        padding: 0.75rem 1.25rem !important;
         border-radius: var(--border-radius);
         transition: var(--transition);
         position: relative;
+        text-decoration: none;
+        margin: 0.125rem 0.25rem;
     }
 
     .nav-link:hover {
         color: var(--primary) !important;
         background: var(--primary-light);
         transform: translateY(-1px);
+        box-shadow: var(--shadow);
     }
 
     .nav-link.active {
@@ -70,6 +84,7 @@
         padding: 0.5rem;
         border-radius: var(--border-radius);
         transition: var(--transition);
+        background: transparent;
     }
 
     .navbar-toggler:hover {
@@ -78,6 +93,13 @@
 
     .navbar-toggler:focus {
         box-shadow: none;
+        background: var(--primary-light);
+    }
+
+    .navbar-toggler-icon {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%2879, 70, 229, 0.8%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+        width: 1.25em;
+        height: 1.25em;
     }
 
     .dropdown-menu {
@@ -88,6 +110,7 @@
         margin-top: 0.5rem !important;
         background: white;
         border: 1px solid #f3f4f6;
+        min-width: 200px;
     }
 
     .dropdown-item {
@@ -98,12 +121,18 @@
         display: flex;
         align-items: center;
         gap: 0.5rem;
+        color: #6b7280;
+        text-decoration: none;
     }
 
     .dropdown-item:hover {
         background: var(--primary-light);
         color: var(--primary);
         transform: translateX(3px);
+    }
+
+    .dropdown-item.text-danger {
+        color: var(--danger) !important;
     }
 
     .dropdown-item.text-danger:hover {
@@ -123,22 +152,21 @@
         font-weight: 600;
         padding: 0.625rem 1.5rem;
         transition: var(--transition);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
     }
 
     .btn-primary:hover {
         transform: translateY(-2px);
         box-shadow: 0 7px 14px rgba(79, 70, 229, 0.25);
-    }
-
-    .nav-user-icon {
-        font-size: 1.75rem;
-        color: var(--primary);
-        transition: var(--transition);
+        color: white;
     }
 
     .user-avatar {
-        width: 36px;
-        height: 36px;
+        width: 40px;
+        height: 40px;
         border-radius: 50%;
         background: linear-gradient(135deg, var(--primary), #6366f1);
         display: flex;
@@ -146,7 +174,13 @@
         justify-content: center;
         color: white;
         font-size: 1rem;
+        font-weight: 600;
         margin-right: 0.5rem;
+        transition: var(--transition);
+    }
+
+    .user-avatar:hover {
+        transform: scale(1.05);
     }
 
     /* Mobile responsiveness */
@@ -162,7 +196,7 @@
 
         .nav-link {
             padding: 0.75rem 1rem !important;
-            margin: 0.125rem 0;
+            margin: 0.25rem 0;
         }
 
         .dropdown-menu {
@@ -175,6 +209,11 @@
         .btn-primary {
             width: 100%;
             margin-top: 0.5rem;
+            justify-content: center;
+        }
+
+        .navbar-nav {
+            gap: 0.5rem;
         }
     }
 
@@ -214,11 +253,44 @@
     .patient-login { color: var(--primary); }
     .doctor-login { color: var(--success); }
     .admin-login { color: var(--warning); }
-    
-    
+
+    /* User info styles */
+    .user-info {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        line-height: 1.2;
+    }
+
+    .user-name {
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: var(--dark);
+    }
+
+    .user-role {
+        font-size: 0.75rem;
+        color: var(--secondary);
+    }
+
+    /* Fix for dropdown toggle arrow */
+    .dropdown-toggle::after {
+        transition: var(--transition);
+    }
+
+    .dropdown-toggle.show::after {
+        transform: rotate(180deg);
+    }
+
+    /* Navbar scroll effect */
+    .navbar-scrolled {
+        background: rgba(255, 255, 255, 0.95) !important;
+        backdrop-filter: blur(20px);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
 </style>
 
-<nav class="navbar navbar-expand-lg navbar-light sticky-top">
+<nav class="navbar navbar-expand-lg navbar-light">
     <div class="container">
         <a class="navbar-brand" href="${pageContext.request.contextPath}/index.jsp">
             <i class="fas fa-heartbeat"></i>   
@@ -235,28 +307,59 @@
             <ul class="navbar-nav ms-auto align-items-lg-center">
                 <%
                     String currentUserRole = "";
+                    String currentUserName = "";
+                    
                     if (session.getAttribute("patientObj") != null) {
                         currentUserRole = "patient";
+                        Object patientObj = session.getAttribute("patientObj");
+                        if (patientObj != null) {
+                            try {
+                                currentUserName = (String) patientObj.getClass().getMethod("getFullName").invoke(patientObj);
+                            } catch (Exception e) {
+                                currentUserName = "Patient";
+                            }
+                        }
                     } else if (session.getAttribute("doctorObj") != null) {
                         currentUserRole = "doctor";
+                        Object doctorObj = session.getAttribute("doctorObj");
+                        if (doctorObj != null) {
+                            try {
+                                currentUserName = (String) doctorObj.getClass().getMethod("getFullName").invoke(doctorObj);
+                            } catch (Exception e) {
+                                currentUserName = "Doctor";
+                            }
+                        }
                     } else if (session.getAttribute("adminObj") != null) {
                         currentUserRole = "admin";
+                        Object adminObj = session.getAttribute("adminObj");
+                        if (adminObj != null) {
+                            try {
+                                currentUserName = (String) adminObj.getClass().getMethod("getFullName").invoke(adminObj);
+                            } catch (Exception e) {
+                                currentUserName = "Administrator";
+                            }
+                        }
                     }
                 %>
 
                 <% if (currentUserRole.isEmpty()) { %>
-                <!-- Public Navigation -->
                 <li class="nav-item">
-                    <a class="nav-link" href="${pageContext.request.contextPath}/index.jsp">Home</a>
+                    <a class="nav-link" href="${pageContext.request.contextPath}/index.jsp">
+                        <i class="fas fa-home me-1"></i>Home
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="${pageContext.request.contextPath}/about.jsp">About</a>
+                    <a class="nav-link" href="${pageContext.request.contextPath}/about.jsp">
+                        <i class="fas fa-info-circle me-1"></i>About
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="${pageContext.request.contextPath}/contact.jsp">Contact</a>
+                    <a class="nav-link" href="${pageContext.request.contextPath}/contact.jsp">
+                        <i class="fas fa-envelope me-1"></i>Contact
+                    </a>
                 </li>
 
-                <li class="nav-item dropdown ms-lg-2">
+                <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="loginDropdown"
                         role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="fas fa-sign-in-alt me-2"></i>
@@ -283,7 +386,7 @@
                     </ul>
                 </li>
 
-                <li class="nav-item ms-lg-2">
+                <li class="nav-item">
                     <a class="btn btn-primary"
                         href="${pageContext.request.contextPath}/patient/register.jsp">
                         <i class="fas fa-user-plus me-2"></i>Get Started
@@ -291,34 +394,75 @@
                 </li>
 
                 <% } else { %>
-                <!-- Authenticated User Navigation -->
                 <li class="nav-item">
                     <a class="nav-link" href="${pageContext.request.contextPath}/<%= currentUserRole %>/dashboard.jsp">
                         <i class="fas fa-tachometer-alt me-1"></i>Dashboard
                     </a>
                 </li>
+                
+                <% if ("patient".equals(currentUserRole)) { %>
                 <li class="nav-item">
-                    <a class="nav-link" href="${pageContext.request.contextPath}/<%= currentUserRole %>/profile">
+                    <%-- --- START: FIX --- --%>
+                    <a class="nav-link" href="${pageContext.request.contextPath}/patient/appointment?action=view">
+                    <%-- --- END: FIX --- --%>
+                        <i class="fas fa-calendar-alt me-1"></i>Appointments
+                    </a>
+                </li>
+                <% } else if ("doctor".equals(currentUserRole)) { %>
+                <li class="nav-item">
+                    <%-- --- START: FIX --- --%>
+                    <a class="nav-link" href="${pageContext.request.contextPath}/doctor/appointment?action=view">
+                    <%-- --- END: FIX --- --%>
+                        <i class="fas fa-calendar-check me-1"></i>My Appointments
+                    </a>
+                </li>
+                <% } else if ("admin".equals(currentUserRole)) { %>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="managementDropdown" role="button" 
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-cog me-1"></i>Management
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="managementDropdown">
+                        <li>
+                            <a class="dropdown-item" href="${pageContext.request.contextPath}/admin/management?action=view&type=doctors">
+                                <i class="fas fa-user-md me-2"></i>Manage Doctors
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="${pageContext.request.contextPath}/admin/management?action=view&type=patients">
+                                <i class="fas fa-users me-2"></i>Manage Patients
+                            </a>
+                        </li>
+                        <li>
+                            <%-- This link was already correct --%>
+                            <a class="dropdown-item" href="${pageContext.request.contextPath}/admin/management?action=view&type=appointments">
+                                <i class="fas fa-calendar-alt me-2"></i>Manage Appointments
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <% } %>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="${pageContext.request.contextPath}/<%= currentUserRole %>/profile.jsp">
                         <i class="fas fa-user me-1"></i>Profile
                     </a>
                 </li>
 
-                <li class="nav-item dropdown ms-lg-2">
+                <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown"
                         role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <div class="user-avatar">
-                            <i class="fas fa-user"></i>
+                            <%= currentUserName.substring(0, 1).toUpperCase() %>
                         </div>
-                        <div class="d-none d-lg-flex flex-column align-items-start">
-                            <span class="fw-semibold">
-                                <%= currentUserRole.substring(0, 1).toUpperCase() + currentUserRole.substring(1) %>
-                            </span>
-                            <small class="text-muted">My Account</small>
+                        <div class="user-info d-none d-lg-block">
+                            <span class="user-name"><%= currentUserName %></span>
+                            <span class="user-role"><%= currentUserRole.substring(0, 1).toUpperCase() + currentUserRole.substring(1) %></span>
                         </div>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                         <li>
-                            <a class="dropdown-item" href="${pageContext.request.contextPath}/<%= currentUserRole %>/profile">
+                            <a class="dropdown-item" href="${pageContext.request.contextPath}/<%= currentUserRole %>/profile.jsp">
                                 <i class="fas fa-user me-2 text-primary"></i>My Profile
                             </a>
                         </li>
@@ -341,25 +485,91 @@
     </div>
 </nav>
 
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
-    integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3"
-    crossorigin="anonymous"></script>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"
-    integrity="sha384-QFJH/2I/Ri7Z27vnOvwf1C/JfWrPytX5T6Gij8axWQzCwoDchzAhWutZAbc8K7wA"
-    crossorigin="anonymous"></script>
 
 <script>
     // Add active class to current page link
     document.addEventListener('DOMContentLoaded', function() {
-        const currentLocation = window.location.pathname;
-        const navLinks = document.querySelectorAll('.nav-link');
+        const currentLocation = window.location.pathname + window.location.search;
+        const navLinks = document.querySelectorAll('.nav-link, .dropdown-item');
+        
+        let bestMatch = null;
         
         navLinks.forEach(link => {
-            if (link.getAttribute('href') === currentLocation) {
-                link.classList.add('active');
+            const linkHref = link.getAttribute('href');
+            if (!linkHref || linkHref === '#') return;
+            
+            // Create a URL object to easily get the pathname and search
+            let linkPath;
+            try {
+                linkPath = new URL(link.href).pathname + new URL(link.href).search;
+            } catch (e) {
+                return; // Invalid URL
+            }
+
+            // Exact match
+            if (linkPath === currentLocation) {
+                bestMatch = link;
+            }
+            
+            // Partial match for dashboard/profile, etc.
+            if (currentLocation.startsWith(linkPath) && linkPath.length > (bestMatch ? bestMatch.getAttribute('href').length : 0)) {
+                 // Check if it's not just the root
+                if(linkPath !== "${pageContext.request.contextPath}/") {
+                    bestMatch = link;
+                }
             }
         });
+        
+        // Handle special case for index.jsp
+        if (currentLocation === "${pageContext.request.contextPath}/" || currentLocation === "${pageContext.request.contextPath}/index.jsp") {
+             document.querySelector('a[href$="index.jsp"]').classList.add('active');
+        }
+
+        if (bestMatch) {
+            bestMatch.classList.add('active');
+            // If it's a dropdown item, also activate the parent nav-link
+            const parentDropdown = bestMatch.closest('.dropdown');
+            if (parentDropdown) {
+                parentDropdown.querySelector('.nav-link.dropdown-toggle').classList.add('active');
+            }
+        }
+
+        // Navbar background on scroll
+        window.addEventListener('scroll', function() {
+            const navbar = document.querySelector('.navbar');
+            if (navbar) { // Check if navbar exists
+                if (window.scrollY > 10) {
+                    navbar.classList.add('navbar-scrolled');
+                } else {
+                    navbar.classList.remove('navbar-scrolled');
+                }
+            }
+        });
+
+        // Initialize scroll effect on page load
+        if (window.scrollY > 10) {
+            const navbar = document.querySelector('.navbar');
+            if (navbar) {
+                navbar.classList.add('navbar-scrolled');
+            }
+        }
+
+        // Close mobile menu when clicking on a link
+        const navLinksMobile = document.querySelectorAll('.nav-link, .dropdown-item');
+        const navbarCollapse = document.querySelector('.navbar-collapse');
+        
+        if (navbarCollapse) {
+            navLinksMobile.forEach(link => {
+                link.addEventListener('click', () => {
+                    if (window.innerWidth < 992) {
+                        const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
+                        if (bsCollapse && navbarCollapse.classList.contains('show')) {
+                            bsCollapse.hide();
+                        }
+                    }
+                });
+            });
+        }
 
         // Smooth scrolling for anchor links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -375,16 +585,16 @@
             });
         });
 
-        // Navbar background on scroll
-        window.addEventListener('scroll', function() {
-            const navbar = document.querySelector('.navbar');
-            if (window.scrollY > 50) {
-                navbar.style.background = 'rgba(255, 255, 255, 0.95)';
-                navbar.style.backdropFilter = 'blur(20px)';
-            } else {
-                navbar.style.background = 'linear-gradient(135deg, #ffffff, #f8fafc)';
-                navbar.style.backdropFilter = 'blur(10px)';
-            }
+        // Handle dropdown animations
+        const dropdownToggles = document.querySelectorAll('.dropdown-toggle');
+        dropdownToggles.forEach(toggle => {
+            toggle.addEventListener('show.bs.dropdown', function () {
+                this.classList.add('show');
+            });
+            
+            toggle.addEventListener('hide.bs.dropdown', function () {
+                this.classList.remove('show');
+            });
         });
     });
 </script>
