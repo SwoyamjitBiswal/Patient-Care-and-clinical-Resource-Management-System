@@ -703,11 +703,32 @@
             </div>
         </div>
 
+        <%-- ===================================================================== --%>
+        <%--         ROBUST MESSAGE HANDLING BLOCK                                 --%>
+        <%-- ===================================================================== --%>
         <%
-            String successMsg = (String) request.getAttribute("successMsg");
-            String errorMsg = (String) request.getAttribute("errorMsg");
+            // 1. Check SESSION (for messages from redirects, e.g., update/delete)
+            String successMsg = (String) session.getAttribute("successMsg");
+            String errorMsg = (String) session.getAttribute("errorMsg");
 
+            // 2. Clear session messages after reading them
             if (successMsg != null) {
+                session.removeAttribute("successMsg");
+            }
+            if (errorMsg != null) {
+                session.removeAttribute("errorMsg");
+            }
+
+            // 3. Check REQUEST (for messages from a forward, e.g., failed validation)
+            if (request.getAttribute("successMsg") != null) {
+                successMsg = (String) request.getAttribute("successMsg");
+            }
+            if (request.getAttribute("errorMsg") != null) {
+                errorMsg = (String) request.getAttribute("errorMsg");
+            }
+            
+            // 4. Display any messages that were found
+            if (successMsg != null && !successMsg.isEmpty()) {
         %>
             <div class="alert alert-success alert-dismissible fade show" role="alert">
                 <i class="fas fa-check-circle me-2"></i><%= successMsg %>
@@ -715,7 +736,7 @@
             </div>
         <%
             }
-            if (errorMsg != null) {
+            if (errorMsg != null && !errorMsg.isEmpty()) {
         %>
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
                 <i class="fas fa-exclamation-triangle me-2"></i><%= errorMsg %>
@@ -724,6 +745,10 @@
         <%
             }
         %>
+        <%-- ===================================================================== --%>
+        <%--         END: ROBUST MESSAGE HANDLING BLOCK                          --%>
+        <%-- ===================================================================== --%>
+
 
         <div class="card shadow-custom">
             <div class="card-header d-flex justify-content-between align-items-center flex-wrap"> <%-- Added flex-wrap --%>
@@ -894,7 +919,7 @@
                                                                 </div>
                                                                 <div class="col-12">
                                                                     <label class="form-label text-muted">Medical History</label>
-                                                                    <p class="fs-6 fw-medium" style="white-space: pre-wrap;"><%= patient.getMedicalHistory() != null && !patient.getMedicalHistory().isEmpty() ? patient.getMedicalHistory() : "N/Failure" %></p>
+                                                                    <p class="fs-6 fw-medium" style="white-space: pre-wrap;"><%= patient.getMedicalHistory() != null && !patient.getMedicalHistory().isEmpty() ? patient.getMedicalHistory() : "N/A" %></p>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -1044,6 +1069,30 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            
+            // --- START: UPDATED AUTO-HIDE SCRIPT ---
+            // Auto-hide success alerts after 5 seconds
+            const successAlerts = document.querySelectorAll('.alert-success.alert-dismissible');
+            
+            successAlerts.forEach(function(alert) {
+                setTimeout(function() {
+                    // Check if Bootstrap's Alert component is loaded
+                    if (typeof bootstrap !== 'undefined' && bootstrap.Alert) {
+                        // Get the instance or create a new one, then close it
+                        const bsAlert = bootstrap.Alert.getInstance(alert) || new bootstrap.Alert(alert);
+                        if (bsAlert) {
+                            bsAlert.close();
+                        }
+                    } else {
+                        // Fallback if Bootstrap JS isn't loaded
+                        alert.style.transition = 'opacity 0.5s ease';
+                        alert.style.opacity = '0';
+                        setTimeout(() => alert.style.display = 'none', 500);
+                    }
+                }, 5000); // 5000 milliseconds = 5 seconds
+            });
+            // --- END: UPDATED AUTO-HIDE SCRIPT ---
+
             // Initialize tooltips
             const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
             const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
@@ -1078,9 +1127,6 @@
                      });
                  }
             });
-
-            // ▼▼▼ The JavaScript for ".view-patient" is no longer needed ▼▼▼
-            // It is now handled directly by Bootstrap's data-bs-toggle attributes.
 
             // Search functionality
             const searchInput = document.getElementById('patientSearchInput'); // Use ID added in HTML
