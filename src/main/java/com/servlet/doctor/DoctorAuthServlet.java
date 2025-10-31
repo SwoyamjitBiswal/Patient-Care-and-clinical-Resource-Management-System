@@ -72,7 +72,7 @@ public class DoctorAuthServlet extends HttpServlet {
 
             if (success) {
                 // Set a message for the user after successful registration
-                request.getSession().setAttribute("successMsg", "Registration successful. Your account is pending admin approval.");
+                request.getSession().setAttribute("successMsg", "Registration successful. Your account is pending admin approval to Login");
                 response.sendRedirect("login.jsp");
             } else {
                 request.setAttribute("errorMsg", "Registration failed. Please try again.");
