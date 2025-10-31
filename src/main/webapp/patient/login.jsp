@@ -206,7 +206,7 @@
     .btn-close:hover {
         opacity: 1;
     }
-
+    
     /* Link Styles */
     .auth-link {
         color: #4f46e5;
@@ -304,14 +304,18 @@
                             <p class="mb-0">Access your patient dashboard</p>
                         </div>
                         <div class="auth-body">
+                            
                             <%
-                                String successMsg = (String) request.getAttribute("successMsg");
+                                // Read success message from session (set after registration redirect)
+                                String successMsg = (String) session.getAttribute("successMsg");
+                                
+                                // Read error message from request (set after failed login forward)
                                 String errorMsg = (String) request.getAttribute("errorMsg");
                                 
-                                // --- Get Cookie data once ---
+                                // --- Get Cookie data ---
                                 Cookie[] cookies = request.getCookies();
                                 String patientEmail = "";
-                                String patientPassword = "";
+                                String patientPassword = ""; // This is only used to prefill if cookie exists
                                 boolean rememberMe = false;
 
                                 if (cookies != null) {
@@ -320,31 +324,33 @@
                                             patientEmail = cookie.getValue();
                                             rememberMe = true; 
                                         }
+                                        // We prefill password only if email is also remembered
+                                        // Note: Your servlet code was corrected to NOT save passwords in cookies.
+                                        // This code is kept for legacy/remember-me email functionality.
                                         if ("patientPassword".equals(cookie.getName())) {
                                             patientPassword = cookie.getValue();
                                         }
                                     }
                                 }
-                                // --- END ---
                                 
-                                // FIXED: Updated success message and proper dismissal logic
+                                // --- NEW: SUCCESS ALERT BLOCK ---
                                 if (successMsg != null && !successMsg.isEmpty()) {
                             %>
                                 <div class="alert alert-success alert-dismissible fade show" role="alert">
                                     <div class="d-flex align-items-center">
                                         <i class="fas fa-check-circle me-3 fs-5"></i>
                                         <div class="flex-grow-1">
-                                            **Registration successful! Please log in with your new credentials.**
+                                            <strong>You have successfully registered!</strong> Now you have to log in.
                                         </div>
                                     </div>
                                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                                 </div>
                             <%
-                                    // CRITICAL: Remove attribute after display to prevent re-showing on refresh
-                                    request.removeAttribute("successMsg");
+                                    // CRITICAL: Remove from session so it doesn't show again on refresh
+                                    session.removeAttribute("successMsg");
                                 }
                                 
-                                // FIXED: Proper dismissal logic for error message
+                                // --- ERROR MESSAGE BLOCK ---
                                 if (errorMsg != null && !errorMsg.isEmpty()) {
                             %>
                                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -359,6 +365,7 @@
                                     request.removeAttribute("errorMsg");
                                 }
                             %>
+
 
                             <form action="${pageContext.request.contextPath}/patient/auth?action=login" method="post" class="needs-validation" novalidate>
                                 <div class="mb-3">
@@ -383,7 +390,8 @@
                                         </span>
                                         <input type="password" class="form-control" id="password" name="password" required 
                                                placeholder="Enter your password"
-                                               autocomplete="current-password">
+                                               autocomplete="current-password"
+                                               value="<%= (rememberMe ? patientPassword : "") %>"> <%-- Prefill if remembered --%>
                                         <button type="button" class="password-toggle" id="passwordToggle">
                                             <i class="fas fa-eye"></i> 
                                         </button>
@@ -395,6 +403,7 @@
                                     <input type="checkbox" class="form-check-input" id="rememberMe" name="rememberMe"
                                         <%= (rememberMe ? "checked" : "") %>>
                                     <label class="form-check-label" for="rememberMe">Remember me on this device</label>
+
                                 </div>
 
                                 <div class="d-grid mb-3">
@@ -423,17 +432,21 @@
         </div>
     </div>
 
+    <%-- MODAL HTML HAS BEEN REMOVED --%>
+
     <%@ include file="../includes/footer.jsp" %>
 
     <script>
         // Store cookie values in JS variables for dynamic fill
         const patientEmailValue = '<%= patientEmail %>';
-        const patientPasswordValue = '<%= patientPassword %>';
+        const patientPasswordValue = '<%= (rememberMe ? patientPassword : "") %>'; // Only use if rememberMe is on
         
         document.addEventListener('DOMContentLoaded', function() {
             const passwordToggle = document.getElementById('passwordToggle');
             const passwordInput = document.getElementById('password');
             const emailInput = document.getElementById('email');
+            
+            // MODAL SCRIPT HAS BEEN REMOVED
             
             // Dynamic fill to beat aggressive browser autofill
             if (patientEmailValue && emailInput) {
@@ -470,21 +483,6 @@
                     }
                     form.classList.add('was-validated');
                 }, false);
-            });
-
-            // Auto-hide alerts after 5 seconds
-            const alerts = document.querySelectorAll('.alert');
-            alerts.forEach(alert => {
-                setTimeout(() => {
-                    if (window.bootstrap && alert.classList.contains('show')) {
-                        const bsAlert = bootstrap.Alert.getInstance(alert) || new bootstrap.Alert(alert);
-                        bsAlert.close();
-                    } else if (alert.classList.contains('show')) {
-                        alert.classList.remove('show');
-                        alert.classList.add('fade');
-                        alert.style.display = 'none'; 
-                    }
-                }, 5000);
             });
         });
     </script>
