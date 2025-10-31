@@ -3,7 +3,7 @@ package com.servlet.admin;
 import com.dao.AppointmentDao;
 import com.dao.DoctorDao;
 import com.dao.PatientDao;
-import com.entity.Appointment; 
+import com.entity.Appointment;
 import com.entity.Doctor;
 import com.entity.Patient;
 import javax.servlet.RequestDispatcher;
@@ -11,8 +11,8 @@ import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
 import java.io.IOException;
-import java.sql.Date; 
-import java.sql.Time; 
+import java.sql.Date;
+import java.sql.Time;
 
 @WebServlet("/admin/management")
 public class AdminManagementServlet extends HttpServlet {
@@ -28,7 +28,7 @@ public class AdminManagementServlet extends HttpServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
         String action = request.getParameter("action");
@@ -51,7 +51,7 @@ public class AdminManagementServlet extends HttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) 
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
         String action = request.getParameter("action");
@@ -64,7 +64,7 @@ public class AdminManagementServlet extends HttpServlet {
         } else if ("update".equals(action)) {
             if ("doctor".equals(type)) {
                 updateDoctor(request, response);
-            } 
+            }
             else if ("patient".equals(type)) {
                 updatePatient(request, response);
             }
@@ -80,7 +80,7 @@ public class AdminManagementServlet extends HttpServlet {
             } else if ("appointment".equals(type)) {
                 deleteAppointment(request, response);
             }
-        } 
+        }
         // ▼▼▼ NEW APPROVAL BLOCK ▼▼▼
         else if ("approve".equals(action)) {
             if ("doctor".equals(type)) {
@@ -91,22 +91,23 @@ public class AdminManagementServlet extends HttpServlet {
     }
 
 
-    private void viewDoctors(HttpServletRequest request, HttpServletResponse response) 
+    private void viewDoctors(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
         request.setAttribute("doctors", doctorDao.getAllDoctors());
         request.getRequestDispatcher("/admin/manage_doctors.jsp").forward(request, response);
     }
 
-    private void viewPatients(HttpServletRequest request, HttpServletResponse response) 
+    private void viewPatients(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
         request.setAttribute("patients", patientDao.getAllPatients());
         request.getRequestDispatcher("/admin/manage_patients.jsp").forward(request, response);
     }
 
-    private void viewAppointments(HttpServletRequest request, HttpServletResponse response) 
+    private void viewAppointments(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.setAttribute("appointments", appointmentDao.getAllAppointments()); // Assuming you have this method
         request.getRequestDispatcher("/admin/manage_appointments.jsp").forward(request, response);
     }
 
@@ -131,7 +132,7 @@ public class AdminManagementServlet extends HttpServlet {
         }
     }
 
-    private void showEditForm(HttpServletRequest request, HttpServletResponse response) 
+    private void showEditForm(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
         try {
@@ -154,7 +155,7 @@ public class AdminManagementServlet extends HttpServlet {
     }
 
 
-    private void addDoctor(HttpServletRequest request, HttpServletResponse response) 
+    private void addDoctor(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
         try {
@@ -174,7 +175,7 @@ public class AdminManagementServlet extends HttpServlet {
                 return;
             }
             
-            Doctor doctor = new Doctor(fullName, email, password, phone, specialization, 
+            Doctor doctor = new Doctor(fullName, email, password, phone, specialization,
                                      department, qualification, experience, visitingCharge);
             
             boolean success = doctorDao.registerDoctor(doctor);
@@ -195,7 +196,7 @@ public class AdminManagementServlet extends HttpServlet {
     }
 
     // ▼▼▼ NEW METHOD TO APPROVE A DOCTOR ▼▼▼
-    private void approveDoctor(HttpServletRequest request, HttpServletResponse response) 
+    private void approveDoctor(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         try {
             int doctorId = Integer.parseInt(request.getParameter("id"));
@@ -216,7 +217,7 @@ public class AdminManagementServlet extends HttpServlet {
     }
     // ▲▲▲ END NEW METHOD ▲▲▲
 
-    private void updateDoctor(HttpServletRequest request, HttpServletResponse response) 
+    private void updateDoctor(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
         try {
@@ -240,7 +241,7 @@ public class AdminManagementServlet extends HttpServlet {
                 doctor.setQualification(qualification);
                 doctor.setExperience(experience);
                 doctor.setVisitingCharge(visitingCharge);
-                doctor.setAvailability(availability); 
+                doctor.setAvailability(availability);
                 
                 boolean success = doctorDao.updateDoctor(doctor);
                 
@@ -261,7 +262,7 @@ public class AdminManagementServlet extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/admin/management?action=view&type=doctors");
     }
 
-    private void updatePatient(HttpServletRequest request, HttpServletResponse response) 
+    private void updatePatient(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
         try {
@@ -280,7 +281,7 @@ public class AdminManagementServlet extends HttpServlet {
                 dateOfBirth = java.sql.Date.valueOf(dobString);
             }
 
-            Patient patient = patientDao.getPatientById(patientId); 
+            Patient patient = patientDao.getPatientById(patientId);
 
             if (patient != null) {
                 patient.setFullName(fullName);
@@ -292,10 +293,11 @@ public class AdminManagementServlet extends HttpServlet {
                 patient.setEmergencyContact(emergencyContact);
                 patient.setMedicalHistory(medicalHistory);
 
-                boolean success = patientDao.updatePatient(patient); 
+                boolean success = patientDao.updatePatient(patient);
                 
                 if (success) {
-                    request.getSession().setAttribute("successMsg", "Patient updated successfully!");
+                    // ▼▼▼ THIS IS THE LINE YOU REQUESTED TO CHANGE ▼▼▼
+                    request.getSession().setAttribute("successMsg", "Updated successful!");
                 } else {
                     request.getSession().setAttribute("errorMsg", "Failed to update patient. Please try again.");
                 }
@@ -311,7 +313,7 @@ public class AdminManagementServlet extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/admin/management?action=view&type=patients");
     }
 
-    private void updateAppointment(HttpServletRequest request, HttpServletResponse response) 
+    private void updateAppointment(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
         try {
@@ -342,8 +344,8 @@ public class AdminManagementServlet extends HttpServlet {
             if (appt != null) {
                 appt.setStatus(status);
                 appt.setAppointmentType(appointmentType);
-                appt.setAppointmentDate(appointmentDate); 
-                appt.setAppointmentTime(appointmentTime); 
+                appt.setAppointmentDate(appointmentDate);
+                appt.setAppointmentTime(appointmentTime);
                 appt.setReason(reason);
                 appt.setNotes(notes);
                 appt.setFollowUpRequired(followUpRequired);
@@ -367,7 +369,7 @@ public class AdminManagementServlet extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/admin/management?action=view&type=appointments");
     }
 
-    private void deleteDoctor(HttpServletRequest request, HttpServletResponse response) 
+    private void deleteDoctor(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
         try {
@@ -388,13 +390,22 @@ public class AdminManagementServlet extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/admin/management?action=view&type=doctors");
     }
 
-    private void deletePatient(HttpServletRequest request, HttpServletResponse response) 
+    private void deletePatient(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
         try {
             int patientId = Integer.parseInt(request.getParameter("id"));
             
-            request.getSession().setAttribute("errorMsg", "Patient deletion not implemented for safety.");
+            // --- SAFETY STUB ---
+            // Deleting patients can be dangerous due to foreign key constraints 
+            // (e.g., appointments). This stub prevents accidental deletion.
+            // To implement, you would need to handle (or cascade) deleting
+            // all related appointments first.
+            
+            // boolean success = patientDao.deletePatient(patientId);
+            // if(success) ...
+            
+            request.getSession().setAttribute("errorMsg", "Patient deletion is not enabled for safety reasons.");
             
         } catch (Exception e) {
             e.printStackTrace();
@@ -404,7 +415,7 @@ public class AdminManagementServlet extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/admin/management?action=view&type=patients");
     }
 
-    private void deleteAppointment(HttpServletRequest request, HttpServletResponse response) 
+    private void deleteAppointment(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
         try {
