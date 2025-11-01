@@ -6,7 +6,6 @@ import java.sql.*;
 
 public class AdminDao {
 
-    // No-argument constructor to be called by the Servlet
     public AdminDao() {
         // Initialization can be minimal as connection is managed per method call
     }
