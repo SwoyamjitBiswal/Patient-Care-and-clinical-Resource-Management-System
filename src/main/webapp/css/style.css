@@ -2149,3 +2149,66 @@ canvas {
 .fa-4x {
     font-size: 4em;
 }
+
+
+
+/* ===================================================================
+   15. ADDED STYLES (From profile.jsp)
+   ================================================================*/
+
+.input-group-text.align-items-start {
+    align-items: flex-start;
+    padding-top: 0.75rem;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.info-item:last-child {
+    border-bottom: none;
+}
+
+.align-items-start {
+    align-items: flex-start !important;
+}
+
+.flex-grow-1 {
+    flex-grow: 1 !important;
+}
+
+.btn-light {
+    color: var(--gray-700);
+    background-color: white;
+    border-color: var(--gray-300);
+}
+
+.btn-light:hover {
+    background-color: var(--gray-100);
+    border-color: var(--gray-400);
+}
+
+.small {
+    font-size: 0.875rem;
+}
+
+.form-row-spaced > [class*="col-"] {
+    margin-bottom: 1.25rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-check.form-switch {
+    padding-left: 3.5rem;
+}
+
+.form-check-input {
+    width: 3rem;
+    height: 1.5rem;
+    margin-left: -3.5rem;
+}
