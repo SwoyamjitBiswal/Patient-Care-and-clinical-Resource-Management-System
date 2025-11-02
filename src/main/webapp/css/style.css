@@ -852,3 +852,118 @@ body {
     display: flex;
     gap: 0.5rem;
 }
+
+/* ===================================================================
+   7. PAGE-SPECIFIC: CHANGE PASSWORD
+   ================================================================*/
+.form-text {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-top: 0.5rem;
+    display: block;
+}
+
+/* Password toggle button */
+.password-toggle {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--secondary);
+    cursor: pointer;
+    z-index: 5;
+}
+
+.password-toggle:hover {
+    color: var(--primary);
+}
+
+/* Password strength meter */
+.password-strength-meter {
+    height: 5px;
+    margin-top: 8px;
+    border-radius: 3px;
+    background-color: #e9ecef;
+    overflow: hidden;
+}
+
+.password-strength-meter-fill {
+    height: 100%;
+    width: 0%;
+    transition: width 0.3s ease;
+    border-radius: 3px;
+}
+
+.strength-weak {
+    background-color: #dc3545;
+    width: 25%;
+}
+
+.strength-fair {
+    background-color: #fd7e14;
+    width: 50%;
+}
+
+.strength-good {
+    background-color: #ffc107;
+    width: 75%;
+}
+
+.strength-strong {
+    background-color: #28a745;
+    width: 100%;
+}
+
+/* Password requirements list */
+.password-requirements {
+    margin-top: 10px;
+    font-size: 0.8rem;
+}
+
+.requirement-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.requirement-icon {
+    margin-right: 8px;
+    width: 16px;
+    text-align: center;
+}
+
+.requirement-met {
+    color: #28a745;
+}
+
+.requirement-unmet {
+    color: #6c757d;
+}
+
+/* Larger button size */
+.btn-lg {
+    padding: 0.875rem 2rem;
+    font-size: 1.1rem;
+}
+
+/* Security Tips */
+.security-tips {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.security-tips li {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 0;
+    color: #374151;
+}
+
+.security-tips li i {
+    color: var(--success);
+    margin-right: 0.75rem;
+    font-size: 0.875rem;
+}
