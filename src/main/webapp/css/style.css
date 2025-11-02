@@ -134,3 +134,150 @@ body {
 .main-content::-webkit-scrollbar-thumb:hover {
     background: #9ca3af;
 }
+
+
+
+/* ===================================================================
+   3. SIDEBAR NAVIGATION
+   ================================================================*/
+.user-section {
+    text-align: center;
+    padding: 1.5rem 1.5rem 2rem;
+    border-bottom: 1px solid #e5e7eb;
+    margin-bottom: 1rem;
+}
+
+.user-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), #6366f1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    border: 3px solid var(--primary-light);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+}
+
+.user-avatar i {
+    font-size: 2.5rem;
+    color: white;
+}
+
+.user-info h6 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    color: var(--dark);
+}
+
+/* This is the SPECIFIC badge for the sidebar user */
+.user-info .badge {
+    background: var(--primary-light);
+    color: var(--primary);
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    border: 1px solid rgba(79, 70, 229, 0.2);
+}
+
+.nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0 1rem;
+    list-style: none;
+}
+
+.nav-main {
+    flex-grow: 1;
+}
+
+.nav-bottom {
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px solid #e5e7eb;
+    margin: 1.5rem 0 0 0;
+}
+
+.nav-item {
+    margin-bottom: 0.25rem;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.875rem 1.25rem;
+    color: #6b7280;
+    text-decoration: none;
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+    font-weight: 500;
+    position: relative;
+    overflow: hidden;
+}
+
+.nav-link::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 4px;
+    background: var(--primary);
+    transform: scaleY(0);
+    transition: var(--transition);
+    border-radius: 0 4px 4px 0;
+}
+
+.nav-link:hover {
+    color: var(--primary);
+    background: var(--primary-light);
+    transform: translateX(5px);
+}
+
+.nav-link:hover::before {
+    transform: scaleY(1);
+}
+
+.nav-link.active {
+    color: var(--primary);
+    background: var(--primary-light);
+}
+
+.nav-link.active::before {
+    transform: scaleY(1);
+}
+
+.nav-link i {
+    width: 20px;
+    text-align: center;
+    font-size: 1.1rem;
+    transition: var(--transition);
+}
+
+.nav-link.active i {
+    color: var(--primary);
+}
+
+.nav-link:hover i {
+    transform: scale(1.1);
+}
+
+.nav-link-logout {
+    color: var(--danger);
+}
+
+.nav-link-logout:hover {
+    background: var(--danger-light);
+    color: var(--danger);
+    transform: translateX(5px);
+}
+
+.nav-link-logout:hover i,
+.nav-link-logout i {
+    color: var(--danger);
+}
