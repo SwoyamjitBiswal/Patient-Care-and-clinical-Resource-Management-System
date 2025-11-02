@@ -2351,3 +2351,171 @@ canvas {
 .sidebar-overlay.active {
     display: block;
 }
+
+
+
+/* ===================================================================
+   17. ADDED STYLES (From dashboard.jsp)
+   ================================================================*/
+
+.main-content-dashboard {
+    padding: 2.5rem;
+}
+
+@media (max-width: 768px) {
+    .main-content-dashboard {
+        padding: 1.5rem;
+        padding-top: 6rem;
+    }
+}
+
+.dashboard-header {
+    background: linear-gradient(135deg, var(--primary), #5a6ff0);
+    color: white;
+    padding: 2.5rem 2.5rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-md);
+}
+
+/* Stats Card (from dashboard.jsp) - Note: .stats-card itself is in section 8 */
+.stats-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0));
+    z-index: 1;
+}
+
+.stats-card > * {
+    position: relative;
+    z-index: 2;
+}
+
+.stats-card h4 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.stats-card small {
+    font-size: 0.9rem;
+    font-weight: 500;
+    opacity: 0.9;
+}
+
+.stats-card-primary { background: linear-gradient(135deg, var(--primary), #5a6ff0); }
+.stats-card-warning { background: linear-gradient(135deg, var(--warning), #ffd54f); color: var(--gray-800); }
+.stats-card-success { background: linear-gradient(135deg, var(--success), #20c997); }
+.stats-card-info { background: linear-gradient(135deg, var(--info), #0dcaf0); color: var(--gray-800); }
+.stats-card-secondary { background: linear-gradient(135deg, var(--secondary), #6c757d); }
+.stats-card-danger { background: linear-gradient(135deg, var(--danger), #e63946); }
+
+/* Badges (from dashboard.jsp) */
+.badge-success { color: #065f46; background-color: #d1fae5; }
+.badge-warning { color: #92400e; background-color: #fef3c7; }
+.badge-danger { color: #991b1b; background-color: #fee2e2; }
+.badge-info { color: #1e40af; background-color: #dbeafe; }
+
+/* Table (Bootstrap 5 style) */
+.table>:not(caption)>*>* {
+    padding: 0.8rem 0.8rem;
+    background-color: transparent;
+    border-bottom-width: 1px;
+    box-shadow: inset 0 0 0 9999px transparent;
+    border-color: var(--gray-300);
+}
+
+.table>thead th {
+    font-weight: 600;
+    color: var(--gray-600);
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+    border-bottom-width: 2px;
+    border-color: var(--gray-300);
+}
+
+.table-hover>tbody>tr:hover>* {
+    background-color: var(--gray-100);
+    color: var(--gray-900);
+}
+
+/* Charts */
+.small-chart-container {
+    position: relative;
+    height: 200px;
+    width: 100%;
+}
+
+/* Dashboard-specific components */
+.activity-item {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--gray-300);
+}
+
+.activity-item:last-child {
+    border-bottom: none;
+}
+
+.status-indicator {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.doctor-rank {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.quick-actions-grid {
+    display: grid;
+    gap: 1rem;
+}
+
+.card-header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.welcome-badge {
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+.system-info-list .list-group-item {
+    border: none;
+    padding: 0.75rem 0;
+    background: transparent;
+}
+
+/* Responsive for dashboard components */
+@media (max-width: 768px) {
+    .table-responsive {
+        border: 1px solid var(--gray-300);
+        border-radius: var(--border-radius);
+    }
+    
+    .card-header-flex {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
