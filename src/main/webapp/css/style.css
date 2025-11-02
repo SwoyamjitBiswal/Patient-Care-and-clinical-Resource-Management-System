@@ -2008,3 +2008,144 @@ textarea.form-control {
     padding-left: 0;
     list-style: none;
 }
+
+
+
+/* ===================================================================
+   14. ADDED STYLES (From dashboard.jsp)
+   ================================================================*/
+
+.dashboard-header {
+    background: linear-gradient(135deg, var(--primary), #5a6ff0);
+    color: white;
+    padding: 2.5rem 2.5rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-md);
+}
+
+.dashboard-body {
+    padding: 0 2.5rem 2.5rem;
+}
+
+.welcome-badge {
+    color: rgba(255, 255, 255, 0.9);
+    text-decoration: none;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.welcome-badge:hover {
+    color: white;
+    background: rgba(255, 255, 255, 0.25);
+    transform: translateY(-1px);
+    text-decoration: none;
+}
+
+.stats-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
+    z-index: 1;
+}
+
+.stats-card > * {
+    position: relative;
+    z-index: 2;
+}
+
+.stats-card > div {
+    text-align: right;
+}
+
+.stats-total {
+    background: linear-gradient(135deg, #0d6efd, #0a58ca);
+}
+
+.stats-pending {
+    background: linear-gradient(135deg, #ffc107, #d39e00);
+}
+
+.stats-confirmed {
+    background: linear-gradient(135deg, #198754, #146c43);
+}
+
+.stats-completed {
+    background: linear-gradient(135deg, #0dcaf0, #0aa3c2);
+}
+
+.table>:not(caption)>*>* {
+    padding: 0.8rem 0.8rem;
+    background-color: transparent;
+    border-bottom-width: 1px;
+    box-shadow: inset 0 0 0 9999px transparent;
+    border-color: var(--gray-300);
+}
+
+.table>thead th {
+    font-weight: 600;
+    color: var(--gray-600);
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+    border-bottom-width: 2px;
+    border-color: var(--gray-300);
+}
+
+.table-hover>tbody>tr:hover>* {
+    background-color: #f9fafb;
+    color: #111827;
+}
+
+.bg-light {
+    background-color: #e9ecef !important;
+}
+
+.text-dark {
+    color: #343a40 !important;
+}
+
+.text-white {
+    color: #fff !important;
+}
+
+canvas {
+    display: block;
+    height: 250px;
+    width: 100%;
+}
+
+.recent-appointments-section {
+    min-height: 650px;
+}
+
+.recent-appointments-table {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+@media (min-width: 1200px) {
+    .col-xl-3 {
+        flex: 0 0 25%;
+        max-width: 25%;
+    }
+}
+
+.py-5 {
+    padding-top: 3rem !important;
+    padding-bottom: 3rem !important;
+}
+
+.fa-4x {
+    font-size: 4em;
+}
