@@ -2893,3 +2893,132 @@ canvas {
 .search-box {
     max-width: 300px;
 }
+
+
+/* ===================================================================
+   21. ADDED STYLES (From admin/profile.jsp)
+   ================================================================*/
+
+/* Large circular icon box for profile page */
+.icon-box {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    flex-shrink: 0;
+}
+
+/* Profile info list styles */
+.profile-info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.profile-info-item:last-child {
+    border-bottom: none;
+}
+
+/* Context-specific info-label and info-value */
+.profile-info-item .info-label {
+    font-weight: 500;
+    color: var(--gray-700);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.profile-info-item .info-value {
+    color: var(--gray-600);
+    text-align: right;
+}
+
+/* New Password Toggle (replaces/augments old one) */
+.password-toggle {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--secondary);
+    cursor: pointer;
+    z-index: 5;
+    width: 45px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.password-toggle:hover {
+    color: var(--primary);
+}
+
+/* New Password Strength Meter */
+.password-strength-meter {
+    height: 6px;
+    margin-top: 8px;
+    border-radius: 3px;
+    background-color: var(--gray-200);
+    overflow: hidden;
+}
+
+.password-strength-meter-fill {
+    height: 100%;
+    width: 0%;
+    transition: width 0.3s ease;
+    border-radius: 3px;
+}
+
+/* New Strength Colors */
+.strength-weak {
+    background-color: var(--danger);
+    width: 25%;
+}
+
+.strength-fair {
+    background-color: var(--warning);
+    width: 50%;
+}
+
+.strength-good {
+    background-color: #17a2b8; /* Different info color */
+    width: 75%;
+}
+
+.strength-strong {
+    background-color: var(--success);
+    width: 100%;
+}
+
+/* New Password Requirements List */
+.password-requirements {
+    margin-top: 10px;
+}
+
+.requirement-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 6px;
+    font-size: 0.85rem;
+}
+
+.requirement-icon {
+    margin-right: 8px;
+    width: 16px;
+    text-align: center;
+}
+
+.requirement-met {
+    color: var(--success);
+}
+
+.requirement-unmet {
+    color: var(--gray-500);
+}
