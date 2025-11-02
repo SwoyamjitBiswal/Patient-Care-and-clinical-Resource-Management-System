@@ -1,0 +1,55 @@
+/* ===================================================================
+   1. AUTHENTICATION LAYOUT (Login/Register)
+   ================================================================*/
+body {
+    /* Ensure auth pages have the correct font and background */
+    font-family: 'Inter', sans-serif;
+    background-color: #f8fafc;
+}
+
+.auth-container {
+    background: #f8fafc;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding: 2rem 0;
+}
+
+.auth-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    border: 1px solid #e5e7eb;
+    margin: 2rem auto;
+    max-width: 500px;
+}
+
+.auth-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+}
+
+.auth-header {
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    color: white;
+    padding: 2.5rem 3rem; /* MODIFIED: Using login.jsp padding */
+    text-align: center;
+}
+
+.auth-header h2 {
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    font-size: 2rem;
+}
+
+.auth-header p {
+    opacity: 0.9;
+    font-size: 1.1rem;
+    margin-bottom: 0;
+}
+
+.auth-body {
+    padding: 3rem; /* MODIFIED: Using login.jsp padding */
+}
