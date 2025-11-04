@@ -1,11 +1,16 @@
 package com.servlet.admin;
 
-import com.dao.AdminDao;
-import com.entity.Admin;
+import java.io.IOException;
+
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.*;
-import java.io.IOException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import com.dao.AdminDao;
+import com.entity.Admin;
 
 @WebServlet("/admin/auth")
 public class AdminAuthServlet extends HttpServlet {
@@ -77,5 +82,17 @@ public class AdminAuthServlet extends HttpServlet {
             request.getRequestDispatcher("login.jsp").forward(request, response);
         }
     }
+    // Admin logout logic
+    private void logoutAdmin(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
 
+        // Get existing session without creating a new one (false)
+        HttpSession session = request.getSession(false); 
+        if (session != null) {
+            session.invalidate(); // Destroy the session
+        }
+        // Redirect to the context root (e.g., /PatientCareSystem/index.jsp)
+        response.sendRedirect(request.getContextPath() + "/index.jsp"); 
+    }
+}
 
