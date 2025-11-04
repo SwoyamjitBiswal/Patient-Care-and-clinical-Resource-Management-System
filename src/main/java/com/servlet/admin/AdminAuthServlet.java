@@ -20,10 +20,9 @@ public class AdminAuthServlet extends HttpServlet {
     @Override
     public void init() throws ServletException {
         // Instantiate the DAO using the no-argument constructor
-        adminDao = new AdminDao(); 
+        adminDao = new AdminDao();
     }
 
-    
     // 2. Handles POST requests (Login, Logout)
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -40,12 +39,12 @@ public class AdminAuthServlet extends HttpServlet {
             response.sendRedirect("login.jsp");
         }
     }
-    
+
     // 3. Handles GET requests (primarily for Logout)
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
         String action = request.getParameter("action");
         if ("logout".equalsIgnoreCase(action)) {
             logoutAdmin(request, response);
@@ -53,7 +52,7 @@ public class AdminAuthServlet extends HttpServlet {
             response.sendRedirect("login.jsp");
         }
     }
-    
+
     // Admin login logic
     private void loginAdmin(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -63,7 +62,7 @@ public class AdminAuthServlet extends HttpServlet {
             String password = request.getParameter("password");
 
             // Calls the correct login(String, String) method from the Dao
-            Admin admin = adminDao.login(email, password); 
+            Admin admin = adminDao.login(email, password);
 
             if (admin != null) {
                 HttpSession session = request.getSession();
@@ -82,17 +81,17 @@ public class AdminAuthServlet extends HttpServlet {
             request.getRequestDispatcher("login.jsp").forward(request, response);
         }
     }
+
     // Admin logout logic
     private void logoutAdmin(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
         // Get existing session without creating a new one (false)
-        HttpSession session = request.getSession(false); 
+        HttpSession session = request.getSession(false);
         if (session != null) {
             session.invalidate(); // Destroy the session
         }
         // Redirect to the context root (e.g., /PatientCareSystem/index.jsp)
-        response.sendRedirect(request.getContextPath() + "/index.jsp"); 
+        response.sendRedirect(request.getContextPath() + "/index.jsp");
     }
 }
-
