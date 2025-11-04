@@ -35,3 +35,17 @@ public class AdminAuthServlet extends HttpServlet {
             response.sendRedirect("login.jsp");
         }
     }
+    
+    // 3. Handles GET requests (primarily for Logout)
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        
+        String action = request.getParameter("action");
+        if ("logout".equalsIgnoreCase(action)) {
+            logoutAdmin(request, response);
+        } else {
+            response.sendRedirect("login.jsp");
+        }
+    }
+
