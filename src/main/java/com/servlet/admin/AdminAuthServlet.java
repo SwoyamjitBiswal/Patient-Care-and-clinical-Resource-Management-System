@@ -17,3 +17,21 @@ public class AdminAuthServlet extends HttpServlet {
         // Instantiate the DAO using the no-argument constructor
         adminDao = new AdminDao(); 
     }
+
+    
+    // 2. Handles POST requests (Login, Logout)
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        String action = request.getParameter("action");
+
+        if ("login".equalsIgnoreCase(action)) {
+            loginAdmin(request, response);
+        } else if ("logout".equalsIgnoreCase(action)) {
+            logoutAdmin(request, response);
+        } else {
+            // Default action if an unknown POST request comes in
+            response.sendRedirect("login.jsp");
+        }
+    }
