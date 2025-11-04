@@ -48,4 +48,34 @@ public class AdminAuthServlet extends HttpServlet {
             response.sendRedirect("login.jsp");
         }
     }
+    
+    // Admin login logic
+    private void loginAdmin(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        try {
+            String email = request.getParameter("email");
+            String password = request.getParameter("password");
+
+            // Calls the correct login(String, String) method from the Dao
+            Admin admin = adminDao.login(email, password); 
+
+            if (admin != null) {
+                HttpSession session = request.getSession();
+                session.setAttribute("adminObj", admin);
+                response.sendRedirect("dashboard.jsp"); // Success redirect
+            } else {
+                // Failure: Set error message and forward back to login page
+                request.setAttribute("errorMsg", "Invalid email or password");
+                request.getRequestDispatcher("login.jsp").forward(request, response);
+            }
+
+        } catch (Exception e) {
+            // Catch any unexpected exceptions (e.g., from DBConnect failure)
+            e.printStackTrace();
+            request.setAttribute("errorMsg", "An unexpected error occurred during login. Check server logs.");
+            request.getRequestDispatcher("login.jsp").forward(request, response);
+        }
+    }
+
 
